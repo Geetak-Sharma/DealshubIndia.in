@@ -1,0 +1,496 @@
+---
+export interface Props {
+  title: string;
+  image: string;
+  price: string;
+  originalPrice?: string;
+  discount?: string;
+  url: string;
+  platform?: string;
+  badge?: string;
+  timestamp?: number;
+  featured?: boolean;
+  isLoot?: boolean;
+}
+
+const { title, image, price, originalPrice, discount, url, platform = '', badge, timestamp, featured = false, isLoot = false } = Astro.props;
+
+// ---- Compute "Posted X mins ago" ----
+let timeAgo = '';
+if (timestamp) {
+  const diffMs = Date.now() - timestamp;
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) timeAgo = 'Just now';
+  else if (mins < 60) timeAgo = `${mins}m ago`;
+  else if (mins < 1440) timeAgo = `${Math.floor(mins / 60)}h ago`;
+  else timeAgo = `${Math.floor(mins / 1440)}d ago`;
+}
+
+// ---- Smart Discount Calculation ----
+// Parse numeric price values for real % calculation
+function parsePrice(s?: string): number {
+  if (!s) return 0;
+  const n = parseFloat(s.replace(/[^\d.]/g, ''));
+  return isNaN(n) ? 0 : n;
+}
+
+const sellingNum = parsePrice(price);
+const originalNum = parsePrice(originalPrice);
+
+let smartDiscount = 0;
+if (originalNum > 0 && sellingNum > 0 && originalNum > sellingNum) {
+  smartDiscount = Math.round(((originalNum - sellingNum) / originalNum) * 100);
+}
+
+// Fallback to scraped discount string if smart calc yields nothing
+if (smartDiscount === 0 && discount) {
+  const m = discount.match(/(\d+)/);
+  if (m) smartDiscount = parseInt(m[1], 10);
+}
+
+// Only show discount pill if > 10%
+const showDiscount = smartDiscount > 10;
+
+// Determine if it's a LOOT (user flag or >90% off)
+const isDealLoot = isLoot || smartDiscount > 90;
+
+// ---- Platform color map ----
+function getPlatformColor(p: string): string {
+  switch (p) {
+    case 'Amazon': return '#ff9900';
+    case 'Flipkart': return '#2874f0';
+    case 'Myntra': return '#ff3f6c';
+    case 'Ajio': return '#d4a015';
+    case 'Croma': return '#00ab67';
+    case 'Meesho': return '#e91e63';
+    case 'Nykaa': return '#fc2779';
+    case 'JioMart': return '#0078ad';
+    case 'Tata CLiQ': return '#e51a4b';
+    default: return '#22C55E';
+  }
+}
+
+const platformColor = getPlatformColor(platform);
+const hasImage = image && !image.includes('dummyimage') && !image.includes('placehold');
+
+// Share data
+const shareTitle = title;
+const shareUrl = url;
+---
+
+<div class={`deal-card ${featured ? 'deal-card--featured' : ''} ${isDealLoot ? 'deal-card--loot' : ''}`}>
+  {/* Image */}
+  <a href={url} target="_blank" rel="noopener noreferrer" class="deal-card__img-wrap" tabindex="-1">
+    {hasImage ? (
+      <img src={image} alt={title} loading="lazy" decoding="async" class="deal-card__img" />
+    ) : (
+      <div class="deal-card__fallback">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="deal-card__fallback-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      </div>
+    )}
+
+    {/* Badges — overlayed on image */}
+    <div class="deal-card__badges">
+      {badge && <span class={`deal-card__badge ${badge.includes('Expired') ? 'deal-card__badge--expired' : 'deal-card__badge--urgency'}`}>{badge}</span>}
+      {platform && <span class="deal-card__badge deal-card__badge--platform" style={`background:${platformColor}`}>{platform}</span>}
+    </div>
+
+    {/* Discount pill — top right (only if > 10%) */}
+    {showDiscount && (
+      <div class="deal-card__discount-pill">
+        {smartDiscount}% OFF
+      </div>
+    )}
+  </a>
+
+  {/* Content */}
+  <div class="deal-card__body">
+    <h3 class="deal-card__title">{title}</h3>
+
+    <div class="deal-card__price-row">
+      <span class="deal-card__price">{price}</span>
+      {isDealLoot && (
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="loot-zap">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+      )}
+      {originalPrice && <span class="deal-card__orig">{originalPrice}</span>}
+    </div>
+
+    <div class="deal-card__footer">
+      {timeAgo && <span class="deal-card__time">⏱ {timeAgo}</span>}
+      <div class="deal-card__actions">
+        <a href={url} target="_blank" rel="noopener noreferrer" class="deal-card__cta">
+          <span>VIEW DEAL</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
+        <button
+          class="deal-card__share"
+          data-share-title={shareTitle}
+          data-share-url={shareUrl}
+          aria-label="Share deal"
+          type="button"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{/* Share button client-side logic */}
+<script is:inline>
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.deal-card__share');
+    if (!btn) return;
+
+    const shareTitle = btn.getAttribute('data-share-title') || 'Check out this deal!';
+    const shareUrl = btn.getAttribute('data-share-url') || window.location.href;
+
+    if (navigator.share) {
+      navigator.share({ title: shareTitle, url: shareUrl }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        btn.classList.add('deal-card__share--copied');
+        setTimeout(() => btn.classList.remove('deal-card__share--copied'), 1500);
+      }).catch(() => {
+        // Final fallback
+        const ta = document.createElement('textarea');
+        ta.value = shareUrl;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        btn.classList.add('deal-card__share--copied');
+        setTimeout(() => btn.classList.remove('deal-card__share--copied'), 1500);
+      });
+    }
+  });
+</script>
+
+<style>
+  /* ===== DEAL CARD — Glassy + Enhanced ===== */
+  .deal-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 450px;
+    background: rgba(19, 23, 32, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(34, 197, 94, 0.08);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.4s ease,
+                border-color 0.3s ease;
+    animation: cardIn 0.5s ease both;
+  }
+
+  [data-theme='light'] .deal-card {
+    background: rgba(255, 255, 255, 0.75);
+    border-color: rgba(0, 0, 0, 0.06);
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .deal-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.45),
+               0 0 0 1px rgba(34, 197, 94, 0.15);
+    border-color: rgba(34, 197, 94, 0.4);
+  }
+
+  /* ---- Image Container (fixed aspect 4:3) ---- */
+  .deal-card__img-wrap {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: #0d1117;
+    flex-shrink: 0;
+  }
+
+  .deal-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .deal-card__img-wrap:hover .deal-card__img {
+    transform: scale(1.06);
+  }
+
+  .deal-card__fallback {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #131720 0%, #0B0E14 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .deal-card__fallback-icon {
+    width: 40px;
+    height: 40px;
+    color: rgba(255, 255, 255, 0.06);
+  }
+
+  /* ---- Badges (Top Left) ---- */
+  .deal-card__badges {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    z-index: 2;
+  }
+
+  .deal-card__badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 9999px;
+    font-size: 9px;
+    font-weight: 800;
+    color: white;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    line-height: 1.2;
+  }
+
+  .deal-card__badge--urgency {
+    background: #DC2626;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
+  }
+
+  .deal-card__badge--expired {
+    background: #6B7280; /* Neutral gray-500 */
+    box-shadow: 0 2px 8px rgba(107, 114, 128, 0.35);
+  }
+
+  .deal-card__badge--platform {
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0.3px;
+    font-size: 9px;
+  }
+
+  /* ---- Discount Pill (Top Right) ---- */
+  .deal-card__discount-pill {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #22C55E;
+    color: #021a0a;
+    font-size: 12px;
+    font-weight: 900;
+    padding: 4px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
+    z-index: 2;
+  }
+
+  /* ---- Body (fills remaining card height) ---- */
+  .deal-card__body {
+    padding: 14px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .deal-card__title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.45;
+    height: 2.9em; /* Fixed: exactly 2 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0 0 8px 0;
+    color: var(--text-primary);
+  }
+
+  /* ---- Pricing ---- */
+  .deal-card__price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+
+  .deal-card__price {
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+  }
+
+  .deal-card__orig {
+    text-decoration: line-through;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* ---- Footer ---- */
+  .deal-card__footer {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .deal-card__time {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: right;
+  }
+
+  /* ---- Action Row (CTA + Share) ---- */
+  .deal-card__actions {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .deal-card__cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1;
+    padding: 11px 16px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 10px;
+    text-decoration: none;
+    background: #22C55E;
+    color: white;
+    transition: all 0.2s ease;
+  }
+
+  .deal-card__cta svg {
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+  }
+
+  .deal-card__cta:hover {
+    background: #16a34a;
+    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.35);
+    transform: translateY(-1px);
+  }
+
+  .deal-card__cta:hover svg {
+    transform: translate(2px, -2px);
+  }
+
+  /* ---- Share Button ---- */
+  .deal-card__share {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .deal-card__share:hover {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: rgba(34, 197, 94, 0.3);
+    color: #22C55E;
+  }
+
+  .deal-card__share--copied {
+    background: rgba(34, 197, 94, 0.15) !important;
+    border-color: #22C55E !important;
+    color: #22C55E !important;
+  }
+
+  /* ---- Featured Variant ---- */
+  .deal-card--featured {
+    height: auto;
+    min-height: 450px;
+  }
+
+  .deal-card--featured .deal-card__img-wrap {
+    aspect-ratio: 16 / 9;
+  }
+
+  .deal-card--featured .deal-card__title {
+    font-size: 17px;
+    height: auto;
+    min-height: 2.9em;
+    -webkit-line-clamp: 3;
+  }
+
+  .deal-card--featured .deal-card__price {
+    font-size: 24px;
+  }
+
+  .deal-card--featured .deal-card__cta {
+    padding: 13px 20px;
+    font-size: 13px;
+  }
+
+  .deal-card--featured .deal-card__discount-pill {
+    font-size: 14px;
+    padding: 5px 12px;
+  }
+
+  /* ===== LOOT SIREN STYLES ===== */
+  .deal-card--loot {
+    animation: lootPulse 2s infinite, cardIn 0.5s ease both;
+    border-color: rgba(239, 68, 68, 0.4);
+  }
+
+  @keyframes lootPulse {
+    0% { box-shadow: 0 0 0px rgba(239, 68, 68, 0.2); }
+    50% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); }
+    100% { box-shadow: 0 0 0px rgba(239, 68, 68, 0.2); }
+  }
+
+  .deal-card--loot .deal-card__cta {
+    background: #EF4444;
+  }
+  
+  .deal-card--loot .deal-card__cta:hover {
+    background: #DC2626;
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+  }
+  
+  .loot-zap {
+    animation: zapBounce 1s infinite alternate;
+  }
+  
+  @keyframes zapBounce {
+    0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.8)); }
+    100% { transform: scale(1.1); filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.8)); }
+  }
+
+  /* ---- Responsive height adjustment ---- */
+  @media (max-width: 640px) {
+    .deal-card {
+      height: auto;
+      min-height: 380px;
+    }
+  }
+</style>

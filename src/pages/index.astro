@@ -1,0 +1,625 @@
+---
+import Layout from '../layouts/Layout.astro';
+import StickyHeader from '../components/StickyHeader.astro';
+import FloatingWhatsApp from '../components/FloatingWhatsApp.astro';
+import SectionBlock from '../components/SectionBlock.astro';
+import DealCard from '../components/DealCard.astro';
+import BentoGrid from '../components/BentoGrid.svelte';
+
+const bentoItems = [
+  {
+    type: 'whatsapp',
+    href: 'https://whatsapp.com/channel/0029Va8sOrp4SpkEQKVElV1i',
+    label: 'WhatsApp',
+    subText: 'Join Channel',
+    color: '#25D366',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>`
+  },
+  {
+    type: 'telegram',
+    href: 'https://t.me/DealsHubIndiaa',
+    label: 'Telegram',
+    subText: 'Alert Group',
+    color: '#0088cc',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.891 8.146l-2.103 9.917c-.159.709-.579.887-1.175.55l-3.204-2.359-1.545 1.488c-.171.171-.315.315-.644.315l.23-3.268 5.948-5.375c.258-.23-.057-.357-.401-.122l-7.35 4.629-3.164-1.009c-.688-.216-.701-.689.144-1.02l12.37-4.767c.571-.216 1.07.126.864 1.022z"/></svg>`
+  },
+  {
+    type: 'instagram',
+    href: 'https://www.instagram.com/dealshubindia.in',
+    label: 'Instagram',
+    subText: 'Visual Deals',
+    color: '#E1306C',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.17.054 1.805.249 2.227.412.558.217.957.477 1.377.896.419.42.679.819.896 1.377.164.422.359 1.057.412 2.227.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.054 1.17-.249 1.805-.412 2.227-.217.558-.477.957-.896 1.377-.42.419-.819.679-1.377.896-.422.164-1.057.359-2.227.412-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.17-.054-1.805-.249-2.227-.412-.558-.217-.957-.477-1.377-.896-.419-.42-.679-.819-.896-1.377-.164-.422-.359-1.057-.412-2.227-.058-1.266-.07-1.646-.07-4.85s.012-3.584.07-4.85c.054-1.17.249-1.805.412-2.227.217-.558.477-.957.896-1.377.42-.419.819-.679 1.377-.896.422-.164 1.057-.359 2.227-.412 1.266-.058 1.646-.07 4.85-.07zm0-2.163c-3.259 0-3.667.014-4.947.072-1.277.057-2.15.26-2.914.557-.79.306-1.459.717-2.126 1.384-.667.667-1.078 1.336-1.384 2.126-.296.764-.499 1.637-.557 2.914-.059 1.28-.073 1.688-.073 4.947s.014 3.667.072 4.947c.057 1.277.26 2.15.557 2.914.306.79.717 1.459 1.384 2.126.667.667 1.336 1.078 2.126 1.384.764.296 1.637.499 2.914.557 1.28.059 1.688.073 4.947.073s3.667-.014 4.947-.072c1.277-.057 2.15-.26 2.914-.557.79-.306 1.459-.717 2.126-1.384.667-.667 1.078-1.336 1.384-2.126.296-.764.499-1.637.557-2.914.059-1.28.073-1.688.073-4.947-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.791-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.209-1.791 4-4 4zm6.406-11.845c.796 0 1.441.645 1.441 1.44s-.645 1.44-1.441 1.44c-.795 0-1.44-.645-1.44-1.44s.645-1.44 1.44-1.44z"/></svg>`
+  },
+  {
+    type: 'youtube',
+    href: 'https://www.youtube.com/@geetaksharma',
+    label: 'YouTube',
+    subText: 'Tech Intel',
+    color: '#FF0000',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186c-.272-1.023-1.078-1.83-2.102-2.102C19.53 3.68 12 3.68 12 3.68s-7.53 0-9.396.404c-1.024.272-1.83 1.079-2.102 2.102-.404 1.866-.404 5.75-.404 5.75s0 3.884.404 5.75c.272 1.024 1.078 1.83 2.102 2.102 1.866.405 9.396.405 9.396.405s7.53 0 9.396-.405c1.024-.272 1.83-1.078 2.102-2.102.404-1.866.404-5.75.404-5.75s0-3.884-.404-5.75zM9.597 14.85V7.022l6.404 3.914-6.404 3.914z"/></svg>`
+  }
+];
+
+// Fetch dynamic deals
+let deals: any[] = [];
+let fetchError = null;
+let updatedText = 'Updated live';
+
+try {
+  const apiUrl = new URL('/api/deals', Astro.url.origin);
+  const response = await fetch(apiUrl);
+  if (response.ok) {
+    const data = await response.json();
+    if (data && Array.isArray(data.deals)) {
+      deals = data.deals;
+      if (data.lastUpdated) {
+         const diffMins = Math.max(0, Math.floor((Date.now() - data.lastUpdated) / 60000));
+         updatedText = diffMins === 0 ? 'Updated just now' : `Updated ${diffMins} mins ago`;
+      }
+    } else if (Array.isArray(data)) {
+      deals = data;
+    } else {
+      fetchError = "Invalid data format received.";
+    }
+  } else {
+    fetchError = `Failed to fetch: ${response.statusText}`;
+  }
+} catch (e: any) {
+  fetchError = "Could not connect to deals API.";
+  console.error(e);
+}
+---
+
+<Layout title="DealshubIndia.in: Best Deals & Offers Today">
+  <StickyHeader />
+  
+  <main>
+    <div class="l-container u-mt-4 u-mb-4">
+      
+      <!-- Premium Conversion Attention Hook -->
+      <div class="attention-hook">
+        🔥 50+ Live Deals <span class="dot-sep">•</span> 🕒 {updatedText}
+      </div>
+      
+      {fetchError && (
+         <div class="error-slate">
+           <h3>Oops! No deals available right now.</h3>
+           <p>Our scouts are fetching the latest loots. Please check back in a few minutes.</p>
+           <small>{fetchError}</small>
+         </div>
+      )}
+      
+      <!-- DOM Empty Search Fallback State (Hidden Automatically) -->
+      <div id="no-search-results" class="error-slate hidden-slate">
+         <h3>No items match your search.</h3>
+         <p>Try modifying your query or checking back later.</p>
+      </div>
+
+      {/* MAIN DEAL GRID */}
+      {deals.length > 0 && (
+        <section class="l-section">
+          <div class="section-header u-flex u-items-center u-mb-3">
+            <h2 class="section-title">🔥 Today's Best Deals</h2>
+          </div>
+
+          <div id="premium-grid" class="deals-grid">
+            {deals.slice(0, 8).map((deal, idx) => (
+              <div
+                class="deal-card-wrapper"
+                data-title={deal.title.toLowerCase()}
+                data-category={deal.category}
+                data-price-num={deal.priceNum}
+                data-is-loot={deal.isLoot ? 'true' : 'false'}
+                style={`animation-delay: ${idx * 60}ms`}
+              >
+                <DealCard 
+                  title={deal.title}
+                  image={deal.image}
+                  price={deal.price}
+                  originalPrice={deal.originalPrice}
+                  discount={deal.discount}
+                  url={deal.url}
+                  platform={deal.platform}
+                  badge={deal.badge}
+                  timestamp={deal.timestamp}
+                  isLoot={deal.isLoot}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ===== OLD DEALS — Horizontal Scroll Archive ===== */}
+      {deals.length > 0 && (() => {
+        // Mock: duplicate existing deals 5x to test scroll physics
+        const archiveDeals = [...deals, ...deals, ...deals, ...deals, ...deals].slice(0, 20);
+        return (
+        <section class="l-section archive-section">
+          <div class="section-header u-flex u-items-center u-mb-3">
+            <h2 class="section-title">🕒 Recently Expired / Older Drops</h2>
+          </div>
+
+          <div class="archive-scroll-wrap">
+            <button class="archive-chevron archive-chevron--left" aria-label="Scroll left" type="button">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+
+            <div class="archive-scroll" id="archive-scroll">
+              {archiveDeals.map((deal, idx) => (
+                <div class="archive-card" style={`animation-delay: ${idx * 40}ms`}>
+                  <DealCard 
+                    title={deal.title}
+                    image={deal.image}
+                    price={deal.price}
+                    originalPrice={deal.originalPrice}
+                    discount={deal.discount}
+                    url={deal.url}
+                    platform={deal.platform}
+                    badge="⏳ Expired"
+                    timestamp={deal.timestamp}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <button class="archive-chevron archive-chevron--right" aria-label="Scroll right" type="button">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+
+          <div class="action-footer">
+            <a href="/livedeals" class="c-btn c-btn--primary view-more-btn">
+              View All Deals &rarr;
+            </a>
+          </div>
+        </section>
+        );
+      })()}
+
+      <SectionBlock title="Join Priority Networks" icon="🤝">
+        <BentoGrid items={bentoItems} client:visible />
+      </SectionBlock>
+
+      <footer class="footer-master">
+        <div class="footer-grid">
+          <div class="footer-col brand-col">
+            <h4>DealshubIndia<span class="logo-accent">.in</span></h4>
+            <p>Best deals from Amazon, Flipkart & more</p>
+          </div>
+          <div class="footer-col">
+            <h4>Quick Links</h4>
+            <a href="/">Latest Drops</a>
+            <a href="/livedeals">Live Deals Archive</a>
+            <a href="/">Categories</a>
+          </div>
+          <div class="footer-col">
+            <h4>Social Networks</h4>
+            <a href="https://whatsapp.com/channel/0029Va8sOrp4SpkEQKVElV1i" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            <a href="https://t.me/DealsHubIndiaa" target="_blank" rel="noopener noreferrer">Telegram</a>
+            <a href="https://www.instagram.com/dealshubindia.in" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href="https://www.youtube.com/@geetaksharma" target="_blank" rel="noopener noreferrer">YouTube</a>
+          </div>
+          <div class="footer-col">
+            <h4>Trust & Verification</h4>
+            <p>Deals updated every few minutes directly from our active scouts.</p>
+            <a href="/disclosure">Affiliate Disclaimer</a>
+            <a href="/dmca">Protocol & DMCA</a>
+          </div>
+        </div>
+        <div class="footer-identity">
+          <p>Made for deal hunters in India 🇮🇳</p>
+        </div>
+      </footer>
+      
+    </div>
+  </main>
+
+  <FloatingWhatsApp />
+</Layout>
+
+<!-- Core DOM Interaction Logic mapping Search UI natively -->
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const allWrappers = Array.from(document.querySelectorAll('.deal-card-wrapper'));
+    const noResultsDiv = document.getElementById('no-search-results');
+    let isSearchActive = false;
+
+    // Material UI Search Custom Event Listener
+    window.addEventListener('deals-search', (e) => {
+      const query = e.detail.query.toLowerCase();
+      isSearchActive = query.length > 0;
+      let visibleCount = 0;
+
+      allWrappers.forEach(wrapper => {
+        const titleText = wrapper.getAttribute('data-title') || '';
+        
+        if (!isSearchActive) {
+          wrapper.classList.remove('is-search-hidden');
+          return;
+        }
+
+        if (titleText.includes(query)) {
+          wrapper.classList.remove('is-search-hidden');   
+          wrapper.classList.add('fade-in-up'); 
+          visibleCount++;
+        } else {
+          wrapper.classList.add('is-search-hidden'); 
+        }
+      });
+
+      if (noResultsDiv) {
+        noResultsDiv.style.display = (isSearchActive && visibleCount === 0) ? 'block' : 'none';
+      }
+    });
+
+    // Category Chips Filter
+    window.addEventListener('deals-category', (e) => {
+      const category = e.detail.category;
+      let visibleCount = 0;
+
+      allWrappers.forEach(wrapper => {
+        const itemCat = wrapper.getAttribute('data-category');
+        const itemIsLoot = wrapper.getAttribute('data-is-loot') === 'true';
+        
+        let show = false;
+        if (category === 'all') {
+            show = true;
+        } else if (category === 'tech' && itemCat === 'tech') {
+            show = true;
+        } else if (category === 'fashion' && itemCat === 'fashion') {
+            show = true;
+        } else if (category === 'home' && itemCat === 'home') {
+            show = true;
+        } else if (category === 'under-99' && itemCat === 'under-99') {
+            show = true;
+        } else if (category === 'loots' && itemIsLoot) {
+            // Note: The chip for "All Loots" has data-category="all"
+            // If we want a specific "Only Loots" filter, we'd use this.
+            show = true;
+        }
+
+        if (show) {
+          wrapper.classList.remove('is-search-hidden');
+          visibleCount++;
+        } else {
+          wrapper.classList.add('is-search-hidden');
+        }
+      });
+      
+      if (noResultsDiv) {
+        noResultsDiv.style.display = (visibleCount === 0) ? 'block' : 'none';
+      }
+    });
+
+  });
+</script>
+
+<!-- Archive Scroll Chevrons -->
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const scroll = document.getElementById('archive-scroll');
+    if (!scroll) return;
+
+    const leftBtn = document.querySelector('.archive-chevron--left');
+    const rightBtn = document.querySelector('.archive-chevron--right');
+    const scrollAmount = 600;
+
+    if (leftBtn) leftBtn.addEventListener('click', () => {
+      scroll.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    });
+
+    if (rightBtn) rightBtn.addEventListener('click', () => {
+      scroll.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    });
+  });
+</script>
+
+<style>
+  main {
+    padding-bottom: var(--spacing-6); 
+  }
+
+  /* Structural Hide Overrides safely isolated using !important to prevent CSS cascade failures */
+  .deal-card-wrapper.is-search-hidden {
+    display: none !important;
+  }
+
+  .hidden-slate {
+    display: none;
+  }
+  
+  .action-footer {
+    display: flex;
+    justify-content: center;
+    padding-top: var(--spacing-4);
+    margin-top: var(--spacing-3);
+  }
+
+  .view-more-btn {
+    padding: 14px 40px !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    border-radius: 12px !important;
+    letter-spacing: 0.5px;
+  }
+
+  /* Staggered load animation on wrappers */
+  .deal-card-wrapper {
+    animation: wrapperFade 0.5s ease both;
+  }
+  @keyframes wrapperFade {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .error-slate {
+    background-color: var(--surface-color);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-4);
+    text-align: center;
+    margin: var(--spacing-3) 0;
+  }
+
+  .error-slate h3 { margin-bottom: var(--spacing-1); color: var(--text-primary); }
+  .error-slate p { color: var(--text-secondary); margin-bottom: var(--spacing-2); }
+  .error-slate small { color: var(--text-muted); }
+  
+  .attention-hook {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: var(--radius-full);
+    display: inline-block;
+    margin: 0 auto var(--spacing-4) auto;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .dot-sep {
+    color: var(--border-color);
+    margin: 0 6px;
+    font-weight: bold;
+  }
+  
+  .footer-master {
+    margin-top: var(--spacing-6);
+    padding: var(--spacing-5) var(--spacing-4);
+    background-color: var(--surface-color);
+    border: 1px solid rgba(150, 150, 150, 0.1);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+
+  [data-theme='dark'] .footer-master {
+    background-color: rgba(0, 0, 0, 0.15); /* Slightly darker than main body */
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-4);
+    margin-bottom: var(--spacing-4);
+  }
+
+  @media (min-width: 640px) {
+    .footer-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (min-width: 960px) {
+    .footer-grid { grid-template-columns: repeat(4, 1fr); padding-bottom: var(--spacing-3); border-bottom: 1px solid var(--border-color); }
+  }
+
+  .footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .footer-col h4 {
+    color: var(--text-primary);
+    font-size: 15px;
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+
+  .brand-col h4 {
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .footer-col a, .footer-col p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    text-decoration: none;
+    line-height: 1.4;
+  }
+
+  .footer-col a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+  }
+
+  .footer-identity {
+    text-align: center;
+    padding-top: var(--spacing-4);
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  /* ===== Section Title ===== */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: var(--spacing-3);
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+    position: relative;
+    display: inline-block;
+  }
+
+  .section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 40%;
+    height: 3px;
+    background-color: #22C55E;
+    border-radius: 2px;
+  }
+
+  /* ===== ARCHIVE HORIZONTAL SCROLL ===== */
+  .archive-section {
+    overflow: hidden;
+  }
+
+  .archive-scroll-wrap {
+    position: relative;
+  }
+
+  .archive-scroll {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding-bottom: 8px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .archive-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .archive-card {
+    flex: 0 0 280px;
+    scroll-snap-align: start;
+    animation: archiveSlide 0.4s ease both;
+  }
+
+  @keyframes archiveSlide {
+    from { opacity: 0; transform: translateX(16px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Grayscale + reduced opacity for expired cards */
+  .archive-card .deal-card__img {
+    filter: grayscale(40%) brightness(0.85);
+    transition: filter 0.3s ease, transform 0.4s ease;
+  }
+
+  .archive-card:hover .deal-card__img {
+    filter: grayscale(0%) brightness(1);
+  }
+
+  .archive-card .deal-card {
+    opacity: 0.85;
+    transition: opacity 0.3s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .archive-card:hover .deal-card {
+    opacity: 1;
+  }
+
+  /* ---- Chevron Scroll Buttons ---- */
+  .archive-chevron {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: var(--surface-color);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: var(--shadow-md);
+  }
+
+  .archive-scroll-wrap:hover .archive-chevron {
+    opacity: 1;
+  }
+
+  .archive-chevron:hover {
+    background: #22C55E;
+    color: white;
+    border-color: #22C55E;
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35);
+  }
+
+  .archive-chevron--left {
+    left: -4px;
+  }
+
+  .archive-chevron--right {
+    right: -4px;
+  }
+
+  @media (max-width: 640px) {
+    .archive-chevron {
+      display: none;
+    }
+  }
+
+  /* ===== SKELETON LOADING PULSE ===== */
+  .skeleton-card {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+  }
+
+  .skeleton-card__img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: var(--surface-color-hover);
+  }
+
+  .skeleton-card__body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .skeleton-line {
+    height: 14px;
+    border-radius: 6px;
+    background: var(--surface-color-hover);
+  }
+
+  .skeleton-line--short { width: 60%; }
+  .skeleton-line--price { width: 40%; height: 20px; }
+  .skeleton-line--btn { width: 100%; height: 44px; border-radius: 10px; }
+
+  @keyframes skeletonPulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.5; }
+  }
+</style>

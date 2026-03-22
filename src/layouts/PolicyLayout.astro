@@ -1,0 +1,168 @@
+---
+import Layout from './Layout.astro';
+import StickyHeader from '../components/StickyHeader.astro';
+import StickyFooter from '../components/StickyFooter.astro';
+
+interface Props {
+	title: string;
+	description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<Layout title={title} description={description}>
+  <div class="policy-page-wrapper">
+    <StickyHeader />
+    
+    <main class="policy-container relative z-10">
+      <slot />
+    </main>
+    
+    <StickyFooter />
+  </div>
+</Layout>
+
+<style is:global>
+  /* Base overriding wrapper to ensure dark background */
+  .policy-page-wrapper {
+    min-height: 100vh;
+    background-color: #0B0E14;
+    color: #94A3B8;
+  }
+
+  /* Container */
+  .policy-container {
+    max-width: 56rem; /* max-w-4xl */
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+  @media (min-width: 768px) {
+    .policy-container {
+      padding-top: 5rem;
+      padding-bottom: 5rem;
+    }
+  }
+
+  /* Glassmorphism Panel */
+  .glass-panel {
+    background-color: rgba(19, 23, 32, 0.5); /* bg-[#131720]/50 */
+    backdrop-filter: blur(12px); /* backdrop-blur-md */
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05); /* border-white/5 */
+    padding: 2rem; /* p-8 */
+    border-radius: 1rem; /* rounded-2xl */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); /* shadow-2xl */
+  }
+  @media (min-width: 768px) {
+    .glass-panel {
+      padding: 3rem; /* md:p-12 */
+    }
+  }
+  
+  /* Typography block */
+  .policy-h1 {
+    font-size: 2.25rem; /* text-4xl */
+    font-weight: 900; /* font-black */
+    color: #ffffff; /* text-white */
+    border-bottom: 4px solid #22C55E; /* border-[#22C55E] */
+    display: inline-block;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+    margin-top: 0;
+  }
+  @media (min-width: 768px) {
+    .policy-h1 {
+      font-size: 3rem; /* md:text-5xl */
+    }
+  }
+
+  .policy-h2 {
+    font-size: 1.5rem; /* text-2xl */
+    font-weight: 700; /* font-bold */
+    color: #ffffff; /* text-white */
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .policy-body {
+    color: #94A3B8; /* text-slate-400 */
+    line-height: 1.625; /* leading-relaxed */
+  }
+  
+  .policy-body p {
+    margin-bottom: 1.5rem;
+    margin-top: 0;
+  }
+  
+  .policy-body ul {
+    list-style-type: disc;
+    padding-left: 1.25rem;
+    margin-bottom: 2rem;
+    margin-top: 0;
+  }
+
+  .policy-body li {
+    margin-bottom: 0.5rem;
+  }
+
+  .policy-link {
+    color: #22C55E; /* text-[#22C55E] */
+    text-decoration: none;
+  }
+  .policy-link:hover {
+    text-decoration: underline;
+  }
+
+  /* Specific internal blocks */
+  .policy-contact-block {
+    background-color: #1A1F2B;
+    padding: 2rem;
+    border-radius: 1rem;
+    margin-top: 3rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  }
+  .policy-contact-label {
+    font-weight: 700;
+    color: #CBD5E1;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  .policy-contact-email {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #22C55E;
+    text-decoration: none;
+    word-break: break-all;
+    transition: all 0.3s;
+  }
+  .policy-contact-email:hover {
+    text-decoration: underline;
+  }
+
+  .policy-footer-nav {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .policy-back-link {
+    color: #22C55E;
+    font-weight: 700;
+    font-size: 0.875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: opacity 0.3s;
+  }
+  .policy-back-link:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+  }
+</style>

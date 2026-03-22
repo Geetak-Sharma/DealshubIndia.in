@@ -1,0 +1,52 @@
+---
+---
+<div class="ticker-wrap" aria-live="polite">
+  <div class="ticker">
+    <div class="ticker__item">🚀 ALPHA LOOT: SONY WH-1000XM5 AT LOWEST EVER! </div>
+    <div class="ticker__item">🔥 NEW DROP: ADIDAS ULTRABOOST 70% OFF! </div>
+    <div class="ticker__item">⚡️ SYSTEM ALERT: JOIN WHATSAPP FOR INSTANT ALERTS! </div>
+    <div class="ticker__item">💎 EXCLUSIVE: 10K+ HUNTERS ALREADY IN! </div>
+    <!-- Loop -->
+    <div class="ticker__item">🚀 ALPHA LOOT: SONY WH-1000XM5 AT LOWEST EVER! </div>
+    <div class="ticker__item">🔥 NEW DROP: ADIDAS ULTRABOOST 70% OFF! </div>
+    <div class="ticker__item">⚡️ SYSTEM ALERT: JOIN WHATSAPP FOR INSTANT ALERTS! </div>
+    <div class="ticker__item">💎 EXCLUSIVE: 10K+ HUNTERS ALREADY IN! </div>
+  </div>
+</div>
+
+<style>
+  .ticker-wrap {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    height: 40px;
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--card-border);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+  }
+
+  .ticker {
+    display: inline-block;
+    white-space: nowrap;
+    animation: ticker 25s linear infinite;
+  }
+
+  .ticker__item {
+    display: inline-block;
+    padding: 0 4rem;
+    font-size: 0.7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-primary);
+  }
+
+  @keyframes ticker {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-50%, 0, 0); }
+  }
+</style>

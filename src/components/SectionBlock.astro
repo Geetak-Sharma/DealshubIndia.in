@@ -1,0 +1,52 @@
+---
+export interface Props {
+  title: string;
+  icon?: string;
+}
+
+const { title, icon } = Astro.props;
+---
+
+<section class="l-section">
+  <div class="l-container">
+    <div class="section-header u-flex u-items-center u-mb-3">
+      {icon && <span class="section-icon">{icon}</span>}
+      <h2 class="section-title">{title}</h2>
+    </div>
+    
+    <div class="l-grid">
+      <slot />
+    </div>
+  </div>
+</section>
+
+<style>
+  .section-header {
+    gap: 12px;
+  }
+
+  .section-icon {
+    font-size: 24px;
+    color: var(--primary-color);
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+    position: relative;
+    display: inline-block;
+  }
+  
+  .section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 40%;
+    height: 3px;
+    background-color: var(--accent-color);
+    border-radius: 2px;
+  }
+</style>

@@ -1,0 +1,51 @@
+---
+---
+<div class="loot-ticker-container">
+  <div class="ticker-wrapper">
+    <div class="ticker-content" id="ticker">
+      <span>🔥 Amazon: iPhone 15 at ₹64,999! •</span>
+      <span>⚡ Flipkart: 70% Off on Nike Shoes •</span>
+      <span>💥 Myntra: End of Reason Sale LIVE •</span>
+      <span>🚀 Telegram: Exclusive Loot at 90% Off! •</span>
+      <span>🔥 Amazon: iPhone 15 at ₹64,999! •</span>
+      <span>⚡ Flipkart: 70% Off on Nike Shoes •</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .loot-ticker-container {
+    width: 100%;
+    background: var(--text-primary);
+    color: var(--bg-color);
+    padding: 0.75rem 0;
+    overflow: hidden;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    font-weight: 800;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .ticker-wrapper {
+    display: flex;
+    white-space: nowrap;
+  }
+
+  .ticker-content {
+    display: inline-block;
+    padding-left: 100%;
+    animation: ticker 25s linear infinite;
+  }
+
+  .ticker-content span {
+    margin-right: 2rem;
+  }
+
+  @keyframes ticker {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-100%, 0, 0); }
+  }
+</style>

@@ -1,0 +1,17 @@
+{
+    "name": "DealsHub India",
+    "short_name": "DealsHub",
+    "description": "Scouring the Internet for Loots Since 2018.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0B0E14",
+    "theme_color": "#25D366",
+    "icons": [
+        {
+            "src": "/favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}

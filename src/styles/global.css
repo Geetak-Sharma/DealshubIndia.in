@@ -1,0 +1,132 @@
+:root {
+  --whatsapp-green: #25D366;
+  --telegram-blue: #0088cc;
+
+  /* Day Mode (Pastel Sky Blue) */
+  --bg-color: #E0F2FE;
+  --text-primary: #0F172A;
+  --text-secondary: #334155;
+  --pill-text: #0F172A;
+  /* NO WHITE TEXT in day mode */
+  --card-radius: 32px;
+  --btn-height: 70px;
+}
+
+[data-theme='dark'] {
+  /* Dark Mode (Bluish Grey) */
+  --bg-color: #334155;
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --pill-text: #F8FAFC;
+  /* NO BLACK TEXT in dark mode */
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+main {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+p {
+  font-size: 16px;
+  margin-bottom: 2.5rem;
+}
+
+.pill-stack {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.loot-pill {
+  width: 100%;
+  height: var(--btn-height);
+  border-radius: var(--card-radius);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  border: none;
+}
+
+.loot-pill:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.pill-icon {
+  flex-shrink: 0;
+  width: 32px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.pill-text {
+  flex-grow: 1;
+  text-align: center;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.footer-nav {
+  margin-top: 4rem;
+  display: flex;
+  gap: 1.5rem;
+}
+
+.footer-link {
+  font-size: 14px;
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+/* Theme Toggle Button */
+#theme-toggle {
+  background: var(--text-primary);
+  color: var(--bg-color);
+  border: none;
+  padding: 0.75rem;
+  border-radius: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+#theme-toggle:active {
+  transform: scale(0.9);
+}
+
+.hidden {
+  display: none;
+}

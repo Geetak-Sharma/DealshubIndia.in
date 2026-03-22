@@ -1,0 +1,237 @@
+---
+import Layout from '../layouts/Layout.astro';
+import StickyHeader from '../components/StickyHeader.astro';
+import FloatingWhatsApp from '../components/FloatingWhatsApp.astro';
+import SectionBlock from '../components/SectionBlock.astro';
+import DealCard from '../components/DealCard.astro';
+
+// Fetch ALL deals (no limit)
+let deals: any[] = [];
+let fetchError = null;
+let updatedText = 'Updated live';
+
+try {
+  const apiUrl = new URL('/api/deals', Astro.url.origin);
+  const response = await fetch(apiUrl);
+  if (response.ok) {
+    const data = await response.json();
+    if (data && Array.isArray(data.deals)) {
+      deals = data.deals;
+      if (data.lastUpdated) {
+         const diffMins = Math.max(0, Math.floor((Date.now() - data.lastUpdated) / 60000));
+         updatedText = diffMins === 0 ? 'Updated just now' : `Updated ${diffMins} mins ago`;
+      }
+    } else if (Array.isArray(data)) {
+      deals = data;
+    } else {
+      fetchError = "Invalid data format received.";
+    }
+  } else {
+    fetchError = `Failed to fetch: ${response.statusText}`;
+  }
+} catch (e: any) {
+  fetchError = "Could not connect to deals API.";
+  console.error(e);
+}
+---
+
+<Layout title="Live Deals Today India | DealshubIndia.in" description="Find latest Amazon, Flipkart, Myntra deals updated every few minutes.">
+  <StickyHeader />
+  
+  <main>
+    <div class="l-container u-mt-4 u-mb-4">
+      
+      <div class="page-header">
+        <h1>🔥 Live Deals</h1>
+        <span class="page-header__meta">🕒 {updatedText} &middot; {deals.length} deals found</span>
+      </div>
+      
+      {fetchError && (
+         <div class="error-slate">
+           <h3>Oops! No deals available right now.</h3>
+           <p>Our scouts are fetching the latest loots. Please check back in a few minutes.</p>
+           <small>{fetchError}</small>
+         </div>
+      )}
+
+      {/* ALL deals rendered, JS handles progressive visibility */}
+      {deals.length > 0 && (
+        <section>
+          <div id="deals-grid" class="deals-grid">
+            {deals.map((deal, index) => (
+              <div
+                class={`deal-card-wrapper ${index >= 12 ? 'is-hidden' : ''}`}
+                data-deal-id={deal.id}
+                data-title={deal.title.toLowerCase()}
+              >
+                <DealCard 
+                  title={deal.title}
+                  image={deal.image}
+                  price={deal.price}
+                  originalPrice={deal.originalPrice}
+                  discount={deal.discount}
+                  url={deal.url}
+                  platform={deal.platform}
+                  badge={deal.badge}
+                  timestamp={deal.timestamp}
+                />
+              </div>
+            ))}
+          </div>
+
+          {deals.length > 12 && (
+            <div class="action-footer" id="load-more-wrap">
+              <button id="load-more-btn" class="c-btn c-btn--primary">
+                Load More Deals &darr;
+              </button>
+            </div>
+          )}
+        </section>
+      )}
+
+      <footer class="footer-master">
+        <div class="footer-grid">
+          <div class="footer-col brand-col">
+            <h4>DealshubIndia<span class="logo-accent">.in</span></h4>
+            <p>Best deals from Amazon, Flipkart & more</p>
+          </div>
+          <div class="footer-col">
+            <h4>Quick Links</h4>
+            <a href="/">Latest Drops</a>
+            <a href="/livedeals">Live Deals Archive</a>
+          </div>
+          <div class="footer-col">
+            <h4>Social Networks</h4>
+            <a href="https://whatsapp.com/channel/0029Va8sOrp4SpkEQKVElV1i" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            <a href="https://t.me/DealsHubIndiaa" target="_blank" rel="noopener noreferrer">Telegram</a>
+            <a href="https://www.instagram.com/dealshubindia.in" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href="https://www.youtube.com/@geetaksharma" target="_blank" rel="noopener noreferrer">YouTube</a>
+          </div>
+          <div class="footer-col">
+            <h4>Trust & Verification</h4>
+            <p>Deals updated every few minutes directly from our active scouts.</p>
+          </div>
+        </div>
+        <div class="footer-identity">
+          <p>Made for deal hunters in India 🇮🇳</p>
+        </div>
+      </footer>
+      
+    </div>
+  </main>
+  <FloatingWhatsApp />
+</Layout>
+
+<!-- Progressive Loading + DealId Scroll/Highlight -->
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const CHUNK = 12;
+    const btn = document.getElementById('load-more-btn');
+    const wrap = document.getElementById('load-more-wrap');
+    const allCards = Array.from(document.querySelectorAll('.deal-card-wrapper'));
+
+    // -------- Progressive Load More --------
+    if (btn) {
+      btn.addEventListener('click', () => {
+        btn.textContent = 'Loading...';
+        btn.disabled = true;
+        setTimeout(() => {
+          const hidden = allCards.filter(c => c.classList.contains('is-hidden'));
+          hidden.slice(0, CHUNK).forEach(c => {
+            c.classList.remove('is-hidden');
+            c.classList.add('fade-in-up');
+          });
+          // If no more hidden cards, remove button
+          if (hidden.length <= CHUNK && wrap) wrap.style.display = 'none';
+          btn.textContent = 'Load More Deals ↓';
+          btn.disabled = false;
+        }, 200);
+      });
+    }
+
+    // -------- DealId Scroll + Highlight --------
+    const params = new URLSearchParams(window.location.search);
+    const targetDealId = params.get('dealId');
+    if (targetDealId) {
+      const targetCard = document.querySelector(`[data-deal-id="${targetDealId}"]`);
+      if (targetCard) {
+        // Reveal it if hidden (force-show everything up to it)
+        targetCard.classList.remove('is-hidden');
+        // Smooth scroll after a tiny delay to let layout settle
+        setTimeout(() => {
+          targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          targetCard.classList.add('deal-highlight');
+          setTimeout(() => targetCard.classList.remove('deal-highlight'), 3000);
+        }, 300);
+      }
+    }
+  });
+</script>
+
+<style>
+  main { padding-bottom: var(--spacing-6); }
+
+  .page-header {
+    margin-bottom: var(--spacing-4);
+  }
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
+  }
+  .page-header__meta {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .deal-card-wrapper.is-hidden { display: none !important; }
+  .deal-card-wrapper.is-search-hidden { display: none !important; }
+
+  /* Highlight animation for dealId scroll-to */
+  .deal-highlight {
+    animation: pulseHighlight 3s ease forwards;
+  }
+  @keyframes pulseHighlight {
+    0%   { box-shadow: 0 0 0 3px var(--primary-color); border-radius: var(--radius-md); }
+    50%  { box-shadow: 0 0 0 6px rgba(var(--primary-color-rgb, 14, 116, 144), 0.3); }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+
+  .action-footer {
+    display: flex;
+    justify-content: center;
+    padding-top: var(--spacing-4);
+    margin-top: var(--spacing-2);
+  }
+
+
+
+  .error-slate {
+    background-color: var(--surface-color);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-4); text-align: center; margin: var(--spacing-3) 0;
+  }
+  .error-slate h3 { margin-bottom: var(--spacing-1); color: var(--text-primary); }
+  .error-slate p { color: var(--text-secondary); margin-bottom: var(--spacing-2); }
+  .error-slate small { color: var(--text-muted); }
+  
+  .footer-master {
+    margin-top: var(--spacing-6);
+    padding: var(--spacing-5) var(--spacing-4);
+    background-color: var(--surface-color);
+    border: 1px solid rgba(150, 150, 150, 0.1); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+  }
+  [data-theme='dark'] .footer-master { background-color: rgba(0, 0, 0, 0.15); border: 1px solid rgba(255, 255, 255, 0.05); }
+  .footer-grid { display: grid; grid-template-columns: 1fr; gap: var(--spacing-4); margin-bottom: var(--spacing-4); }
+  @media (min-width: 640px) { .footer-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 960px) { .footer-grid { grid-template-columns: repeat(4, 1fr); padding-bottom: var(--spacing-3); border-bottom: 1px solid var(--border-color); } }
+  .footer-col { display: flex; flex-direction: column; gap: 8px; }
+  .footer-col h4 { color: var(--text-primary); font-size: 15px; margin-bottom: 4px; font-weight: 700; }
+  .brand-col h4 { font-size: 18px; font-weight: 800; }
+  .footer-col a, .footer-col p { color: var(--text-secondary); font-size: 14px; text-decoration: none; line-height: 1.4; }
+  .footer-col a:hover { color: var(--primary-color); text-decoration: underline; }
+  .footer-identity { text-align: center; padding-top: var(--spacing-4); font-size: 14px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; }
+</style>

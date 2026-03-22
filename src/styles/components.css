@@ -1,0 +1,59 @@
+/* Standardized Card Style */
+.c-card {
+  background-color: var(--surface-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.c-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* CTA Buttons */
+.c-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.c-btn--primary {
+  background-color: var(--primary-color);
+  color: #ffffff;
+}
+
+.c-btn--primary:hover {
+  background-color: #20b858;
+}
+
+.c-btn--accent {
+  background-color: var(--accent-color);
+  color: #ffffff;
+}
+
+.c-btn--accent:hover {
+  background-color: #0077b3;
+}
+
+/* Badges */
+.c-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: var(--surface-color-hover);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}

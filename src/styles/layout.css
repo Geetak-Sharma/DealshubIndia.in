@@ -1,0 +1,44 @@
+/* Container limits width to prevent stretching on desktop */
+.l-container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-2); /* 16px padding */
+  width: 100%;
+}
+
+/* ===== DEAL GRID — strict responsive columns ===== */
+.deals-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 16px;
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .deals-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .deals-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Featured card spans 2 columns on wider screens */
+.deal-card--span-2 {
+  grid-column: span 2;
+}
+
+@media (max-width: 768px) {
+  .deal-card--span-2 {
+    grid-column: span 1;
+  }
+}
+
+/* Sections for spacing content vertically */
+.l-section {
+  padding-top: var(--spacing-4);
+  padding-bottom: var(--spacing-4);
+}

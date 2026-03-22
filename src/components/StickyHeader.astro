@@ -1,0 +1,214 @@
+---
+import ThemeToggle from './ThemeToggle.svelte';
+import SearchBar from './SearchBar.tsx';
+---
+
+<header class="sticky-header">
+  <div class="l-container sticky-header__inner">
+    
+    <!-- Logo -->
+    <a href="/" class="sticky-header__brand" aria-label="DealshubIndia Home">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="brand-icon">
+        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+      </svg>
+      <span class="sticky-header__logo">DealshubIndia<span class="logo-accent">.in</span></span>
+    </a>
+
+    <!-- Center: Search Bar -->
+    <div class="sticky-header__search">
+      <SearchBar client:load />
+    </div>
+
+    <!-- Right Actions -->
+    <div class="sticky-header__actions">
+      <ThemeToggle client:visible />
+      <a 
+        href="https://whatsapp.com/channel/0029Va8sOrp4SpkEQKVElV1i" 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        class="c-btn c-btn--primary whatsapp-header-btn"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        <span class="whatsapp-text">Join</span>
+      </a>
+    </div>
+
+    <!-- Category Chips (Horizontal Scroll) -->
+    <div class="sticky-header__chips">
+      <button class="chip active" data-category="all" type="button">🔥 All Loots</button>
+      <button class="chip" data-category="tech" type="button">💻 Tech</button>
+      <button class="chip" data-category="fashion" type="button">👗 Fashion</button>
+      <button class="chip" data-category="home" type="button">🏠 Home</button>
+      <button class="chip" data-category="under-99" type="button">⚡ Under ₹99</button>
+    </div>
+  </div>
+</header>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const chips = document.querySelectorAll('.chip');
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        // Toggle Active state
+        chips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        
+        // Dispatch Custom Event
+        const cat = chip.getAttribute('data-category');
+        window.dispatchEvent(new CustomEvent('deals-category', { detail: { category: cat } }));
+      });
+    });
+  });
+</script>
+
+<style>
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: rgba(11, 14, 20, 0.85);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  [data-theme='light'] .sticky-header {
+    background-color: rgba(255, 255, 255, 0.85);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .sticky-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 64px;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 10px 0;
+  }
+
+  /* ---- Brand ---- */
+  .sticky-header__brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+
+  .brand-icon {
+    flex-shrink: 0;
+  }
+
+  .sticky-header__logo {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: 0.3px;
+  }
+
+  .logo-accent {
+    color: #22C55E;
+    font-weight: 700;
+  }
+
+  /* ---- Search ---- */
+  .sticky-header__search {
+    flex: 1 1 100%;
+    order: 3;
+    max-width: 100%;
+  }
+
+  @media (min-width: 768px) {
+    .sticky-header__search {
+      flex: 1;
+      order: unset;
+      max-width: 420px;
+    }
+  }
+
+  /* ---- Right Actions ---- */
+  .sticky-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .whatsapp-header-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--radius-full);
+    background: #22C55E !important;
+    font-size: 13px;
+  }
+
+  .whatsapp-text {
+    font-size: 13px;
+    font-weight: 700;
+    display: none;
+  }
+
+  @media (min-width: 480px) {
+    .whatsapp-text {
+      display: inline;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .whatsapp-header-btn {
+      padding: 10px;
+    }
+  }
+
+  /* ---- Chips ---- */
+  .sticky-header__chips {
+    width: 100%;
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 8px; /* padding for scrollbar */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+
+  .sticky-header__chips::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+
+  .chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: var(--surface-color-hover, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+  }
+
+  .chip:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+  }
+
+  .chip.active {
+    background: #22C55E;
+    color: #ffffff;
+    border-color: #22C55E;
+    box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);
+  }
+  
+  [data-theme='light'] .chip {
+    background: rgba(0, 0, 0, 0.05);
+  }
+  
+  [data-theme='light'] .chip.active {
+    background: #22C55E;
+    color: #ffffff; /* ensure white text on green even in light mode */
+  }
+</style>
