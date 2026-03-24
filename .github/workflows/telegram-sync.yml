@@ -3,11 +3,13 @@ name: 🚀 DealsHub Auto-Loot V2
 on:
   schedule:
     - cron: '*/30 * * * *'
-  workflow_dispatch: {} # Force "Run workflow" button to appear
+  workflow_dispatch: {}
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Silence deprecation warnings
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -18,7 +20,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24 # Upgraded to Node 24
 
       - name: Install Dependencies
         run: npm install
