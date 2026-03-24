@@ -28,7 +28,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
           GITHUB_REPOSITORY: "Geetak-Sharma/DealshubIndia.in"
-        run: node scripts/telegram-sync.js
+        run: node scripts/telegram-sync.cjs
 
       - name: Trigger Site Redeploy
         if: success()
