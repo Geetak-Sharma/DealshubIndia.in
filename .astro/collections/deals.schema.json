@@ -1,0 +1,69 @@
+{
+  "$ref": "#/definitions/deals",
+  "definitions": {
+    "deals": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "price": {
+          "type": "string"
+        },
+        "originalPrice": {
+          "type": "string"
+        },
+        "link": {
+          "type": "string",
+          "format": "uri"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "CPU",
+            "GPU",
+            "Storage",
+            "Peripheral",
+            "Laptop",
+            "Other"
+          ]
+        },
+        "image": {
+          "type": "string"
+        },
+        "isLoot": {
+          "type": "boolean",
+          "default": false
+        },
+        "date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "integer",
+              "format": "unix-time"
+            }
+          ]
+        },
+        "$schema": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "price",
+        "link",
+        "category",
+        "date"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

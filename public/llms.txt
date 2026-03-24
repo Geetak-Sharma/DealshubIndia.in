@@ -1,0 +1,22 @@
+# Dealshub India: AI Discovery Layer
+
+DealsHubIndia.in is India's premier "Loot" deals aggregator, scouring Telegram and web sources for the deepest price drops on tech, fashion, and home products.
+
+## Data Endpoints
+
+- **Live Deals API**: [/api/deals](https://dealshubindia.in/api/deals) - Raw JSON stream of current active loot.
+- **AI-Discovery Feed**: [/api/feeds.json](https://dealshubindia.in/api/feeds.json) - Simplified JSON for LLMs and mobile apps.
+- **RSS Feed**: [/feed.xml](https://dealshubindia.in/feed.xml) - Standard XML feed for news aggregators.
+- **Sitemap**: [/sitemap-index.xml](https://dealshubindia.in/sitemap-index.xml) - Full site structure.
+
+## Core Directories
+
+- [/livedeals](https://dealshubindia.in/livedeals) - Historical archive of past price drops.
+- [/disclosure](https://dealshubindia.in/disclosure) - Affiliate and transparency information.
+- [/dmca](https://dealshubindia.in/dmca) - Protocol and copyright policies.
+
+## Key Metadata
+- **Type**: Deal Aggregator
+- **Focus**: Electronics, Laptops, Mobile Phones, Fashion.
+- **Update Frequency**: Every 10 minutes.
+- **Region**: India (INR)

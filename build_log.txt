@@ -1,0 +1,27 @@
+
+> site@0.0.1 build
+> astro build
+
+[2m04:05:18[22m [34m[@astrojs/node][39m Enabling sessions with filesystem storage
+[2m04:05:18[22m [34m[vite][39m Re-optimizing dependencies because vite config has changed
+[2m04:05:18[22m [34m[types][39m Generated [2m132ms[22m
+[2m04:05:18[22m [34m[build][39m output: [34m"server"[39m
+[2m04:05:18[22m [34m[build][39m mode: [34m"server"[39m
+[2m04:05:18[22m [34m[build][39m directory: [34mA:\Dealshub_GCP_AntiGravity\dist\[39m
+[2m04:05:18[22m [34m[build][39m adapter: [32m@astrojs/node[39m
+[2m04:05:18[22m [34m[build][39m Collecting build info...
+[2m04:05:18[22m [34m[build][39m [32mΓ£ô Completed in 149ms.[39m
+[2m04:05:18[22m [34m[build][39m Building server entrypoints...
+[33m[1m04:05:19[22m [WARN] [vite][39m [33m"matchHostname", "matchPathname", "matchPort" and "matchProtocol" are imported from external module "@astrojs/internal-helpers/remote" but never used in "node_modules/astro/dist/assets/utils/index.js".[39m
+[2m04:05:19[22m [34m[vite][39m [32mΓ£ô built in 316ms[39m
+04:05:19 [ERROR] [vite] Γ£ù Build failed in 389ms
+[CompilerError] [astro:build] The closing frontmatter fence (---) is missing an opening fence
+file: A:/Dealshub_GCP_AntiGravity/src/layouts/Layout.astro:13:1
+  Hint:
+    Add --- at the beginning of your file before any import statements or code
+  Location:
+    A:/Dealshub_GCP_AntiGravity/src/layouts/Layout.astro:13:1
+  Stack trace:
+    at handleCompileResultErrors (file:///A:/Dealshub_GCP_AntiGravity/node_modules/astro/dist/core/compile/compile.js:63:11)
+    at async compileAstro (file:///A:/Dealshub_GCP_AntiGravity/node_modules/astro/dist/vite-plugin-astro/compile.js:13:23)
+    at async transform (file:///A:/Dealshub_GCP_AntiGravity/node_modules/rollup/dist/es/shared/node-entry.js:21269:16)
