@@ -1,9 +1,11 @@
 ---
 import { ClientRouter } from 'astro:transitions';
+import SEO from '../components/SEO.astro';
 import '../styles/base.css';
 import '../styles/layout.css';
 import '../styles/components.css';
 import '../styles/utilities.css';
+
 interface Props {
 	title: string;
 	description?: string;
@@ -16,13 +18,8 @@ const { title, description = "DealshubIndia.in: Best Loot Deals Since 2018. Scou
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
-		<title>{title}</title>
-		<meta name="description" content={description} />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <SEO title={title} description={description} />
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">

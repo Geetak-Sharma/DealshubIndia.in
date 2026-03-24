@@ -78,7 +78,25 @@ const shareTitle = title;
 const shareUrl = url;
 ---
 
-<div class={`deal-card ${featured ? 'deal-card--featured' : ''} ${isDealLoot ? 'deal-card--loot' : ''}`}>
+<div class={`deal-card spring-hover ${featured ? 'deal-card--featured' : ''} ${isDealLoot ? 'deal-card--loot' : ''}`}>
+  {/* JSON-LD for Search Engines */}
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": title,
+    "image": image,
+    "description": title,
+    "offers": {
+      "@type": "Offer",
+      "url": url,
+      "priceCurrency": "INR",
+      "price": sellingNum,
+      "itemCondition": "https://schema.org/NewCondition",
+      "availability": "https://schema.org/InStock",
+      "priceValidUntil": "2026-12-31"
+    }
+  })} />
+
   {/* Image */}
   <a href={url} target="_blank" rel="noopener noreferrer" class="deal-card__img-wrap" tabindex="-1">
     {hasImage ? (
@@ -460,6 +478,35 @@ const shareUrl = url;
   .deal-card--loot {
     animation: lootPulse 2s infinite, cardIn 0.5s ease both;
     border-color: rgba(239, 68, 68, 0.4);
+  }
+
+  .is-loot-siren {
+    border-color: #ef4444;
+    animation: pulse-glow 2s infinite ease-in-out;
+  }
+
+  .loot-siren-2-0 {
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
+    animation: pulse-border-red 1.5s infinite alternate ease-in-out;
+    border: 2px solid #dc2626;
+  }
+
+  @keyframes pulse-border-red {
+    from { box-shadow: 0 0 10px rgba(220, 38, 38, 0.4); border-color: #dc2626; }
+    to { box-shadow: 0 0 25px rgba(220, 38, 38, 0.8); border-color: #ef4444; }
+  }
+
+  .deal-card__discount-pill.is-extreme {
+    background: #dc2626;
+    color: white;
+    font-weight: 900;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.5);
+  }
+
+  @keyframes pulse-glow {
+    0% { box-shadow: 0 0 5px rgba(239, 68, 68, 0.2); }
+    50% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
+    100% { box-shadow: 0 0 5px rgba(239, 68, 68, 0.2); }
   }
 
   @keyframes lootPulse {

@@ -60,10 +60,11 @@ export default function SearchBar() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         size="small"
+        inputProps={{ id: 'deals-search' }}
         InputProps={{
           startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon sx={{ color: 'var(--text-muted)' }} />
+            <InputAdornment position="start" className="search-icon-wrapper">
+              <SearchIcon sx={{ color: 'var(--text-muted)', cursor: 'pointer' }} />
             </InputAdornment>
           ),
           endAdornment: query ? (

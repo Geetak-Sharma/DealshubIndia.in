@@ -1,0 +1,88 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import StickyHeader from '../../components/StickyHeader.astro';
+import ReviewList from '../../components/ReviewList.astro';
+import { getCollection, getEntry } from 'astro:content';
+
+export async function getStaticPaths() {
+  const deals = await getCollection('deals');
+  return deals.map(deal => ({
+    params: { id: deal.id },
+    props: { deal },
+  }));
+}
+
+const { deal } = Astro.props;
+const { title, price, link, image, date } = deal.data;
+---
+
+<Layout title={`${title} - Dealshub India`}>
+  <StickyHeader />
+  
+  <main class="container">
+    <nav class="breadcrumb">
+      <a href="/">← Back to All deals</a>
+    </nav>
+
+    <article class="deal-detail">
+      <div class="deal-layout">
+        <div class="deal-media">
+          <img src={image || '/placeholder-deal.png'} alt={title} class="main-img" />
+        </div>
+        
+        <div class="deal-info">
+          <h1>{title}</h1>
+          <div class="price-tag">₹{price}</div>
+          <p class="post-date">Posted on {date.toLocaleDateString()}</p>
+          
+          <a href={link} target="_blank" rel="noopener noreferrer" class="grab-btn">
+            Grab this Deal Now
+          </a>
+          
+          <div class="trust-badge">
+            ✅ Verified by Dealshub Scouts
+          </div>
+        </div>
+      </div>
+
+      <Section class="review-section">
+        <ReviewList url={link} />
+      </Section>
+    </article>
+  </main>
+</Layout>
+
+<style>
+  .container { max-width: 1000px; margin: 0 auto; padding: 2rem 1rem; }
+  .breadcrumb { margin-bottom: 2rem; }
+  .breadcrumb a { color: var(--primary-color); text-decoration: none; font-weight: 600; }
+  
+  .deal-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-bottom: 4rem; }
+  
+  @media (max-width: 768px) {
+    .deal-layout { grid-template-columns: 1fr; gap: 2rem; }
+  }
+
+  .main-img { width: 100%; border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); }
+  
+  .deal-info h1 { font-size: 2.5rem; line-height: 1.2; margin-bottom: 1rem; color: var(--text-primary); }
+  .price-tag { font-size: 2rem; font-weight: 800; color: #22C55E; margin-bottom: 1.5rem; }
+  .post-date { color: var(--text-muted); margin-bottom: 2rem; }
+  
+  .grab-btn {
+    display: block;
+    background: var(--primary-color);
+    color: white;
+    text-align: center;
+    padding: 1.2rem;
+    border-radius: var(--radius-lg);
+    font-weight: 800;
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition: transform 0.2s;
+  }
+  
+  .grab-btn:hover { transform: scale(1.02); background: #15803d; }
+  
+  .trust-badge { margin-top: 1rem; text-align: center; font-size: 0.9rem; color: var(--text-secondary); }
+</style>

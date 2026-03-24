@@ -1,10 +1,15 @@
 ---
+export const prerender = false; // Ensure page is not static
+import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 import StickyHeader from '../components/StickyHeader.astro';
 import FloatingWhatsApp from '../components/FloatingWhatsApp.astro';
 import SectionBlock from '../components/SectionBlock.astro';
-import DealCard from '../components/DealCard.astro';
 import BentoGrid from '../components/BentoGrid.svelte';
+import StructuredData from '../components/StructuredData.astro';
+
+// Fetch deals for SSR Search Engines (SEO)
+const deals = await getCollection('deals');
 
 const bentoItems = [
   {
@@ -40,143 +45,69 @@ const bentoItems = [
     icon: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186c-.272-1.023-1.078-1.83-2.102-2.102C19.53 3.68 12 3.68 12 3.68s-7.53 0-9.396.404c-1.024.272-1.83 1.079-2.102 2.102-.404 1.866-.404 5.75-.404 5.75s0 3.884.404 5.75c.272 1.024 1.078 1.83 2.102 2.102 1.866.405 9.396.405 9.396.405s7.53 0 9.396-.405c1.024-.272 1.83-1.078 2.102-2.102.404-1.866.404-5.75.404-5.75s0-3.884-.404-5.75zM9.597 14.85V7.022l6.404 3.914-6.404 3.914z"/></svg>`
   }
 ];
-
-// Fetch dynamic deals
-let deals: any[] = [];
-let fetchError = null;
-let updatedText = 'Updated live';
-
-try {
-  const apiUrl = new URL('/api/deals', Astro.url.origin);
-  const response = await fetch(apiUrl);
-  if (response.ok) {
-    const data = await response.json();
-    if (data && Array.isArray(data.deals)) {
-      deals = data.deals;
-      if (data.lastUpdated) {
-         const diffMins = Math.max(0, Math.floor((Date.now() - data.lastUpdated) / 60000));
-         updatedText = diffMins === 0 ? 'Updated just now' : `Updated ${diffMins} mins ago`;
-      }
-    } else if (Array.isArray(data)) {
-      deals = data;
-    } else {
-      fetchError = "Invalid data format received.";
-    }
-  } else {
-    fetchError = `Failed to fetch: ${response.statusText}`;
-  }
-} catch (e: any) {
-  fetchError = "Could not connect to deals API.";
-  console.error(e);
-}
 ---
 
 <Layout title="DealshubIndia.in: Best Deals & Offers Today">
   <StickyHeader />
   
   <main>
-    <div class="l-container u-mt-4 u-mb-4">
-      
-      <!-- Premium Conversion Attention Hook -->
-      <div class="attention-hook">
-        🔥 50+ Live Deals <span class="dot-sep">•</span> 🕒 {updatedText}
+    <!-- Premium Hero Section -->
+    <div class="hero-section glass-panel u-mb-6 fade-in-up">
+      <div class="l-container">
+        <div class="hero-content u-py-6">
+          <div class="attention-hook u-mb-3">
+             🔥 50+ Live Deals <span class="dot-sep">•</span> 🕒 Updated live
+          </div>
+          <h1 class="u-text-4xl u-font-black u-text-white u-mb-2">Best Loot Deals & <span class="u-text-green">Offers in India</span></h1>
+          <p class="u-text-lg u-text-secondary">Scouring the internet for the biggest price drops, since 2018.</p>
+        </div>
       </div>
+    </div>
+
+    <div class="l-container u-mb-4">
       
-      {fetchError && (
-         <div class="error-slate">
-           <h3>Oops! No deals available right now.</h3>
-           <p>Our scouts are fetching the latest loots. Please check back in a few minutes.</p>
-           <small>{fetchError}</small>
-         </div>
-      )}
-      
-      <!-- DOM Empty Search Fallback State (Hidden Automatically) -->
-      <div id="no-search-results" class="error-slate hidden-slate">
-         <h3>No items match your search.</h3>
-         <p>Try modifying your query or checking back later.</p>
+      <div id="deals-grid" class="deals-grid">
+         {/* Hydrated via script below */}
+         <div class="skeleton-slate">Fetching latest loots...</div>
       </div>
 
-      {/* MAIN DEAL GRID */}
-      {deals.length > 0 && (
-        <section class="l-section">
-          <div class="section-header u-flex u-items-center u-mb-3">
-            <h2 class="section-title">🔥 Today's Best Deals</h2>
-          </div>
+      <script is:inline>
+        async function loadDeals() {
+          const grid = document.getElementById('deals-grid');
+          try {
+            // Use relative path for GCP stability
+            const res = await fetch('/api/deals');
+            const data = await res.json();
 
-          <div id="premium-grid" class="deals-grid">
-            {deals.slice(0, 8).map((deal, idx) => (
-              <div
-                class="deal-card-wrapper"
-                data-title={deal.title.toLowerCase()}
-                data-category={deal.category}
-                data-price-num={deal.priceNum}
-                data-is-loot={deal.isLoot ? 'true' : 'false'}
-                style={`animation-delay: ${idx * 60}ms`}
-              >
-                <DealCard 
-                  title={deal.title}
-                  image={deal.image}
-                  price={deal.price}
-                  originalPrice={deal.originalPrice}
-                  discount={deal.discount}
-                  url={deal.url}
-                  platform={deal.platform}
-                  badge={deal.badge}
-                  timestamp={deal.timestamp}
-                  isLoot={deal.isLoot}
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+            if (data.error || !data.length) {
+              grid.innerHTML = '<p class="glass-panel">No live loots at the moment. Check back soon!</p>';
+              return;
+            }
 
-      {/* ===== OLD DEALS — Horizontal Scroll Archive ===== */}
-      {deals.length > 0 && (() => {
-        // Mock: duplicate existing deals 5x to test scroll physics
-        const archiveDeals = [...deals, ...deals, ...deals, ...deals, ...deals].slice(0, 20);
-        return (
-        <section class="l-section archive-section">
-          <div class="section-header u-flex u-items-center u-mb-3">
-            <h2 class="section-title">🕒 Recently Expired / Older Drops</h2>
-          </div>
-
-          <div class="archive-scroll-wrap">
-            <button class="archive-chevron archive-chevron--left" aria-label="Scroll left" type="button">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-
-            <div class="archive-scroll" id="archive-scroll">
-              {archiveDeals.map((deal, idx) => (
-                <div class="archive-card" style={`animation-delay: ${idx * 40}ms`}>
-                  <DealCard 
-                    title={deal.title}
-                    image={deal.image}
-                    price={deal.price}
-                    originalPrice={deal.originalPrice}
-                    discount={deal.discount}
-                    url={deal.url}
-                    platform={deal.platform}
-                    badge="⏳ Expired"
-                    timestamp={deal.timestamp}
-                  />
+            grid.innerHTML = data.map(deal => `
+              <div class="deal-card-wrapper glass-panel spring-hover" 
+                   data-title="${deal.title}" 
+                   data-category="${deal.category}" 
+                   data-price="${deal.price.replace(/[^0-9]/g, '')}"
+                   data-is-loot="${deal.isLoot}">
+                <div class="deal-card-content">
+                  <div class="deal-badge ${deal.isLoot ? 'loot-tag' : ''}">${deal.category}</div>
+                  <h3 class="u-text-base u-font-bold u-mb-1">${deal.title}</h3>
+                  <div class="price-stack">
+                    <span class="price-current">₹${deal.price}</span>
+                    ${deal.originalPrice ? `<span class="price-old">₹${deal.originalPrice}</span>` : ''}
+                  </div>
+                  <a href="${deal.link}" target="_blank" rel="noopener" class="btn btn--primary u-mt-2">View Loot</a>
                 </div>
-              ))}
-            </div>
-
-            <button class="archive-chevron archive-chevron--right" aria-label="Scroll right" type="button">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-          </div>
-
-          <div class="action-footer">
-            <a href="/livedeals" class="c-btn c-btn--primary view-more-btn">
-              View All Deals &rarr;
-            </a>
-          </div>
-        </section>
-        );
-      })()}
+              </div>
+            `).join('');
+          } catch (e) {
+            console.error("Frontend Fetch Error:", e);
+            grid.innerHTML = '<p class="glass-panel">Failed to load deals. Please refresh.</p>';
+          }
+        }
+        loadDeals();
+      </script>
 
       <SectionBlock title="Join Priority Networks" icon="🤝">
         <BentoGrid items={bentoItems} client:visible />
@@ -217,6 +148,7 @@ try {
   </main>
 
   <FloatingWhatsApp />
+  <StructuredData deals={deals} />
 </Layout>
 
 <!-- Core DOM Interaction Logic mapping Search UI natively -->
@@ -261,6 +193,7 @@ try {
 
       allWrappers.forEach(wrapper => {
         const itemCat = wrapper.getAttribute('data-category');
+        const itemPrice = parseInt(wrapper.getAttribute('data-price') || '0');
         const itemIsLoot = wrapper.getAttribute('data-is-loot') === 'true';
         
         let show = false;
@@ -272,11 +205,9 @@ try {
             show = true;
         } else if (category === 'home' && itemCat === 'home') {
             show = true;
-        } else if (category === 'under-99' && itemCat === 'under-99') {
+        } else if (category === 'under-99' && itemPrice < 99) {
             show = true;
         } else if (category === 'loots' && itemIsLoot) {
-            // Note: The chip for "All Loots" has data-category="all"
-            // If we want a specific "Only Loots" filter, we'd use this.
             show = true;
         }
 
@@ -288,6 +219,17 @@ try {
         }
       });
       
+      // Ensure sorting by date_added (timestamp) - though grid is already sorted, 
+      // this ensures consistency after filtering.
+      const grid = document.getElementById('premium-grid');
+      if (grid && category !== 'all') {
+        const visibleWrappers = Array.from(grid.querySelectorAll('.deal-card-wrapper:not(.is-search-hidden)'));
+        visibleWrappers.sort((a, b) => {
+          return parseInt(b.getAttribute('data-timestamp')) - parseInt(a.getAttribute('data-timestamp'));
+        });
+        visibleWrappers.forEach(w => grid.appendChild(w));
+      }
+
       if (noResultsDiv) {
         noResultsDiv.style.display = (visibleCount === 0) ? 'block' : 'none';
       }
@@ -621,5 +563,50 @@ try {
   @keyframes skeletonPulse {
     0%, 100% { opacity: 1; }
     50%      { opacity: 0.5; }
+  }
+</style>
+<style>
+  .savings-card {
+    padding: 1.5rem 2rem;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  }
+
+  .savings-icon {
+    font-size: 2rem;
+    background: rgba(34, 197, 94, 0.1);
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+  }
+
+  .savings-live-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(220, 38, 38, 0.1);
+    color: #ef4444;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+  }
+
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    animation: dotPulse 1.5s infinite;
+  }
+
+  @keyframes dotPulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
   }
 </style>

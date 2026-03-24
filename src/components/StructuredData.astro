@@ -1,0 +1,45 @@
+---
+// src/components/StructuredData.astro
+const { deals = [] } = Astro.props;
+
+// Limit for performance
+const currentDeals = deals.slice(0, 50);
+
+// Product schema requirements
+const priceValidUntil = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+const itemCondition = "https://schema.org/NewCondition";
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "DealsHub India: Best Loot Deals Today",
+  "description": "Live tech deals and bank offers from Amazon, Flipkart, & more.",
+  "itemListElement": currentDeals.map((deal, index) => {
+    const item = deal.data || deal; // Handle both direct array and content entries
+    return {
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "Product",
+        "name": item.title,
+        "description": `${item.title} - Best price loot discovery via DealsHub India.`,
+        "image": item.image,
+        "brand": {
+          "@type": "Brand",
+          "name": "DealsHub India"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": item.price?.toString().replace(/[^0-9.]/g, '') || "0",
+          "priceCurrency": "INR",
+          "availability": "https://schema.org/InStock",
+          "url": item.link,
+          "priceValidUntil": priceValidUntil,
+          "itemCondition": itemCondition
+        }
+      }
+    };
+  })
+};
+---
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

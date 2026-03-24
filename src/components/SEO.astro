@@ -1,0 +1,63 @@
+---
+import { SEO as AstroSEO } from "astro-seo";
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogTitle?: string;
+  ogType?: string;
+  canonical?: string;
+}
+
+const { 
+  title = "DealshubIndia.in: Best Loot Deals & Offers Today",
+  description = "DealshubIndia.in: Best Loot Deals Since 2018. Scouring the internet for the biggest price drops from Amazon, Flipkart, Myntra & more.",
+  ogTitle,
+  ogType = "website",
+  canonical
+} = Astro.props;
+
+const siteUrl = "https://dealshubindia.in";
+const currentCanonical = canonical || new URL(Astro.url.pathname, siteUrl).toString();
+const ogImage = new URL("/og-image.png", siteUrl).toString();
+---
+
+<AstroSEO
+  title={title}
+  description={description}
+  canonical={currentCanonical}
+  openGraph={{
+    basic: {
+      title: ogTitle || title,
+      type: ogType,
+      image: ogImage,
+      url: currentCanonical,
+    },
+    image: {
+      alt: "Dealshub India Loot Deals",
+    }
+  }}
+  twitter={{
+    card: "summary_large_image",
+    site: "@dealshubindia",
+    creator: "@geetaksharma",
+    title: ogTitle || title,
+    description: description,
+    image: ogImage,
+  }}
+  extend={{
+    meta: [
+      { name: "viewport", content: "width=device-width, initial-scale=1.0" },
+      { name: "generator", content: Astro.generator },
+    ],
+    link: [
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/favicon.ico" },
+      { rel: "manifest", href: "/manifest.json" },
+      { rel: "apple-touch-icon", href: "/favicon.svg" },
+      { rel: "alternate", type: "application/rss+xml", title: "Dealshub RSS Feed", href: "/feed.xml" },
+      { rel: "alternate", type: "application/json", title: "Dealshub JSON Feed", href: "/api/feeds.json" },
+      { rel: "llms-txt", href: "/llms.txt" },
+    ],
+  }}
+/>
