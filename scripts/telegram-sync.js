@@ -26,8 +26,10 @@ async function syncDeals() {
       const post = update.channel_post;
       if (!post) continue;
 
-      // Filtering for targeted channel
-      if (post.chat?.username !== 'DealsHubIndiaa') continue;
+      // Filtering for targeted channel (Case-Insensitive)
+      const chatUsername = post.chat?.username || "";
+      console.log(`[DEBUG] Processing post from: ${chatUsername}`);
+      if (chatUsername.toLowerCase() !== 'dealshubindiaa') continue;
 
       const text = post.text || post.caption || "";
       if (!text) continue;
