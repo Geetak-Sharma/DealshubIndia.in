@@ -79,7 +79,7 @@ ${text}`;
           owner: OWNER,
           repo: REPO,
           path: filePath,
-          message: `build: force-register telegram-sync workflow v1.1 [${updateId}]`,
+          message: `build: auto-loot sync [${updateId}]`,
           content: Buffer.from(markdownContent).toString("base64"),
         });
         console.log(`[SYNC] ✅ Force-Sync SUCCESS: ${fileName}`);

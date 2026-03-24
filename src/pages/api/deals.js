@@ -6,15 +6,12 @@ export async function GET() {
   try {
     let deals = await getCollection('deals');
     
-    // Defensive Sorting: Ensure date exists and is a valid Date object
+    // Sort deals by date (Newest First)
     deals.sort((a, b) => {
       const dateA = a.data.date instanceof Date ? a.data.date.getTime() : 0;
       const dateB = b.data.date instanceof Date ? b.data.date.getTime() : 0;
       return dateB - dateA;
     });
-
-    // Log for GCP Cloud Run Debugging
-    console.log(`[SERVER] Found ${deals.length} deals. Latest: ${deals[0]?.data?.title || 'None'}`);
 
     if (!deals || deals.length === 0) {
       return new Response(JSON.stringify({ 
@@ -23,7 +20,7 @@ export async function GET() {
       }), { status: 200, headers: { "Content-Type": "application/json" } });
     }
 
-    // Map to simple JSON for production serializability
+    // Map to simplified JSON for serializability
     const payload = deals.map(d => ({
       id: d.id,
       slug: d.slug,
