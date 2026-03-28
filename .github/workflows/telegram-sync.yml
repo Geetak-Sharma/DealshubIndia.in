@@ -34,4 +34,11 @@ jobs:
 
       - name: Trigger Site Redeploy
         if: success()
-        run: curl -X POST ${{ secrets.DEPLOY_HOOK_URL }}
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$DEPLOY_HOOK_URL" ]; then
+            echo "DEPLOY_HOOK_URL secret is not set — skipping redeploy trigger."
+            exit 0
+          fi
+          curl -X POST "$DEPLOY_HOOK_URL"
