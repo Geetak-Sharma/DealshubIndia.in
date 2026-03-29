@@ -1,37 +1,38 @@
-name: 🚀 DealsHub Auto-Loot V2
+name:  DealsHub Auto-Loot V2
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
-  workflow_dispatch: {}
+      - cron: '*/30 * * * *' # Runs every 30 minutes
+        workflow_dispatch: {}
 
-jobs:
-  sync:
-    runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          token: ${{ secrets.GH_PAT }}
+        jobs:
+          sync:
+              runs-on: ubuntu-latest
+                  env:
+                        FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+                            steps:
+                                  - name: Checkout Repository
+                                          uses: actions/checkout@v4
+                                                  with:
+                                                            ref: main
+                                                                      token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-
-      - name: Install Dependencies
-        run: npm install axios @octokit/rest node-fetch
-
-      - name: Run Auto-Loot Sync
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-          GITHUB_REPOSITORY: "Geetak-Sharma/DealshubIndia.in"
-        run: node scripts/telegram-sync.cjs
-
-      - name: Trigger Site Redeploy
-        if: success()
-        run: curl -X POST ${{ secrets.DEPLOY_HOOK_URL }}
+                                                                            - name: Setup Node.js
+                                                                                    uses: actions/setup-node@v4
+                                                                                            with:
+                                                                                                      node-version: 24
+                                                                                                      
+                                                                                                            - name: Install Dependencies
+                                                                                                                    run: npm install axios @octokit/rest node-fetch
+                                                                                                                    
+                                                                                                                          - name: Run Auto-Loot Sync
+                                                                                                                                  env:
+                                                                                                                                            TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+                                                                                                                                                      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                                                                                                                                                                GITHUB_REPOSITORY: "Geetak-Sharma/DealshubIndia.in"
+                                                                                                                                                                        run: node scripts/telegram-sync.cjs
+                                                                                                                                                                        
+                                                                                                                                                                              - name: Trigger Site Redeploy
+                                                                                                                                                                                      if: success()
+                                                                                                                                                                                              run: curl -X POST ${{ secrets.DEPLOY_HOOK_URL }}
+                                                                                                                                                                                              
