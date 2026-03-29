@@ -78,6 +78,7 @@ isLoot: true
 
 ${text}`;
 
+      // 5. COMMIT TO REPOSITORY
       try {
         console.log(`[SYNC] Syncing ${fileName} to ${OWNER}/${REPO}...`);
         await octokit.repos.createOrUpdateFileContents({
