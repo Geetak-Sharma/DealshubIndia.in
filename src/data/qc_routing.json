@@ -1,0 +1,93 @@
+{
+  "Zepto": {
+    "domain": "https://www.zepto.com",
+    "searchPath": "/search",
+    "queryParam": "q",
+    "healthStatus": "healthy",
+    "lastChecked": "2026-06-06T08:31:10.744Z"
+  },
+  "Blinkit": {
+    "domain": "https://blinkit.com",
+    "searchPath": "/s/",
+    "queryParam": "q",
+    "healthStatus": "healthy",
+    "lastChecked": "2026-06-06T14:01:00.000Z"
+  },
+  "Swiggy Instamart": {
+    "domain": "https://www.swiggy.com",
+    "searchPath": "/instamart/search",
+    "queryParam": "q",
+    "healthStatus": "healthy",
+    "lastChecked": "2026-06-06T14:01:00.000Z"
+  },
+  "Swiggy": {
+    "domain": "https://www.swiggy.com",
+    "searchPath": "/search",
+    "queryParam": "q",
+    "healthStatus": "healthy",
+    "lastChecked": "2026-06-06T14:01:00.000Z"
+  },
+  "Zomato": {
+    "domain": "https://www.zomato.com",
+    "searchPath": "/search",
+    "queryParam": "q",
+    "healthStatus": "healthy",
+    "lastChecked": "2026-06-06T14:01:00.000Z"
+  },
+  "BigBasket": {
+    "domain": "https://www.bigbasket.com",
+    "searchPath": "/ps/",
+    "queryParam": "q",
+    "healthStatus": "healthy",
+    "lastChecked": "2026-06-06T08:37:25.193Z"
+  },
+  "Domino's": {
+    "domain": "https://dominos.co.in",
+    "searchPath": "/menu",
+    "queryParam": "search",
+    "healthStatus": "healthy",
+    "lastChecked": "2026-06-06T14:01:00.000Z"
+  },
+  "KFC": {
+    "domain": "https://online.kfc.co.in",
+    "searchPath": "/menu",
+    "queryParam": "search",
+    "healthStatus": "healthy",
+    "lastChecked": "2026-06-06T14:01:00.000Z"
+  },
+  "McDonald's": {
+    "domain": "https://mcdelivery.co.in",
+    "searchPath": "/menu",
+    "queryParam": "search",
+    "healthStatus": "healthy",
+    "lastChecked": "2026-06-06T12:01:18.551Z"
+  },
+  "Pizza Hut": {
+    "domain": "https://www.pizzahut.co.in",
+    "searchPath": "/menu",
+    "queryParam": "search",
+    "healthStatus": "healthy",
+    "lastChecked": "2026-06-06T14:01:00.000Z"
+  },
+  "Magicpin": {
+    "domain": "https://magicpin.in",
+    "searchPath": "/search",
+    "queryParam": "q",
+    "healthStatus": "healthy",
+    "lastChecked": "2026-06-06T14:01:00.000Z"
+  },
+  "EatSure": {
+    "domain": "https://www.eatsure.com",
+    "searchPath": "/search",
+    "queryParam": "q",
+    "healthStatus": "healthy",
+    "lastChecked": "2026-06-06T14:01:00.000Z"
+  },
+  "Amazon Pay": {
+    "domain": "https://www.amazon.in",
+    "searchPath": "/gp/s",
+    "queryParam": "k",
+    "healthStatus": "healthy",
+    "lastChecked": "2026-06-06T14:01:00.000Z"
+  }
+}

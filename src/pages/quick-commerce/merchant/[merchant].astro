@@ -1,0 +1,29 @@
+---
+export const prerender = false;
+
+const { merchant } = Astro.params;
+
+// Map lowercase merchant params to official casing
+const MERCHANT_MAP: Record<string, string> = {
+  zomato: 'Zomato',
+  swiggy: 'Swiggy',
+  zepto: 'Zepto',
+  blinkit: 'Blinkit',
+  bigbasket: 'BigBasket',
+  dominos: "Domino's",
+  kfc: 'KFC',
+  mcdonalds: "McDonald's",
+  pizzahut: 'Pizza Hut',
+  eatsure: 'EatSure',
+  magicpin: 'Magicpin',
+  paytm: 'Paytm',
+  phonepe: 'PhonePe',
+  amazonpay: 'Amazon Pay',
+  mobikwik: 'Mobikwik'
+};
+
+const formattedMerchant = merchant ? (MERCHANT_MAP[merchant.toLowerCase()] || merchant.charAt(0).toUpperCase() + merchant.slice(1).toLowerCase()) : '';
+
+// Future-proof redirect to the main feed pre-filtered by merchant
+return Astro.redirect(`/quick-commerce?merchant=${encodeURIComponent(formattedMerchant)}`, 302);
+---

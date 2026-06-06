@@ -1,0 +1,152 @@
+{
+  "channels": [
+    {
+      "id": "dealbeetricks",
+      "name": "DealBee Tricks",
+      "url": "https://t.me/s/dealbeetricks",
+      "enabled": true,
+      "intervalSeconds": 120,
+      "acceptTextOnly": true,
+      "priority": 1,
+      "description": "Food, grocery, and quick-commerce deals channel (Redirected/Blocked in some regions)"
+    },
+    {
+      "id": "dealbeeofficial",
+      "name": "DealBee Official",
+      "url": "https://t.me/s/dealbeeofficial",
+      "enabled": true,
+      "intervalSeconds": 120,
+      "acceptTextOnly": true,
+      "priority": 2,
+      "description": "Main DealBee channel - contains real food, grocery, and quick-commerce deals"
+    },
+    {
+      "id": "desidime",
+      "name": "DesiDime Official",
+      "url": "https://t.me/s/desidime",
+      "enabled": false,
+      "intervalSeconds": 120,
+      "acceptTextOnly": true,
+      "priority": 3,
+      "description": "DesiDime official channel - contains excellent quick commerce and delivery freebies/deals"
+    },
+    {
+      "id": "coolztricks",
+      "name": "CoolzTricks Official",
+      "url": "https://t.me/s/coolztricks",
+      "enabled": true,
+      "intervalSeconds": 120,
+      "acceptTextOnly": true,
+      "priority": 4,
+      "description": "CoolzTricks channel - contains daily loot deals and shopping coupons"
+    },
+    {
+      "id": "indiafreestuff",
+      "name": "IndiaFreeStuff",
+      "url": "https://t.me/s/indiafreestuff",
+      "enabled": true,
+      "intervalSeconds": 120,
+      "acceptTextOnly": true,
+      "priority": 5,
+      "description": "IndiaFreeStuff channel - deals and grocery coupons"
+    },
+    {
+      "id": "gopaisa",
+      "name": "GoPaisa",
+      "url": "https://t.me/s/gopaisa",
+      "enabled": true,
+      "intervalSeconds": 120,
+      "acceptTextOnly": true,
+      "priority": 6,
+      "description": "GoPaisa channel - grocery loot deals and delivery offers"
+    }
+  ],
+  "brand": {
+    "remove": [
+      "DealBee",
+      "dealbee",
+      "Deal Bee",
+      "@dealbeetricks",
+      "@dealbeeofficial",
+      "@DealBeeDeals_Bot",
+      "DealBeeDeals_Bot",
+      "dealbeeofficial",
+      "DesiDime",
+      "desidime",
+      "@desidime",
+      "CoolzTricks",
+      "coolztricks",
+      "@coolztricks"
+    ],
+    "removeLinks": [
+      "t.me/dealbee",
+      "dealbeetricks.com",
+      "dealbeeofficial",
+      "ddime.in",
+      "coolztricks.com"
+    ],
+    "siteName": "Dealshub India",
+    "siteUrl": "https://dealshubindia.in",
+    "telegramChannel": "https://t.me/DealsHubIndiaa",
+    "affiliateLink": "https://dealshub.bio.link/"
+  },
+  "qcKeywords": [
+    "swiggy",
+    "zomato",
+    "blinkit",
+    "zepto",
+    "bigbasket",
+    "instamart",
+    "eatsure",
+    "domino",
+    "kfc",
+    "mcdonald",
+    "pizza hut",
+    "magicpin",
+    "food delivery",
+    "grocery",
+    "restaurant",
+    "quick commerce",
+    "bb now",
+    "dunzo",
+    "grofers",
+    "eatclub",
+    "freshmenu",
+    "free delivery",
+    "food coupon",
+    "cashback on food",
+    "cashback on grocery",
+    "order food",
+    "food order",
+    "delivery free",
+    "flat off on food"
+  ],
+  "spamPatterns": [
+    "join our channel",
+    "join channel",
+    "join the channel",
+    "share with friends",
+    "forward this",
+    "subscribe to",
+    "invite link",
+    "click here to join",
+    "whatsapp group link",
+    "telegram group link",
+    "only for members",
+    "good morning",
+    "good evening",
+    "good night",
+    "happy"
+  ],
+  "searchTemplates": {
+    "Swiggy Instamart": "https://www.swiggy.com/instamart/search?q={product}",
+    "Swiggy": "https://www.swiggy.com/search?q={product}",
+    "Blinkit": "https://blinkit.com/s/?q={product}",
+    "Zepto": "https://www.zepto.com/search?q={product}",
+    "BigBasket": "https://www.bigbasket.com/ps/?q={product}",
+    "Magicpin": "https://magicpin.in/search?q={product}",
+    "Zomato": "https://www.zomato.com/search?q={product}"
+  },
+  "maxPosts": 3000,
+  "deduplicationWindowHours": 24
+}

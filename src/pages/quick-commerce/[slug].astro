@@ -1,0 +1,547 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import { QCDataStore } from '../../lib/qcStore.js';
+import { startQCScraper } from '../../lib/qcScraper.js';
+import FloatingWhatsApp from '../../components/FloatingWhatsApp.astro';
+
+// Boot scraper when any deal page is hit
+startQCScraper();
+
+const { slug } = Astro.params;
+const deal = slug ? QCDataStore.getBySlug(slug) : null;
+
+// 404 if deal not found
+if (!deal) {
+  return Astro.redirect('/quick-commerce', 302);
+}
+
+// Increment view count when deal detail page is rendered
+QCDataStore.incrementView(deal.id);
+
+// Related deals (same merchant, exclude current)
+const related = deal.merchant
+  ? QCDataStore.getRelated(deal.id, deal.merchant, 4)
+  : QCDataStore.getLatest(4).filter(d => d.id !== deal.id).slice(0, 4);
+
+// Priority: real product image > Dealshub branded SVG card
+const imgSrc = deal.image || deal.fallbackSvg || '';
+const accentColor = deal.merchantColor || '#22C55E';
+
+// SEO
+const pageTitle = `${deal.title} | Dealshub India Quick Commerce`;
+const pageDesc  = `${deal.title}${deal.couponCode ? ` – Use code ${deal.couponCode}` : ''}${deal.discount ? ` – ${deal.discount}` : ''}. Verified by Dealshub India.`;
+const dealUrl   = `/go/qc?id=${encodeURIComponent(deal.id)}&action=get-offer`;
+const canonicalUrl = `https://dealshubindia.in/quick-commerce/${slug}`;
+---
+
+<Layout title={pageTitle} description={pageDesc} ogTitle={pageTitle} image={imgSrc}>
+
+  <!-- Canonical -->
+  <link rel="canonical" href={canonicalUrl} slot="head" />
+
+  <!-- Schema.org: Offer -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Offer",
+    "name": deal.title,
+    "description": pageDesc,
+    "url": canonicalUrl,
+    "seller": {
+      "@type": "Organization",
+      "name": deal.merchant || "Quick Commerce",
+    },
+    "offeredBy": {
+      "@type": "Organization",
+      "name": "Dealshub India",
+      "url": "https://dealshubindia.in"
+    },
+    ...(deal.couponCode ? { "priceSpecification": { "@type": "PriceSpecification", "name": `Coupon: ${deal.couponCode}` } } : {}),
+    "validFrom": new Date(deal.timestamp).toISOString(),
+    ...(deal.validTill ? { "validThrough": deal.validTill } : {}),
+    "availability": deal.isExpired ? "https://schema.org/Discontinued" : "https://schema.org/InStock",
+  })} />
+
+  <!-- Schema.org: BreadcrumbList -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home",            "item": "https://dealshubindia.in/" },
+      { "@type": "ListItem", "position": 2, "name": "Quick Commerce",  "item": "https://dealshubindia.in/quick-commerce" },
+      { "@type": "ListItem", "position": 3, "name": deal.merchant || "Deal", "item": `https://dealshubindia.in/quick-commerce/${slug}` },
+    ]
+  })} />
+
+  <main class="qcd-main">
+
+    <div class="qcd-container">
+
+      <!-- Breadcrumb -->
+      <nav class="qcd-breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span>›</span>
+        <a href="/quick-commerce">Quick Commerce</a>
+        <span>›</span>
+        <span>{deal.merchant || 'Deal'}</span>
+      </nav>
+
+      <!-- Deal Detail Card -->
+      <div class="qcd-card" style={`--acc:${accentColor}`}>
+
+        <!-- Accent bar -->
+        <div class="qcd-card__bar" />
+
+        <!-- Two column layout -->
+        <div class="qcd-card__layout">
+
+          <!-- Image column -->
+          <div class="qcd-card__img-col">
+            {imgSrc ? (
+              <img
+                src={imgSrc}
+                alt={deal.title}
+                class="qcd-card__img"
+                loading="eager"
+                referrerpolicy="no-referrer"
+              />
+            ) : (
+              <div class="qcd-card__img-ph">
+                <span class="qcd-card__img-emoji">{deal.merchantEmoji || '🛍️'}</span>
+              </div>
+            )}
+            <!-- Expiry badge -->
+            {deal.isExpiringToday && (
+              <div class="qcd-card__expiry">⏰ Expires Today</div>
+            )}
+          </div>
+
+          <!-- Content column -->
+          <div class="qcd-card__content">
+
+            <!-- Merchant + time -->
+            <div class="qcd-card__toprow">
+              <span class="qcd-merchant" style={`background:${accentColor}18;border-color:${accentColor}40;color:${accentColor}`}>
+                <span>{deal.merchantEmoji}</span>
+                <span>{deal.merchant || 'Quick Commerce'}</span>
+              </span>
+              <span class="qcd-time">🕒 {deal.timeAgo}</span>
+            </div>
+
+            <!-- Title (h1 for SEO) -->
+            <h1 class="qcd-title">{deal.title}</h1>
+
+            <!-- Badges -->
+            <div class="qcd-badges">
+              {deal.discount && <span class="qcd-badge qcd-badge--discount">{deal.discount}</span>}
+              {deal.cashback && <span class="qcd-badge qcd-badge--cashback">💰 {deal.cashback}</span>}
+              {deal.isFreebie && <span class="qcd-badge qcd-badge--free">🆓 FREE</span>}
+              {deal.isFirstOrder && <span class="qcd-badge qcd-badge--new">🆕 NEW USER</span>}
+              {deal.minOrder && <span class="qcd-badge qcd-badge--min">Min {deal.minOrder}</span>}
+            </div>
+
+            <!-- Coupon code chip -->
+            {deal.couponCode && (
+              <div class="qcd-coupon-wrap">
+                <button class="qcd-coupon" id="copy-code-btn" data-code={deal.couponCode}>
+                  <span>🎟️</span>
+                  <span class="qcd-coupon__code">{deal.couponCode}</span>
+                  <span class="qcd-coupon__action">Tap to Copy</span>
+                </button>
+                <p class="qcd-coupon__hint">Apply this code at checkout on {deal.merchant || 'the platform'}</p>
+              </div>
+            )}
+
+
+            <!-- Price info -->
+            {(deal.finalPrice || deal.minOrder) && (
+              <div class="qcd-price-row">
+                {deal.finalPrice && <span class="qcd-price">{deal.finalPrice}</span>}
+                {deal.minOrder && <span class="qcd-min-order">Min order: {deal.minOrder}</span>}
+              </div>
+            )}
+
+            <!-- Validity -->
+            {deal.validTill && (
+              <p class="qcd-validity">
+                {deal.isExpiringToday
+                  ? '⚠️ This offer expires today'
+                  : `✓ Valid till ${new Date(deal.validTill).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`}
+              </p>
+            )}
+
+            <!-- CTA Buttons -->
+            <div class="qcd-cta-row">
+              {deal.destinationType === 'no-link' ? (
+                <button
+                  type="button"
+                  class="qcd-btn qcd-btn--primary qcd-btn--no-link"
+                  style={`background:${accentColor}`}
+                  data-merchant={deal.merchant || 'Quick Commerce'}
+                  data-product={deal.productName || deal.title}
+                  data-url={deal.url}
+                >
+                  🔍 Open App & Search
+                </button>
+              ) : (
+                <a
+                  href={dealUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="qcd-btn qcd-btn--primary"
+                  style={`background:${accentColor}`}
+                >
+                  Get Offer →
+                </a>
+              )}
+              {deal.couponCode && (
+                <button class="qcd-btn qcd-btn--copy" id="copy-btn-2" data-code={deal.couponCode}>
+                  🎟️ Copy Code
+                </button>
+              )}
+              <button
+                class="qcd-btn qcd-btn--share"
+                id="share-btn"
+                data-id={deal.id}
+                data-title={deal.title}
+                data-slug={deal.slug}
+                data-coupon={deal.couponCode || ''}
+                data-aicontext={deal.aiContext || ''}
+              >
+                📢 Share Deal
+              </button>
+            </div>
+
+            <!-- Verified watermark -->
+            <div class="qcd-verified">✓ Auto Imported • dealshubindia.in</div>
+            <p class="qcd-disclaimer">Deals are automatically aggregated from public deal communities and may expire without notice.</p>
+
+          </div>
+        </div>
+
+        <!-- Full description -->
+        {deal.text && (
+          <div class="qcd-desc">
+            <h2 class="qcd-desc__title">Deal Details</h2>
+            <p class="qcd-desc__body">{deal.text}</p>
+          </div>
+        )}
+
+      </div>
+
+      <!-- Related deals -->
+      {related.length > 0 && (
+        <section class="qcd-related">
+          <h2 class="qcd-related__title">
+            More {deal.merchant || 'Quick Commerce'} Offers
+          </h2>
+          <div class="qcd-related__grid">
+            {related.map(r => (
+              <a href={`/quick-commerce/${r.slug}`} class="qcd-related-card">
+                <div class="qcd-related-card__bar" style={`background:${r.merchantColor || '#22C55E'}`} />
+                {(r.image || r.fallbackSvg) && (
+                  <img
+                    src={r.image || r.fallbackSvg}
+                    alt={r.title}
+                    class="qcd-related-card__img"
+                    loading="lazy"
+                  />
+                )}
+                <div class="qcd-related-card__body">
+                  <span class="qcd-related-card__merchant" style={`color:${r.merchantColor || '#22C55E'}`}>
+                    {r.merchantEmoji} {r.merchant}
+                  </span>
+                  <p class="qcd-related-card__title">{r.title}</p>
+                  {r.discount && <span class="qcd-related-card__discount">{r.discount}</span>}
+                  {r.couponCode && <span class="qcd-related-card__coupon">🎟️ {r.couponCode}</span>}
+                </div>
+              </a>
+            ))}
+          </div>
+
+          <div class="qcd-related__more">
+            <a href="/quick-commerce" class="qcd-btn qcd-btn--back">← View All Quick Commerce Offers</a>
+          </div>
+        </section>
+      )}
+
+    </div>
+  </main>
+
+  <FloatingWhatsApp />
+</Layout>
+
+<!-- Copy code & sharing interaction -->
+<script>
+  function initCopyButtons() {
+    document.querySelectorAll('[data-code]').forEach(btn => {
+      btn.addEventListener('click', async function() {
+        const code = this.dataset.code;
+        if (!code) return;
+        try {
+          await navigator.clipboard.writeText(code);
+        } catch {
+          const el = document.createElement('textarea');
+          el.value = code;
+          document.body.appendChild(el);
+          el.select();
+          document.execCommand('copy');
+          document.body.removeChild(el);
+        }
+        const original = this.innerHTML;
+        this.innerHTML = this.innerHTML.replace(/Tap to Copy|Copy Code|🎟️/, '✓ Copied!');
+        setTimeout(() => { this.innerHTML = original; }, 2500);
+      });
+    });
+  }
+
+  function initNoLinkButton() {
+    const btn = document.querySelector('.qcd-btn--no-link');
+    if (!btn) return;
+    btn.addEventListener('click', async function() {
+      const merchant = this.dataset.merchant;
+      const product = this.dataset.product;
+      const url = this.dataset.url;
+
+      try {
+        await navigator.clipboard.writeText(product);
+        alert('Copied product name to clipboard!');
+      } catch {}
+
+      const confirmOpen = confirm(
+        `🔍 Open App & Search:\n\n` +
+        `1. The product name "${product}" has been copied to your clipboard.\n` +
+        `2. Click OK to open the ${merchant} app/website.\n` +
+        `3. Search for the item inside the app and paste the name.`
+      );
+      
+      if (confirmOpen && url) {
+        window.open(url, '_blank');
+      }
+    });
+  }
+
+  function initShareButton() {
+    const btn = document.getElementById('share-btn');
+    if (!btn) return;
+    btn.addEventListener('click', async function() {
+      const id = this.dataset.id;
+      const title = this.dataset.title;
+      const slug = this.dataset.slug;
+      const coupon = this.dataset.coupon;
+      const ai = this.dataset.aicontext;
+      
+      const shareUrl = `https://dealshubindia.in/quick-commerce/${slug}`;
+      const couponText = coupon ? `Use code ${coupon}\n\n` : '';
+      const summaryText = ai ? ai.replace(/^✨\s*Auto Imported:\s*/, '') + '\n\n' : '';
+      const shareText = `🔥 ${title}\n\n${couponText}${summaryText}Found on Dealshub India:\n${shareUrl}`;
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: title,
+            text: shareText,
+            url: shareUrl
+          });
+          await fetch('/api/qc-share', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ dealId: id })
+          });
+        } catch {}
+      } else {
+        try {
+          await navigator.clipboard.writeText(shareText);
+          alert('Deal details copied to clipboard!');
+        } catch {
+          const el = document.createElement('textarea');
+          el.value = shareText;
+          document.body.appendChild(el);
+          el.select();
+          document.execCommand('copy');
+          document.body.removeChild(el);
+          alert('Deal details copied to clipboard!');
+        }
+        await fetch('/api/qc-share', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dealId: id })
+        }).catch(() => {});
+      }
+    });
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    initCopyButtons();
+    initShareButton();
+    initNoLinkButton();
+  });
+  initCopyButtons();
+  initShareButton();
+  initNoLinkButton();
+</script>
+
+<style>
+  .qcd-main {
+    background: var(--bg-color);
+    min-height: 100vh;
+    padding: 40px 0 80px;
+  }
+  .qcd-container {
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  /* Breadcrumb */
+  .qcd-breadcrumb {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.3);
+  }
+  .qcd-breadcrumb a { color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.2s; }
+  .qcd-breadcrumb a:hover { color: var(--acc, #FC8019); }
+
+  /* Main card */
+  .qcd-card {
+    background: rgba(19,23,32,0.9);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  .qcd-card__bar { height: 4px; background: var(--acc, #22C55E); }
+  .qcd-card__layout {
+    display: flex; flex-direction: row; gap: 0;
+  }
+  @media(max-width:768px){ .qcd-card__layout { flex-direction: column; } }
+
+  .qcd-card__img-col {
+    width: 45%; min-width: 280px; position: relative;
+    background: rgba(255,255,255,0.02); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    align-self: stretch;
+  }
+  @media(max-width:768px){ .qcd-card__img-col { width: 100%; min-width: unset; height: 260px; } }
+  .qcd-card__img { width: 100%; height: 100%; object-fit: contain; background: rgba(0,0,0,0.15); }
+  .qcd-card__img-ph {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; min-height: 220px;
+  }
+  .qcd-card__img-emoji { font-size: 4rem; }
+  .qcd-card__expiry {
+    position: absolute; top: 12px; left: 12px;
+    background: rgba(239,68,68,0.9); color: white;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.5px;
+    padding: 4px 10px; border-radius: 99px;
+  }
+
+  .qcd-card__content { flex: 1; padding: 28px 32px; display: flex; flex-direction: column; gap: 14px; }
+  @media(max-width:768px){ .qcd-card__content { padding: 20px; } }
+
+  .qcd-card__toprow { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .qcd-merchant {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 8px; border: 1px solid;
+    font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .qcd-time { font-size: 11px; color: rgba(255,255,255,0.3); font-weight: 600; }
+
+  .qcd-title {
+    font-size: clamp(18px, 3vw, 24px); font-weight: 800;
+    color: #f0f2f5; line-height: 1.3; margin: 0;
+  }
+
+  .qcd-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+  .qcd-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 4px 10px; border-radius: 99px;
+    font-size: 11px; font-weight: 800;
+  }
+  .qcd-badge--discount { background: rgba(251,146,60,0.12); color:#fb923c; border:1px solid rgba(251,146,60,0.25); }
+  .qcd-badge--cashback { background: rgba(34,197,94,0.10); color:#22C55E; border:1px solid rgba(34,197,94,0.25); }
+  .qcd-badge--free     { background: rgba(52,211,153,0.10); color:#34d399; border:1px solid rgba(52,211,153,0.25); }
+  .qcd-badge--new      { background: rgba(139,92,246,0.10); color:#a78bfa; border:1px solid rgba(139,92,246,0.25); }
+  .qcd-badge--min      { background: rgba(255,255,255,0.05); color:rgba(255,255,255,0.4); border:1px solid rgba(255,255,255,0.1); }
+
+  .qcd-coupon-wrap { display: flex; flex-direction: column; gap: 6px; }
+  .qcd-coupon {
+    display: inline-flex; align-items: center; gap: 10px; cursor: pointer;
+    padding: 12px 18px; border-radius: 12px;
+    background: rgba(34,197,94,0.06); border: 2px dashed rgba(34,197,94,0.35);
+    transition: all 0.2s ease; width: fit-content;
+  }
+  .qcd-coupon:hover { background: rgba(34,197,94,0.14); border-color: #22C55E; }
+  .qcd-coupon__code {
+    font-family: 'Courier New', monospace; font-size: 16px; font-weight: 900;
+    color: #22C55E; letter-spacing: 3px;
+  }
+  .qcd-coupon__action { font-size: 10px; color: rgba(34,197,94,0.5); font-weight: 700; text-transform: uppercase; }
+  .qcd-coupon__hint { font-size: 11px; color: rgba(255,255,255,0.3); margin: 0; }
+
+  .qcd-ai {
+    font-size: 12px; color: rgba(34,197,94,0.7); font-weight: 500; line-height: 1.5;
+    background: rgba(34,197,94,0.05); border: 1px dashed rgba(34,197,94,0.15);
+    border-radius: 10px; padding: 10px 14px; margin: 0;
+  }
+
+  .qcd-price-row { display: flex; align-items: baseline; gap: 12px; }
+  .qcd-price { font-size: 24px; font-weight: 900; color: var(--acc, #22C55E); }
+  .qcd-min-order { font-size: 12px; color: rgba(255,255,255,0.3); font-weight: 600; }
+
+  .qcd-validity { font-size: 12px; color: rgba(255,255,255,0.4); font-weight: 600; margin: 0; }
+
+  .qcd-cta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .qcd-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 12px 20px; border-radius: var(--radius-md);
+    font-size: 12px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase;
+    text-decoration: none; cursor: pointer; border: none;
+    transition: all 0.2s ease; white-space: nowrap;
+  }
+  .qcd-btn--primary { color: white; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+  .qcd-btn--primary:hover { filter: brightness(1.12); transform: translateY(-1px); }
+  .qcd-btn--copy { background: rgba(34,197,94,0.08); color: #22C55E; border: 1px solid rgba(34,197,94,0.25); }
+  .qcd-btn--copy:hover { background: rgba(34,197,94,0.18); }
+  .qcd-btn--share { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.65); border: 1px solid rgba(255,255,255,0.12); }
+  .qcd-btn--share:hover { background: rgba(255,255,255,0.12); color: white; }
+  .qcd-btn--back { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.1); }
+  .qcd-btn--back:hover { background: rgba(255,255,255,0.1); color: white; }
+ 
+  .qcd-verified { font-size: 9px; color: rgba(255,255,255,0.2); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+  .qcd-disclaimer { font-size: 10px; color: rgba(255,255,255,0.25); line-height: 1.5; margin: 8px 0 0; }
+
+  .qcd-desc {
+    padding: 24px 32px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  @media(max-width:768px){ .qcd-desc { padding: 20px; } }
+  .qcd-desc__title { font-size: 14px; font-weight: 800; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .qcd-desc__body { font-size: 13px; color: rgba(255,255,255,0.4); line-height: 1.7; white-space: pre-wrap; }
+
+  /* Related */
+  .qcd-related { display: flex; flex-direction: column; gap: 16px; }
+  .qcd-related__title { font-size: 16px; font-weight: 900; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.5px; }
+  .qcd-related__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .qcd-related-card {
+    display: flex; flex-direction: column;
+    background: rgba(19,23,32,0.8); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-md); overflow: hidden; text-decoration: none;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .qcd-related-card:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(0,0,0,0.3); }
+  .qcd-related-card__bar { height: 3px; }
+  .qcd-related-card__img { width: 100%; height: 140px; object-fit: cover; }
+  .qcd-related-card__body { padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+  .qcd-related-card__merchant { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+  .qcd-related-card__title { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.75); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .qcd-related-card__discount { font-size: 11px; font-weight: 800; color: #fb923c; }
+  .qcd-related-card__coupon { font-size: 10px; font-weight: 700; color: #22C55E; font-family: monospace; }
+  .qcd-related__more { display: flex; justify-content: center; }
+</style>

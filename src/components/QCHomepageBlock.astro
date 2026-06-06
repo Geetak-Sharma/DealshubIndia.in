@@ -1,0 +1,463 @@
+---
+import { QCDataStore } from '../lib/qcStore.js';
+import { startQCScraper } from '../lib/qcScraper.js';
+
+// Boot scraper when homepage loads
+startQCScraper();
+
+const latestDeals = QCDataStore.getLatest(8);
+
+// Trending deals sorted by clickCount
+const trendingDeals = QCDataStore.load().posts
+  .filter(p => !p.isExpired)
+  .sort((a, b) => (b.clickCount || 0) - (a.clickCount || 0))
+  .slice(0, 8);
+
+// Most Shared deals sorted by shareCount
+const sharedDeals = QCDataStore.load().posts
+  .filter(p => !p.isExpired)
+  .sort((a, b) => (b.shareCount || 0) - (a.shareCount || 0))
+  .slice(0, 8);
+
+const hasAnyDeals = latestDeals.length > 0;
+---
+
+{hasAnyDeals && (
+<section class="qchp-section">
+  <div class="qchp-inner">
+
+    <!-- Section header -->
+    <div class="qchp-header">
+      <div>
+        <div class="qchp-eyebrow">
+          <span class="qchp-live-dot" />
+          LIVE UPDATED
+        </div>
+        <h2 class="qchp-title">🍕 Quick Commerce Offers</h2>
+        <p class="qchp-sub">Food delivery, grocery & instant cashback deals — auto-imported every 2 minutes</p>
+      </div>
+      <a href="/quick-commerce" class="qchp-view-all">
+        View All Offers →
+      </a>
+    </div>
+
+    <!-- Tabbed navigation -->
+    <div class="qchp-tabs">
+      <button class="qchp-tab-btn qchp-tab-btn--active" data-tab="latest">⏱️ Latest</button>
+      <button class="qchp-tab-btn" data-tab="trending">🔥 Trending</button>
+      <button class="qchp-tab-btn" data-tab="shared">📢 Most Shared</button>
+    </div>
+
+    <!-- Merchant strip -->
+    <div class="qchp-merchants">
+      {['🧡 Swiggy', '❤️ Zomato', '⚡ Blinkit', '💜 Zepto', '🛒 BigBasket', '🍕 Domino\'s', '🍗 KFC', '🍔 McD'].map(m => (
+        <span class="qchp-merchant-pill">{m}</span>
+      ))}
+    </div>
+
+    <!-- Grid: Latest -->
+    <div class="qchp-grid" id="qchp-grid-latest">
+      {latestDeals.map(deal => {
+        const accent = deal.merchantColor || '#22C55E';
+        const imgSrc = deal.image || deal.fallbackSvg || '';
+        return (
+          <a
+            href={`/quick-commerce/${deal.slug}`}
+            class={`qchp-card ${deal.isLoot ? 'qchp-card--loot' : ''}`}
+            style={`--acc:${accent}`}
+          >
+            <div class="qchp-card__bar" />
+            <div class="qchp-card__img-wrap">
+              <img 
+                src={imgSrc} 
+                alt={deal.title} 
+                class="qchp-card__img" 
+                loading="lazy" 
+                referrerpolicy="no-referrer"
+                style={imgSrc ? "" : "display: none;"}
+                onerror="this.onerror=null; if (this.dataset.fallback) { this.src = this.dataset.fallback; } else { this.style.display = 'none'; const ph = this.parentElement.querySelector('.qchp-card__img-ph'); if (ph) ph.style.display = 'flex'; }" 
+                data-fallback={deal.image ? '' : (deal.fallbackSvg || '')} 
+              />
+              <div 
+                class="qchp-card__img-ph" 
+                style={imgSrc ? "display: none;" : "display: flex;"}
+              >
+                <span>{deal.merchantEmoji || '🛍️'}</span>
+              </div>
+              {deal.isExpiringToday && (
+                <span class="qchp-card__expiry">⏰ Today</span>
+              )}
+            </div>
+            <div class="qchp-card__body">
+              <div class="qchp-card__meta">
+                <span class="qchp-card__merchant" style={`color:${accent}`}>
+                  {deal.merchantEmoji} {deal.merchant || 'Quick Commerce'}
+                </span>
+                <span class="qchp-card__time">{deal.timeAgo}</span>
+              </div>
+              <p class="qchp-card__title">{deal.title}</p>
+              <div class="qchp-card__badges">
+                {deal.discount && <span class="qchp-badge qchp-badge--discount">{deal.discount}</span>}
+                {deal.cashback && <span class="qchp-badge qchp-badge--cashback">💰 {deal.cashback}</span>}
+                {deal.couponCode && <span class="qchp-badge qchp-badge--coupon">🎟️ {deal.couponCode}</span>}
+                {deal.isFreebie && <span class="qchp-badge qchp-badge--free">🆓 FREE</span>}
+              </div>
+              <div class="qchp-card__cta" style={`background:${accent}`}>
+                Get Offer →
+              </div>
+            </div>
+          </a>
+        );
+      })}
+    </div>
+
+    <!-- Grid: Trending -->
+    <div class="qchp-grid" id="qchp-grid-trending" style="display: none;">
+      {trendingDeals.map(deal => {
+        const accent = deal.merchantColor || '#22C55E';
+        const imgSrc = deal.image || deal.fallbackSvg || '';
+        return (
+          <a
+            href={`/quick-commerce/${deal.slug}`}
+            class={`qchp-card ${deal.isLoot ? 'qchp-card--loot' : ''}`}
+            style={`--acc:${accent}`}
+          >
+            <div class="qchp-card__bar" />
+            <div class="qchp-card__img-wrap">
+              <img 
+                src={imgSrc} 
+                alt={deal.title} 
+                class="qchp-card__img" 
+                loading="lazy" 
+                referrerpolicy="no-referrer"
+                style={imgSrc ? "" : "display: none;"}
+                onerror="this.onerror=null; if (this.dataset.fallback) { this.src = this.dataset.fallback; } else { this.style.display = 'none'; const ph = this.parentElement.querySelector('.qchp-card__img-ph'); if (ph) ph.style.display = 'flex'; }" 
+                data-fallback={deal.image ? '' : (deal.fallbackSvg || '')} 
+              />
+              <div 
+                class="qchp-card__img-ph" 
+                style={imgSrc ? "display: none;" : "display: flex;"}
+              >
+                <span>{deal.merchantEmoji || '🛍️'}</span>
+              </div>
+              {deal.isExpiringToday && (
+                <span class="qchp-card__expiry">⏰ Today</span>
+              )}
+            </div>
+            <div class="qchp-card__body">
+              <div class="qchp-card__meta">
+                <span class="qchp-card__merchant" style={`color:${accent}`}>
+                  {deal.merchantEmoji} {deal.merchant || 'Quick Commerce'}
+                </span>
+                <span class="qchp-card__time">{deal.timeAgo}</span>
+              </div>
+              <p class="qchp-card__title">{deal.title}</p>
+              <div class="qchp-card__badges">
+                {deal.discount && <span class="qchp-badge qchp-badge--discount">{deal.discount}</span>}
+                {deal.cashback && <span class="qchp-badge qchp-badge--cashback">💰 {deal.cashback}</span>}
+                {deal.couponCode && <span class="qchp-badge qchp-badge--coupon">🎟️ {deal.couponCode}</span>}
+                {deal.isFreebie && <span class="qchp-badge qchp-badge--free">🆓 FREE</span>}
+              </div>
+              <div class="qchp-card__cta" style={`background:${accent}`}>
+                Get Offer →
+              </div>
+            </div>
+          </a>
+        );
+      })}
+    </div>
+
+    <!-- Grid: Most Shared -->
+    <div class="qchp-grid" id="qchp-grid-shared" style="display: none;">
+      {sharedDeals.map(deal => {
+        const accent = deal.merchantColor || '#22C55E';
+        const imgSrc = deal.image || deal.fallbackSvg || '';
+        return (
+          <a
+            href={`/quick-commerce/${deal.slug}`}
+            class={`qchp-card ${deal.isLoot ? 'qchp-card--loot' : ''}`}
+            style={`--acc:${accent}`}
+          >
+            <div class="qchp-card__bar" />
+            <div class="qchp-card__img-wrap">
+              <img 
+                src={imgSrc} 
+                alt={deal.title} 
+                class="qchp-card__img" 
+                loading="lazy" 
+                referrerpolicy="no-referrer"
+                style={imgSrc ? "" : "display: none;"}
+                onerror="this.onerror=null; if (this.dataset.fallback) { this.src = this.dataset.fallback; } else { this.style.display = 'none'; const ph = this.parentElement.querySelector('.qchp-card__img-ph'); if (ph) ph.style.display = 'flex'; }" 
+                data-fallback={deal.image ? '' : (deal.fallbackSvg || '')} 
+              />
+              <div 
+                class="qchp-card__img-ph" 
+                style={imgSrc ? "display: none;" : "display: flex;"}
+              >
+                <span>{deal.merchantEmoji || '🛍️'}</span>
+              </div>
+              {deal.isExpiringToday && (
+                <span class="qchp-card__expiry">⏰ Today</span>
+              )}
+            </div>
+            <div class="qchp-card__body">
+              <div class="qchp-card__meta">
+                <span class="qchp-card__merchant" style={`color:${accent}`}>
+                  {deal.merchantEmoji} {deal.merchant || 'Quick Commerce'}
+                </span>
+                <span class="qchp-card__time">{deal.timeAgo}</span>
+              </div>
+              <p class="qchp-card__title">{deal.title}</p>
+              <div class="qchp-card__badges">
+                {deal.discount && <span class="qchp-badge qchp-badge--discount">{deal.discount}</span>}
+                {deal.cashback && <span class="qchp-badge qchp-badge--cashback">💰 {deal.cashback}</span>}
+                {deal.couponCode && <span class="qchp-badge qchp-badge--coupon">🎟️ {deal.couponCode}</span>}
+                {deal.isFreebie && <span class="qchp-badge qchp-badge--free">🆓 FREE</span>}
+              </div>
+              <div class="qchp-card__cta" style={`background:${accent}`}>
+                Get Offer →
+              </div>
+            </div>
+          </a>
+        );
+      })}
+    </div>
+
+    <!-- Bottom CTA -->
+    <div class="qchp-footer">
+      <a href="/quick-commerce" class="qchp-footer-btn">
+        🍽️ Browse All Quick Commerce Deals →
+      </a>
+    </div>
+
+  </div>
+</section>
+)}
+
+<script>
+  function initQCTabs() {
+    const btns = document.querySelectorAll('.qchp-tab-btn');
+    btns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const tab = (this as HTMLButtonElement).dataset.tab;
+        
+        // Update active class on buttons
+        btns.forEach(b => b.classList.remove('qchp-tab-btn--active'));
+        this.classList.add('qchp-tab-btn--active');
+        
+        // Hide all grids
+        const gridL = document.getElementById('qchp-grid-latest');
+        const gridT = document.getElementById('qchp-grid-trending');
+        const gridS = document.getElementById('qchp-grid-shared');
+        if (gridL) gridL.style.display = 'none';
+        if (gridT) gridT.style.display = 'none';
+        if (gridS) gridS.style.display = 'none';
+        
+        // Show active grid
+        const activeGrid = document.getElementById(`qchp-grid-${tab}`);
+        if (activeGrid) {
+          activeGrid.style.display = 'grid';
+        }
+      });
+    });
+  }
+  document.addEventListener('astro:page-load', initQCTabs);
+  initQCTabs();
+</script>
+
+<style>
+  .qchp-section {
+    padding: 48px 0;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    background: linear-gradient(180deg, transparent 0%, rgba(252,128,25,0.03) 50%, transparent 100%);
+  }
+
+  .qchp-inner {
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Header */
+  .qchp-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding-bottom: 16px;
+  }
+  .qchp-eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 9px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+    color: #FC8019; margin-bottom: 6px;
+  }
+  .qchp-live-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: #FC8019;
+    animation: hpDotPing 1.8s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes hpDotPing {
+    0%  { box-shadow: 0 0 0 0 rgba(252,128,25,0.8); }
+    60% { box-shadow: 0 0 0 5px rgba(252,128,25,0); }
+    100%{ box-shadow: 0 0 0 0 rgba(252,128,25,0); }
+  }
+  .qchp-title {
+    font-size: 18px; font-weight: 900; color: #f0f2f5;
+    text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .qchp-sub {
+    font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.25);
+    text-transform: uppercase; letter-spacing: 1px; margin-top: 4px;
+  }
+  .qchp-view-all {
+    display: inline-flex; align-items: center;
+    padding: 8px 16px; border-radius: var(--radius-sm);
+    font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+    color: #FC8019; border: 1px solid rgba(252,128,25,0.3);
+    background: rgba(252,128,25,0.06); text-decoration: none;
+    transition: all 0.2s ease; white-space: nowrap;
+  }
+  .qchp-view-all:hover { background: rgba(252,128,25,0.14); border-color: rgba(252,128,25,0.6); }
+
+  /* Tabs */
+  .qchp-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 4px 0;
+  }
+  .qchp-tab-btn {
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .qchp-tab-btn:hover {
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .qchp-tab-btn--active {
+    color: #FC8019;
+    background: rgba(252, 128, 25, 0.08);
+    border-color: rgba(252, 128, 25, 0.35);
+  }
+
+  /* Merchant strip */
+  .qchp-merchants {
+    display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0;
+  }
+  .qchp-merchant-pill {
+    padding: 4px 12px; border-radius: 99px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.35);
+  }
+
+  /* Grid */
+  .qchp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  @media(max-width:640px){
+    .qchp-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  }
+  @media(max-width:400px){
+    .qchp-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Card */
+  .qchp-card {
+    display: flex;
+    flex-direction: column;
+    background: rgba(19,23,32,0.85);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease, border-color 0.3s ease;
+    position: relative;
+  }
+  .qchp-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 32px rgba(0,0,0,0.35), 0 0 0 1px var(--acc, #22C55E) 30;
+    border-color: color-mix(in srgb, var(--acc, #22C55E) 30%, transparent);
+  }
+  .qchp-card--loot { border-color: rgba(239,68,68,0.25); animation: cardLootPulse 2.5s ease-in-out infinite; }
+  @keyframes cardLootPulse {
+    0%,100%{ box-shadow: none; }
+    50%    { box-shadow: 0 0 16px rgba(239,68,68,0.25); }
+  }
+
+  .qchp-card__bar { height: 3px; background: var(--acc, #22C55E); }
+
+  .qchp-card__img-wrap {
+    width: 100%; height: 150px; overflow: hidden; position: relative;
+    background: rgba(255,255,255,0.02); flex-shrink: 0;
+  }
+  .qchp-card__img { width: 100%; height: 100%; object-fit: contain; background: rgba(0,0,0,0.15); transition: transform 0.3s ease; }
+  .qchp-card:hover .qchp-card__img { transform: scale(1.05); }
+  .qchp-card__img-ph {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: 100%;
+    font-size: 2.5rem;
+  }
+  .qchp-card__expiry {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(239,68,68,0.85); color: white;
+    font-size: 8px; font-weight: 800; padding: 2px 8px; border-radius: 99px;
+    letter-spacing: 0.5px;
+  }
+
+  .qchp-card__body { padding: 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+
+  .qchp-card__meta { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+  .qchp-card__merchant { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+  .qchp-card__time { font-size: 9px; color: rgba(255,255,255,0.25); font-weight: 600; }
+
+  .qchp-card__title {
+    font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.8);
+    line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden; margin: 0;
+  }
+
+  .qchp-card__badges { display: flex; flex-wrap: wrap; gap: 4px; }
+  .qchp-badge {
+    display: inline-flex; align-items: center; gap: 2px;
+    padding: 2px 7px; border-radius: 99px;
+    font-size: 9px; font-weight: 800; white-space: nowrap;
+  }
+  .qchp-badge--discount { background: rgba(251,146,60,0.12); color:#fb923c; }
+  .qchp-badge--cashback { background: rgba(34,197,94,0.10); color:#22C55E; }
+  .qchp-badge--coupon   { background: rgba(34,197,94,0.08); color:#22C55E; font-family: monospace; }
+  .qchp-badge--free     { background: rgba(52,211,153,0.10); color:#34d399; }
+
+  .qchp-card__cta {
+    display: flex; align-items: center; justify-content: center;
+    padding: 8px; border-radius: var(--radius-sm);
+    font-size: 10px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase;
+    color: white; margin-top: auto; transition: filter 0.2s;
+  }
+  .qchp-card:hover .qchp-card__cta { filter: brightness(1.15); }
+
+  /* Footer */
+  .qchp-footer { display: flex; justify-content: center; padding-top: 8px; }
+  .qchp-footer-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 28px; border-radius: var(--radius-md);
+    background: rgba(252,128,25,0.08); border: 1px solid rgba(252,128,25,0.25);
+    color: #FC8019; font-size: 13px; font-weight: 800;
+    text-decoration: none; letter-spacing: 0.3px;
+    transition: all 0.2s ease;
+  }
+  .qchp-footer-btn:hover { background: rgba(252,128,25,0.18); border-color: rgba(252,128,25,0.5); }
+</style>

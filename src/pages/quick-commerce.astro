@@ -1,0 +1,372 @@
+---
+export const prerender = false;
+
+import Layout from '../layouts/Layout.astro';
+import QCFeed from '../components/QCFeed.tsx';
+import FloatingWhatsApp from '../components/FloatingWhatsApp.astro';
+
+const title       = "Quick Commerce Offers – Food, Grocery & Delivery Deals | Dealshub India";
+const description = "Best Swiggy, Zomato, Blinkit, Zepto & BigBasket coupons, cashback offers, first-order deals and freebies. Updated every 2 minutes. Verified by Dealshub India.";
+const ogImage     = "https://dealshubindia.in/og-quick-commerce.png";
+---
+
+<Layout title={title} description={description} ogTitle={title} image={ogImage}>
+
+  <!-- Schema.org: BreadcrumbList -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home",            "item": "https://dealshubindia.in/" },
+      { "@type": "ListItem", "position": 2, "name": "Quick Commerce",  "item": "https://dealshubindia.in/quick-commerce" }
+    ]
+  })} />
+
+  <!-- Schema.org: WebPage -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Quick Commerce Offers",
+    "description": description,
+    "url": "https://dealshubindia.in/quick-commerce",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Dealshub India",
+      "url": "https://dealshubindia.in"
+    }
+  })} />
+
+  <main>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!--  HERO SECTION                                              -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <section class="qc-hero">
+      <div class="qc-hero__glow" />
+      <div class="qc-hero__inner">
+
+        <!-- Breadcrumb -->
+        <nav class="qc-breadcrumb" aria-label="Breadcrumb">
+          <a href="/">Home</a>
+          <span>›</span>
+          <span>Quick Commerce</span>
+        </nav>
+
+        <!-- Heading -->
+        <div class="qc-hero__text">
+          <h1 class="qc-hero__title">
+            Quick Commerce<br />
+            <span class="qc-hero__title-accent">Deals & Offers</span>
+          </h1>
+          <p class="qc-hero__subtitle">
+            Best grocery, food delivery & cashback offers.
+          </p>
+        </div>
+
+        <!-- CTAs -->
+        <div class="qc-hero__ctas">
+          <a
+            href="https://whatsapp.com/channel/0029Va8sOrp4SpkEQKVElV1i"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="qc-cta qc-cta--whatsapp"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+            </svg>
+            Get WhatsApp Alerts
+          </a>
+          <a href="https://t.me/DealsHubIndiaa" target="_blank" rel="noopener noreferrer" class="qc-cta qc-cta--telegram">
+            📲 Telegram Alerts
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!--  FEED SECTION                                              -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <section class="qc-feed-section">
+      <div class="qc-feed-inner">
+
+        <div class="qc-section-header">
+          <div>
+            <h2 class="qc-section-title">
+              Live Food &amp; Grocery Offers
+            </h2>
+            <p class="qc-section-sub">✓ Auto-imported &amp; Community Sourced</p>
+          </div>
+        </div>
+
+        <!-- React Feed Island -->
+        <QCFeed client:load />
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!--  FAQ SECTION (SEO)                                         -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <section class="qc-faq-section">
+      <div class="qc-feed-inner">
+        <h2 class="qc-section-title">Frequently Asked Questions</h2>
+        <div class="qc-faq-grid">
+          {[
+            {
+              q: "How often are the Quick Commerce deals updated?",
+              a: "Our system scrapes and processes new deals every 2 minutes. Deals appear live on this page the moment they're verified by our AI pipeline."
+            },
+            {
+              q: "Are the coupon codes verified?",
+              a: "Yes. Our AI extractor identifies and validates coupon code patterns. Click 'Copy Code' and apply at checkout on the respective platform."
+            },
+            {
+              q: "Which platforms are covered?",
+              a: "We cover Swiggy, Zomato, Blinkit, Zepto, BigBasket, Swiggy Instamart, Domino's, KFC, McDonald's, Pizza Hut, Magicpin, and all major UPI cashback platforms."
+            },
+            {
+              q: "How do I get instant alerts for new deals?",
+              a: "Join our WhatsApp Channel or Telegram Channel to receive instant push alerts when new deals go live."
+            },
+          ].map(faq => (
+            <details class="qc-faq-item">
+              <summary class="qc-faq-q">{faq.q}</summary>
+              <p class="qc-faq-a">{faq.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Schema -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How often are the Quick Commerce deals updated?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Our system scrapes and processes new deals every 2 minutes." }
+        },
+        {
+          "@type": "Question",
+          "name": "Are the coupon codes verified?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. Our AI extractor identifies and validates coupon code patterns." }
+        },
+        {
+          "@type": "Question",
+          "name": "Which platforms are covered?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Swiggy, Zomato, Blinkit, Zepto, BigBasket, Domino's, KFC, McDonald's, Pizza Hut, Magicpin, and UPI cashback platforms." }
+        },
+      ]
+    })} />
+
+    <!-- ── Disclaimer ── -->
+    <div class="qc-disclaimer-container">
+      <p class="qc-disclaimer-text">Deals are automatically aggregated from public deal communities and may expire without notice.</p>
+    </div>
+
+  </main>
+
+  <FloatingWhatsApp />
+</Layout>
+
+<style>
+  /* ─── Layout ─────────────────────────────────────────────────── */
+  main { background: var(--bg-color); min-height: 100vh; }
+
+  .qc-hero {
+    position: relative;
+    padding: 48px 0 40px;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  /* Orange/amber food-commerce glow — layered over the dark bg */
+  .qc-hero__glow {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 600px 300px at 20% 50%, rgba(252,128,25,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 400px 200px at 80% 30%, rgba(227,55,68,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .qc-hero__inner {
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── Breadcrumb ─────────────────────────────────────────────── */
+  .qc-breadcrumb {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.3);
+  }
+  .qc-breadcrumb a { color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.2s; }
+  .qc-breadcrumb a:hover { color: #FC8019; }
+
+  /* ─── Pills ──────────────────────────────────────────────────── */
+  .qc-hero__pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .qc-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: 99px;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase;
+  }
+  .qc-pill--live {
+    background: rgba(252,128,25,0.12); color: #FC8019;
+    border: 1px solid rgba(252,128,25,0.3);
+    animation: qcLivePulse 2.5s ease-in-out infinite;
+  }
+  @keyframes qcLivePulse {
+    0%,100%{ box-shadow: 0 0 0 rgba(252,128,25,0); }
+    50%    { box-shadow: 0 0 12px rgba(252,128,25,0.4); }
+  }
+  .qc-pill__dot {
+    width: 6px; height: 6px; border-radius: 50%; background: #FC8019;
+    animation: dotPing 1.8s ease-in-out infinite;
+  }
+  @keyframes dotPing {
+    0%  { transform: scale(1); box-shadow: 0 0 0 0 rgba(252,128,25,0.8); }
+    60% { transform: scale(1.2); box-shadow: 0 0 0 5px rgba(252,128,25,0); }
+    100%{ transform: scale(1); box-shadow: 0 0 0 0 rgba(252,128,25,0); }
+  }
+  .qc-pill--verified {
+    background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .qc-pill--auto {
+    background: rgba(139,92,246,0.08); color: rgba(167,139,250,0.8);
+    border: 1px solid rgba(139,92,246,0.2);
+  }
+
+  /* ─── Heading ────────────────────────────────────────────────── */
+  .qc-hero__text { space-y: 12px; }
+  .qc-hero__title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    color: #f0f2f5;
+    letter-spacing: -1.5px;
+    line-height: 1.05;
+    text-transform: uppercase;
+  }
+  .qc-hero__title-accent {
+    background: linear-gradient(135deg, #FC8019, #E23744 60%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .qc-hero__subtitle {
+    margin-top: 12px;
+    font-size: clamp(13px, 2vw, 15px);
+    color: rgba(255,255,255,0.45);
+    font-weight: 500;
+    max-width: 620px;
+    line-height: 1.6;
+  }
+
+  /* ─── Marquee ────────────────────────────────────────────────── */
+  .qc-hero__marquee {
+    overflow: hidden;
+    position: relative;
+    mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+  }
+  .qc-hero__marquee-track {
+    display: flex; gap: 32px; width: max-content;
+    animation: qcMarquee 25s linear infinite;
+  }
+  @keyframes qcMarquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  .qc-hero__marquee-item {
+    font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.25);
+    white-space: nowrap; letter-spacing: 0.5px;
+  }
+
+  /* ─── CTAs ───────────────────────────────────────────────────── */
+  .qc-hero__ctas { display: flex; flex-wrap: wrap; gap: 10px; }
+  .qc-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 20px; border-radius: var(--radius-md);
+    font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px;
+    text-decoration: none; transition: all 0.2s ease;
+  }
+  .qc-cta--whatsapp {
+    background: #22C55E; color: white;
+    box-shadow: 0 4px 16px rgba(34,197,94,0.3);
+  }
+  .qc-cta--whatsapp:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .qc-cta--telegram {
+    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  .qc-cta--telegram:hover { background: rgba(255,255,255,0.1); color: white; }
+
+  /* ─── Feed section ───────────────────────────────────────────── */
+  .qc-feed-section { padding: 48px 0; }
+  .qc-feed-inner {
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .qc-section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 16px;
+  }
+  .qc-section-title {
+    font-size: 18px; font-weight: 900; color: #f0f2f5;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .qc-section-sub {
+    font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.25);
+    text-transform: uppercase; letter-spacing: 1px; margin-top: 4px;
+  }
+
+  /* ─── FAQ ────────────────────────────────────────────────────── */
+  .qc-faq-section {
+    padding: 48px 0;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.01);
+  }
+  .qc-faq-grid { display: flex; flex-direction: column; gap: 8px; }
+  .qc-faq-item {
+    background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: var(--radius-md); padding: 16px 20px;
+    transition: border-color 0.2s;
+  }
+  .qc-faq-item[open] { border-color: rgba(252,128,25,0.25); }
+  .qc-faq-q {
+    font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.8);
+    cursor: pointer; list-style: none; padding-right: 24px;
+  }
+  .qc-faq-q::-webkit-details-marker { display: none; }
+  .qc-faq-a {
+    font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.6;
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  
+  .qc-disclaimer-container {
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 24px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    text-align: center;
+  }
+  .qc-disclaimer-text {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.3);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+</style>
