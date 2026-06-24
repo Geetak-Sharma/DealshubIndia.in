@@ -183,11 +183,15 @@ export class QCDataStore {
         ...post,
         merchant:        post.merchant         || null,
         productName:     post.productName      || null,
-        price:           parseInt(post.price)  || 0,
+        price: post.price || 0,
         mrp:             parseInt(post.mrp)    || 0,
         discountPercent: parseInt(post.discountPercent) || 0,
         seoTitle:        post.seoTitle         || post.title || '',
         shortTitle:      post.shortTitle       || '',
+        explanation:       post.explanation       || '',
+        verdictTier:       post.verdictTier       || 'GOOD_DEAL',
+        whatsappShareText: post.whatsappShareText || '',
+        twitterShareText:  post.twitterShareText  || '',
         confidence:      parseInt(post.confidence) || 100,
         destinationType: post.destinationType  || 'merchant-url',
         finalUrl:        post.finalUrl         || post.url || '',
@@ -207,6 +211,15 @@ export class QCDataStore {
       data.posts.unshift(enriched);
       QCLogger.postPublished(post.id, post.merchant);
       added++;
+
+      // Trigger Google Indexing API ping
+      import('./googleIndexer.js').then(({ pingGoogleIndexing }) => {
+        pingGoogleIndexing(`https://dealshubindia.in/quick-commerce/${enriched.slug}`).catch(err => {
+          console.error('[QCStore] Indexing ping failed:', err);
+        });
+      }).catch(err => {
+        console.error('[QCStore] Failed to load googleIndexer:', err);
+      });
     }
 
     if (added > 0) {
@@ -219,6 +232,18 @@ export class QCDataStore {
       data.totalRejected  = (data.totalRejected  || 0) + rejected;
       data.totalPublished = (data.totalPublished || 0) + added;
       this.save(data);
+
+      // Trigger Web Push Notifications for the newest deal
+      const newestPost = data.posts[0];
+      if (newestPost) {
+        import('./qcNotifier.js').then(({ QCNotifier }) => {
+          QCNotifier.sendNotificationToAll(newestPost).catch(err => {
+            console.error('[QCStore] Notification dispatch failed:', err);
+          });
+        }).catch(err => {
+          console.error('[QCStore] Failed to load QCNotifier:', err);
+        });
+      }
     }
 
     return { added, rejected };
@@ -430,3 +455,4 @@ export class QCDataStore {
     this.save(data);
   }
 }
+

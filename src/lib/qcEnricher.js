@@ -78,45 +78,14 @@ export const CATEGORIES = {
 
 // ─── QC Relevance & Reject Keywords ───────────────────────────────────────────
 
-const APPROVED_QC_MERCHANTS_LOWER = [
-  'swiggy', 'zomato', 'blinkit', 'zepto', 'bigbasket', 'instamart', 'bb now',
-  "domino", 'kfc', 'mcdonald', 'pizza hut', 'eatsure', 'magicpin',
-  'paytm', 'phonepe', 'amazon pay', 'mobikwik'
-];
-
 // Phrases that are safe for substring matching (multi-word, won't false-positive)
 const REJECT_PHRASES = [
-  'led bulb', 'earphones', 'headphones', 'smart watch', 'smartwatch', 'smartwatches',
-  't-shirt', 't-shirts', 'tshirt', 'tshirts',
-  'luggage bag', 'trolley bag', 'trolley bags', 'handbag', 'handbags',
-  'power bank', 'power banks', 'powerbank', 'powerbanks',
-  'mobile phone', 'mobile phones', 'sd card', 'sd cards', 'pen drive', 'pen drives',
-  'hard disk', 'hard disks',
-  'hair straightener', 'hair straighteners',
-  'vacuum cleaner', 'vacuum cleaners',
-  'washing machine', 'washing machines',
-  'air conditioner',
   'amazon shopping', 'amazon product', 'amazon deals', 'amazon offers', 'amazon loot', 'amazon prime video',
   'myntra', 'ajio', 'meesho', 'flipkart',
   // Bank card spend deals (NOT quick-commerce delivery deals)
   'hdfc credit card', 'icici credit card', 'sbi credit card', 'axis credit card',
   'credit card spend', 'debit card spend', 'credit card bill',
 ];
-
-// Single-word keywords that MUST use word-boundary matching to avoid false positives:
-// e.g. 'table' in REJECT_WORDS would wrongly reject 'vegetables'
-// e.g. 'shirt' would wrongly reject 'instamart' (no, actually fine) but 'pant' in 'restaurant'
-const REJECT_WORD_PATTERNS = /\b(?:bulb|bulbs|earphone|headphone|headphones|watch|watches|clock|clocks|laptop|laptops|shirt|shirts|jeans|pant|pants|shoes|shoe|slipper|slippers|saree|sarees|kurtas|kurta|backpack|backpacks|wallet|wallets|luggage|suitcase|suitcases|charger|chargers|cable|cables|gadget|gadgets|smartphone|smartphones|iphone|samsung|oneplus|realme|boult|jbl|sandisk|ssd|ssds|battery|batteries|keyboard|keyboards|mouse|monitors|monitor|apparel|clothing|clothes|jacket|jackets|coat|coats|sock|socks|furniture|chair|chairs|sofa|sofas|mattress|toy|toys|game|games|book|books|stationery|electronic|electronics|refrigerator|fridge|fridges|television|televisions|microwave|oven|ovens|geyser|geysers|heater|heaters|trimmer|trimmers|jewellery|gold|silver|platinum|diamond|diamonds|ring|rings|pendant|pendants|necklace|necklaces|bracelet|bracelets|bangle|bangles|earring|earrings|coin|coins|investment|investments)\b/i;
-
-// Sensitive single words that cause false positives if substring-matched:
-// 'table' matches 'vegetables', 'bed' matches 'embedded', 'iron' in food context, 'tv ' has trailing space
-const REJECT_CAREFUL_WORDS = [
-  '\btable\b', '\btables\b',  // 'tables' would match 'vegetables'
-  '\bbed\b', '\bbeds\b',      // 'bed' could match 'embedded'
-  '\biron\b', '\birons\b',    // 'iron' is also a food item
-  '\btv\b',                   // 'tv' standalone only
-];
-const REJECT_CAREFUL_PATTERN = new RegExp(REJECT_CAREFUL_WORDS.join('|'), 'i');
 
 // Bank-offer subjects: title starts with a card/bank name, not a delivery platform.
 // Used to reject deals like "HDFC Credit Card + 23k spends = ₹400 voucher like Swiggy"
@@ -165,66 +134,12 @@ export function isQCRelevant(text, url) {
     return false;
   }
 
-  // 1b. Reject if it matches single-word reject patterns (word-boundary matched)
-  if (REJECT_WORD_PATTERNS.test(lower)) {
-    return false;
-  }
-
-  // 1c. Reject careful words that need their own word-boundary patterns
-  if (REJECT_CAREFUL_PATTERN.test(lower)) {
-    return false;
-  }
-
   // 1d. Reject if the PRIMARY subject is a bank card spend deal
   if (BANK_CARD_PRIMARY_REGEX.test(text.trim())) {
     return false;
   }
 
-  // 2. Must detect an approved merchant (from text or URL)
-  const merchant = detectMerchant(text);
-  const merchantName = merchant ? merchant.name : detectMerchantFromUrl(url);
-  if (!merchantName) return false;
-
-  const mNameLower = merchantName.toLowerCase();
-  const directPlatforms = ['swiggy', 'zomato', 'blinkit', 'zepto', 'bigbasket', 'instamart', 'domino', 'kfc', 'mcdonald', 'pizza hut', 'eatsure', 'magicpin'];
-  const walletPlatforms = ['paytm', 'phonepe', 'amazon pay', 'mobikwik'];
-
-  if (directPlatforms.some(p => mNameLower.includes(p))) {
-    return true;
-  }
-
-  if (walletPlatforms.some(w => mNameLower.includes(w))) {
-    // Strict block of jewellery or checkout leaks even if they match wallet keywords
-    if (REJECT_WORD_PATTERNS.test(lower) || REJECT_CAREFUL_PATTERN.test(lower)) {
-      return false;
-    }
-    const hasQcContext = [
-      'swiggy', 'zomato', 'blinkit', 'zepto', 'bigbasket', 'instamart',
-      'grocery', 'groceries', 'food', 'restaurant', 'order food', 'delivery'
-    ].some(kw => lower.includes(kw));
-    if (!hasQcContext) {
-      return false;
-    }
-    return true;
-  }
-
-  // 3. Must contain one of approved merchant keywords
-  const hasApprovedMerchant = APPROVED_QC_MERCHANTS_LOWER.some(kw => lower.includes(kw)) || detectMerchantFromUrl(url) !== null;
-  if (!hasApprovedMerchant) return false;
-
-  // 4. Must be a food, grocery, or payment bill deal
-  const qcKeywords = [
-    'swiggy', 'zomato', 'blinkit', 'zepto', 'bigbasket', 'instamart',
-    'eatsure', 'domino', 'kfc', 'mcdonald', 'pizza hut', 'magicpin',
-    'food delivery', 'grocery', 'restaurant', 'quick commerce',
-    'bb now', 'grofers', 'eatclub', 'freshmenu',
-    'free delivery', 'food coupon', 'cashback on food', 'cashback on grocery',
-    'order food', 'food order', 'delivery free', 'flat off on food',
-    'burger', 'biryani', 'pizza', 'paytm', 'phonepe', 'amazon pay', 'mobikwik',
-    'recharge', 'bill payment', 'electricity bill', 'gas bill', 'dth'
-  ];
-
-  return qcKeywords.some(kw => lower.includes(kw)) || detectMerchantFromUrl(url) !== null;
+  return true;
 }
 
 export function isSpam(text) {
@@ -665,6 +580,57 @@ export function generateSEOKeywords(merchant, category) {
 
 // ─── Gemini AI & Ingestion Helpers ───────────────────────────────────────────
 
+async function callNvidiaAPI(text, regexMerchant) {
+  const apiKey = process.env.NVIDIA_API_KEY;
+  if (!apiKey) return null;
+  const parts = [
+    'You are a Quick Commerce Deal Extractor for Indian apps.',
+    'Analyze the deal post and return ONLY valid JSON with no extra text.',
+    '',
+    'Text: ' + JSON.stringify(text || ''),
+    'Merchant hint: ' + (regexMerchant || 'None'),
+    '',
+    'Allowed merchants: Swiggy, Swiggy Instamart, Blinkit, Zepto, Zomato, BigBasket, Dominos, KFC, McDonalds, Pizza Hut, Magicpin, Amazon Fresh, Flipkart Minutes.',
+    'Set confidence 0 if merchant not in list.',
+    'Allow all product types on listed QC platforms.',
+    'Reject Myntra, Ajio, Meesho, standard Amazon, Flipkart, loans, insurance.',
+    '',
+    'Return JSON with keys: productName, merchant, price (can be text like \"Upto 50% Off\"), discount (nullable), originalPrice (nullable), minimumOrderValue (nullable), bankOffer (nullable, ignore generic footers), couponCode (nullable), category, confidence (integer 0-100), dealExplanation (short 2-line explanation), verdictTier (MUST_BUY, GOOD_DEAL, or SKIP), whatsappShareText, twitterShareText.'
+  ];
+  const prompt = parts.join('\n');
+  try {
+    const response = await axios.post(
+      'https://integrate.api.nvidia.com/v1/chat/completions',
+      {
+        model: 'meta/llama-3.3-70b-instruct',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.1,
+        max_tokens: 300,
+        response_format: { type: 'json_object' }
+      },
+      {
+        headers: { Authorization: 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
+        timeout: 35000
+      }
+    );
+    const cnt = response.data.choices[0].message.content;
+    if (!cnt) throw new Error('Empty NVIDIA response');
+    const parsed = JSON.parse(cnt.trim());
+    parsed._aiSource = 'nvidia-llama-3.3-70b';
+    return parsed;
+  } catch (err) {
+    console.error('[NVIDIA-API-ERROR]', err.message);
+    return null;
+  }
+}
+
+async function callAI(text, regexMerchant) {
+  const nv = await callNvidiaAPI(text, regexMerchant);
+  if (nv) { console.log('[AI] NVIDIA ok conf:' + nv.confidence); return nv; }
+  console.warn('[AI] NVIDIA failed, using Gemini');
+  return callGeminiAPI(text, regexMerchant);
+}
+
 async function callGeminiAPI(text, regexMerchant) {
   const apiKey = process.env.GEMINI_API_KEY || 'AIzaSyDLGBRs4tveXVzQWqgvvQbr48LrEBpcWzk';
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
@@ -677,18 +643,22 @@ Input:
 - Merchant detected by rules: "${regexMerchant || 'None'}"
 
 Allowed Quick Commerce merchants are: Swiggy, Swiggy Instamart, Blinkit, Zepto, Zomato, BigBasket, Domino's, KFC, McDonald's, Pizza Hut, Magicpin.
-If the merchant is not one of these, or the deal is not for grocery, food, restaurant, or dining, set confidence to 0.
-Specifically reject fashion (e.g. clothing, shirts, shoes, myntra, ajio), electronics, jewellery, marketplace (flipkart, amazon shopping), credit cards, loan promotions, insurance.
+If the merchant is one of these allowed merchants, ALLOW the deal regardless of the product category (even if it is electronics, fashion, or home appliances).
+If the merchant is NOT one of these, set confidence to 0. Specifically reject deals from marketplaces (flipkart, amazon shopping, myntra, ajio, meesho), credit cards, loan promotions, insurance.
 
 Your output MUST be a strict JSON object matching this schema (do NOT wrap in markdown or return anything else):
 {
   "productName": "Clean Title-Cased Product Name (e.g. 'Del Monte Tomato Ketchup' or 'Amul Butter'). Never use generic text like 'Check Yours' or 'Sort by'. Max 40 chars.",
   "merchant": "One of the allowed merchant names",
   "price": "Final deal price in INR (integer or numeric string, e.g. '37')",
-  "discount": "Discount percentage or amount (e.g. '82% off' or 'flat 100 off')",
-  "couponCode": "Coupon code if any, else empty string",
+  "discount": "Discount percentage or amount (e.g. '82% off' or 'flat 100 off'). Null if missing.",
+  "originalPrice": "Original MRP price as integer. Null if missing.",
+  "minimumOrderValue": "Min order value needed for deal. Null if missing.",
+  "bankOffer": "Specific bank/card offer tied to this product. IGNORE generic footers like '5% cashback on all transactions'. Null if missing.",
+  "couponCode": "Coupon code if any, else null",
   "category": "grocery" | "food-delivery",
-  "confidence": 0-100 // Integer confidence score based on the clarity of the deal. Set to less than 70 if it's fashion/electronics/spammer/payment screenshot.
+  "confidence": 0-100, // Set to high confidence if it's an allowed merchant. Set to 0 if it's a non-QC marketplace (Amazon, Flipkart, Myntra, etc) or spam.
+  "dealExplanation": "A short, 2-line explanation of why it is a good deal (e.g., 'Lowest price since Diwali sale' or 'Slashed by 50% with free delivery'). Max 15 words."
 }
 `;
 
@@ -773,8 +743,7 @@ export async function enrichQCPost(rawPost) {
   const lowerText = fullText.toLowerCase();
   const rejectKeywords = [
     'myntra', 'ajio', 'meesho', 'amazon shopping', 'flipkart',
-    'jewellery', 'jewelry', 'fashion', 'electronics', 'credit card promotions',
-    'credit card promotion', 'insurance', 'loan offer', 'loan offers', 'trading', 'crypto'
+    'credit card promotions', 'credit card promotion', 'insurance', 'loan offer', 'loan offers', 'trading', 'crypto'
   ];
   if (rejectKeywords.some(kw => lowerText.includes(kw))) {
     console.log(`[PRE-FILTER-REJECT] Rejected non-QC post: ${id}`);
@@ -811,13 +780,7 @@ export async function enrichQCPost(rawPost) {
   const qualityScore = calculateQualityScore(tempPostForScore, fullText);
 
   // Determine if we need AI fallback
-  const isMerchantAmbiguous = !regexMerchant;
-  const isPriceMissing = !finalPrice;
-  const isDiscountAmbiguous = !discount;
-  const isProductNameUnconfident = regexProductNameConfidence < 80;
-  const isQualityScoreLow = qualityScore < 55;
-
-  const useAI = isMerchantAmbiguous || isPriceMissing || isDiscountAmbiguous || isProductNameUnconfident || isQualityScoreLow;
+  const useAI = true; // Always use AI to generate 2-line deal explanations
 
   let finalMerchant = regexMerchant;
   let finalProductName = productName;
@@ -827,11 +790,23 @@ export async function enrichQCPost(rawPost) {
   let finalCategory = category;
   let finalConfidence = 100;
   let aiVersion = null;
+  let finalExplanation = '';
+  let finalVerdictTier = 'GOOD_DEAL';
+  let finalWhatsappShareText = '';
+  let finalTwitterShareText = '';
 
   if (useAI) {
-    const aiResult = await callGeminiAPI(fullText, regexMerchant);
+    const aiResult = await callAI(fullText, regexMerchant);
     if (aiResult) {
       finalConfidence = aiResult.confidence || 0;
+      finalExplanation = aiResult.dealExplanation || '';
+      finalVerdictTier = aiResult.verdictTier || 'GOOD_DEAL';
+      finalWhatsappShareText = aiResult.whatsappShareText || '';
+      finalTwitterShareText = aiResult.twitterShareText || '';
+      const isSearchLoot = /search\s*:/i.test(fullText) || /loot/i.test(fullText);
+      if (isSearchLoot) {
+        finalConfidence = Math.max(finalConfidence, 85);
+      }
       if (finalConfidence < 70) {
         console.log(`[AI-REJECT] Rejected deal due to low confidence (${finalConfidence} < 70) for post ${id}`);
         return null;
@@ -846,7 +821,7 @@ export async function enrichQCPost(rawPost) {
       }
 
       if (!finalPriceVal && aiResult.price) {
-        const cleanPrice = String(aiResult.price).replace(/[^0-9]/g, '');
+        // Removed numeric stripping
         if (cleanPrice) finalPriceVal = `₹${cleanPrice}`;
       }
 
@@ -865,12 +840,17 @@ export async function enrichQCPost(rawPost) {
       if (aiResult.category) {
         finalCategory = aiResult.category;
       }
-      aiVersion = 'gemini-2.5-flash';
+      aiVersion = (aiResult && aiResult._aiSource) || 'gemini-2.5-flash';
     } else {
       // If AI fails and we are missing critical fields, reject
-      if (!finalMerchant || !finalProductName || !finalPriceVal) {
-        console.log(`[AI-FAIL-REJECT] AI failed and missing critical fields for post ${id}`);
-        return null;
+      if (!finalMerchant || !finalProductName || (!finalPriceVal && !finalDiscount && !(aiResult && aiResult.bankOffer))) {
+        const isSearchLoot = /search\s*:/i.test(fullText) || /loot/i.test(fullText);
+        if (isSearchLoot && finalMerchant && finalProductName) {
+          // Allow missing price
+        } else {
+          console.log(`[AI-FAIL-REJECT] AI failed and missing critical fields for post ${id}`);
+          return null;
+        }
       }
     }
   }
@@ -885,8 +865,14 @@ export async function enrichQCPost(rawPost) {
 
   const cleanPriceNum = finalPriceVal ? parseInt(finalPriceVal.replace(/[^0-9]/g, '')) : 0;
   if (!cleanPriceNum) {
-    console.log(`[PRICE-REJECT] Price missing/zero for post ${id}`);
-    return null;
+    const isSearchLoot = /search\s*:/i.test(fullText) || /loot/i.test(fullText);
+    const hasDiscountOrCoupon = finalDiscount || finalCouponCode;
+    if (isSearchLoot || hasDiscountOrCoupon) {
+      finalPriceVal = null;
+    } else {
+      console.log(`[PRICE-REJECT] Price missing/zero for post ${id}`);
+      return null;
+    }
   }
 
   // Enforce Title Generation V2: [Product] at ₹[Price] on [Merchant]
@@ -898,12 +884,12 @@ export async function enrichQCPost(rawPost) {
   // Strip any trailing price/merchant suffixes that might be present
   cleanProdForTitle = cleanProdForTitle.replace(/\s+(?:at|for|just|@)\s*(?:Rs\.?|₹)?\s*\d+\s*$/i, '').trim();
 
-  const suffix = ` at ₹${cleanPriceNum} on ${finalMerchant}`;
+  const suffix = cleanPriceNum ? ` at ₹${cleanPriceNum} on ${finalMerchant}` : ` on ${finalMerchant}`;
   if (cleanProdForTitle.length + suffix.length > 80) {
     cleanProdForTitle = cleanProdForTitle.slice(0, 80 - suffix.length - 3).trim() + '...';
   }
   const seoTitle = cleanProdForTitle + suffix;
-  const shortTitle = `${cleanProdForTitle.slice(0, 30)} ₹${cleanPriceNum}`;
+  const shortTitle = cleanPriceNum ? `${cleanProdForTitle.slice(0, 30)} ₹${cleanPriceNum}` : `${cleanProdForTitle.slice(0, 30)}`;
 
   const slug = generateSlug(seoTitle, timestamp || Date.now());
 
@@ -957,6 +943,10 @@ export async function enrichQCPost(rawPost) {
     timeAgo,
     badges:         [],
     aiContext:      '',
+    explanation:    finalExplanation || '',
+    verdictTier:    finalVerdictTier,
+    whatsappShareText: finalWhatsappShareText,
+    twitterShareText: finalTwitterShareText,
     // Step 9 fields
     price:          cleanPriceNum,
     mrp:            finalMrp,
@@ -976,3 +966,11 @@ export async function enrichQCPost(rawPost) {
 
   return post;
 }
+
+
+
+
+
+
+
+
