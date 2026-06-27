@@ -1,6 +1,5 @@
 ---
 import Layout from './Layout.astro';
-import StickyHeader from '../components/StickyHeader.astro';
 import FloatingWhatsApp from '../components/FloatingWhatsApp.astro';
 
 interface Props {
@@ -13,7 +12,6 @@ const { title, description } = Astro.props;
 
 <Layout title={title} description={description}>
   <div class="policy-page-wrapper">
-    <StickyHeader />
     
     <main class="policy-container relative z-10">
       <slot />

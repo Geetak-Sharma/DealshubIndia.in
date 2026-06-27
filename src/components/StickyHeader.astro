@@ -1,245 +1,760 @@
 ---
-import ThemeToggle from './ThemeToggle.svelte';
-import SearchBar from './SearchBar.tsx';
+import BrandLogo from './BrandLogo.astro';
 ---
 
-<header class="sticky-header">
-  <div class="l-container sticky-header__inner">
-    
+<header class="nav" transition:persist>
+  <div class="nav__inner">
+
     <!-- Logo -->
-    <a href="/" class="sticky-header__brand" aria-label="DealshubIndia Home">
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="brand-icon">
-        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
-      </svg>
-      <span class="sticky-header__logo">DealshubIndia<span class="logo-accent">.in</span></span>
+    <a href="/" class="nav__brand" aria-label="DealsHub India Home">
+      <BrandLogo size={30} gradientId="header-logo-grad" />
+      <span class="nav__logo">DealsHub<span class="nav__accent-neon">India</span></span>
     </a>
 
-    <!-- Center: Search Bar -->
-    <div class="sticky-header__search">
-      <SearchBar client:load />
-    </div>
+    <!-- Desktop Nav Links -->
+    <nav class="nav__links" aria-label="Main navigation">
+      <a href="/" class="nav__link" data-navlink="home">Deals</a>
+      <a href="/livedeals" class="nav__link" data-navlink="livedeals">Live Deals</a>
+      <a href="/quick-commerce" class="nav__link nav__link--qc" data-navlink="quick-commerce">🍕 Quick Commerce</a>
+      <a href="/blog" class="nav__link" data-navlink="blog">Blog</a>
+      <a href="/about" class="nav__link" data-navlink="about">About</a>
+      <a href="/contact" class="nav__link" data-navlink="contact">Contact</a>
+    </nav>
 
-    <!-- Right Actions -->
-    <div class="sticky-header__actions">
-      <ThemeToggle client:visible />
-      <a 
-        href="https://whatsapp.com/channel/0029Va8sOrp4SpkEQKVElV1i" 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        class="c-btn c-btn--primary whatsapp-header-btn"
+    <!-- Desktop Search Trigger (CMD+K) -->
+    <div class="nav__search">
+      <button
+        class="nav__cmd-trigger"
+        id="nav-search-trigger"
+        aria-label="Search deals (Ctrl+K)"
+        onclick="window.dispatchEvent(new CustomEvent('open-command-palette'))"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-        <span class="whatsapp-text">Join</span>
-      </a>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:0.5">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <span class="nav__cmd-label">Search deals, categories…</span>
+        <kbd class="nav__cmd-kbd">Ctrl K</kbd>
+      </button>
     </div>
 
-    <!-- Category Chips (Horizontal Scroll) -->
-    <div class="sticky-header__chips">
-      <button class="chip active" data-category="all" type="button">🔥 All Loots</button>
-      <button class="chip" data-category="tech" type="button">💻 Tech</button>
-      <button class="chip" data-category="fashion" type="button">👗 Fashion</button>
-      <button class="chip" data-category="home" type="button">🏠 Home</button>
-      <button class="chip" data-category="under-99" type="button">⚡ Under ₹99</button>
+    <!-- Right Area -->
+    <div class="nav__right">
+      <div class="nav__control-cluster">
+        <a
+          href="https://whatsapp.com/channel/0029Va8sOrp4SpkEQKVElV1i"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="nav__join-btn-icon pulse-button"
+          aria-label="Join WhatsApp Channel"
+          onclick="if(navigator.vibrate) navigator.vibrate(50);"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#22C55E"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        </a>
+
+        <!-- Hamburger Button -->
+        <button class="nav__hamburger" id="nav-hamburger" aria-label="Open menu" aria-expanded="false">
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+        </button>
+      </div>
     </div>
+
   </div>
+
 </header>
 
-<script is:inline>
-  document.addEventListener('DOMContentLoaded', () => {
-    // Search Auto-focus Logic
-    const searchWrapper = document.querySelector('.sticky-header__search');
-    const searchInput = document.getElementById('deals-search');
-    const searchIcon = searchWrapper?.querySelector('svg');
+<!-- Mobile Sidebar Overlay -->
+<div class="nav__overlay" id="nav-overlay" aria-hidden="true"></div>
 
-    if (searchIcon && searchInput) {
-      searchIcon.addEventListener('click', () => {
-        searchInput.focus();
-      });
-      
-      // Also focus if the wrapper is clicked but not the input directly
-      searchWrapper.addEventListener('click', (e) => {
-        if (e.target !== searchInput) {
-          searchInput.focus();
-        }
-      });
+<!-- Mobile Sidebar -->
+<aside class="nav__sidebar" id="nav-sidebar" aria-label="Mobile navigation" aria-hidden="true">
+  <div class="sidebar__header">
+    <a href="/" class="nav__brand">
+      <BrandLogo size={24} gradientId="sidebar-logo-grad" />
+      <span class="nav__logo">DealsHub<span class="nav__accent-neon">India</span></span>
+    </a>
+    <button class="sidebar__close" id="nav-close" aria-label="Close menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <nav class="sidebar__nav">
+    <a href="/" class="sidebar__link">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Deals</span>
+    </a>
+    <a href="/livedeals" class="sidebar__link">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Live Deals</span>
+    </a>
+    <a href="/quick-commerce" class="sidebar__link sidebar__link--qc">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      <span>Quick Commerce</span>
+      <span class="sidebar__qc-badge">🍕 FOOD</span>
+    </a>
+    <a href="/blog" class="sidebar__link">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span>Blog</span>
+    </a>
+    <a href="/about" class="sidebar__link">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>About</span>
+    </a>
+    <a href="/contact" class="sidebar__link">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Contact</span>
+    </a>
+    <div class="sidebar__divider"></div>
+    <a href="/saved-deals" class="sidebar__link">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+      <span>My Saved Deals</span>
+    </a>
+    <a href="/guides" class="sidebar__link">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+      <span>Expert Guides</span>
+    </a>
+    <a href="/settings" class="sidebar__link">
+       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span>Settings</span>
+    </a>
+  </nav>
+
+  <div class="sidebar__footer">
+    <a
+      href="https://whatsapp.com/channel/0029Va8sOrp4SpkEQKVElV1i"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="sidebar__join-btn"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+      Join WhatsApp Channel
+    </a>
+  </div>
+</aside>
+
+<script is:inline>
+  function initNav() {
+    const hamburger = document.getElementById('nav-hamburger');
+    const sidebar   = document.getElementById('nav-sidebar');
+    const overlay   = document.getElementById('nav-overlay');
+    const closeBtn  = document.getElementById('nav-close');
+    if (!hamburger || !sidebar) return;
+
+    function openMenu() {
+      if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(50);
+      sidebar.classList.add('is-open');
+      overlay.classList.add('is-open');
+      hamburger.setAttribute('aria-expanded', 'true');
+      sidebar.setAttribute('aria-hidden', 'false');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
     }
 
-    // Chip Filtering Logic
-    const chips = document.querySelectorAll('.chip');
-    chips.forEach(chip => {
-      chip.addEventListener('click', () => {
-        // Toggle Active state
-        chips.forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        
-        // Dispatch Custom Event
-        const cat = chip.getAttribute('data-category');
-        window.dispatchEvent(new CustomEvent('deals-category', { detail: { category: cat } }));
-      });
+    function closeMenu() {
+      if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(50);
+      sidebar.classList.remove('is-open');
+      overlay.classList.remove('is-open');
+      hamburger.setAttribute('aria-expanded', 'false');
+      sidebar.setAttribute('aria-hidden', 'true');
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    hamburger.addEventListener('click', openMenu);
+
+    if (closeBtn)  closeBtn.addEventListener('click', closeMenu);
+    if (overlay)   overlay.addEventListener('click', closeMenu);
+
+    // Close on Esc
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeMenu();
     });
-  });
+
+    const path = window.location.pathname;
+    document.querySelectorAll('.nav__link, .sidebar__link').forEach(link => {
+      const href = link.getAttribute('href');
+      const isActive = href === '/'
+        ? path === '/' || path === ''
+        : path.startsWith(href);
+      if (isActive) link.classList.add('is-active');
+      else link.classList.remove('is-active');
+    });
+
+    // Add Mouse Tracker to Nav
+    const navNode = document.querySelector('.nav');
+    if (navNode) {
+       navNode.addEventListener('mousemove', (e) => {
+         const rect = navNode.getBoundingClientRect();
+         navNode.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+         navNode.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+       });
+       
+       window.addEventListener('open-command-palette', () => navNode.classList.add('search-active'));
+       window.addEventListener('close-command-palette', () => navNode.classList.remove('search-active'));
+    }
+  }
+
+  document.addEventListener('astro:page-load', initNav);
 </script>
 
 <style>
-  .sticky-header {
+  .nav {
     position: sticky;
     top: 0;
-    z-index: 100;
-    background-color: rgba(11, 14, 20, 0.85);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    z-index: 200;
+    background-color: hsla(189, 80%, 2%, 0.65);
+    background-image: radial-gradient(
+      600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(139, 92, 246, 0.1),
+      transparent 80%
+    );
+    backdrop-filter: blur(32px) saturate(2.5) brightness(0.9);
+    -webkit-backdrop-filter: blur(32px) saturate(2.5) brightness(0.9);
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 1px 0px rgba(255,255,255,0.03) inset;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+    transition: backdrop-filter 0.3s ease, background-color 0.3s ease, -webkit-backdrop-filter 0.3s ease;
+    padding-top: 0px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .nav.search-active {
+    backdrop-filter: blur(64px) saturate(2.5) brightness(0.7);
+    -webkit-backdrop-filter: blur(64px) saturate(2.5) brightness(0.7);
+    background-color: hsla(189, 80%, 2%, 0.85); /* Slightly darker focus backdrop */
   }
 
-  [data-theme='light'] .sticky-header {
-    background-color: rgba(255, 255, 255, 0.85);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  }
-
-  .sticky-header__inner {
+  .nav__inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    min-height: 64px;
-    gap: 16px;
-    flex-wrap: wrap;
-    padding: 10px 0;
+    gap: 20px;
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 60px;
+    width: 100%;
+    margin-bottom: 0px; /* Separation from feed handled by container page layout */
   }
 
-  /* ---- Brand ---- */
-  .sticky-header__brand {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    flex-shrink: 0;
+  /* Remove old search styles */
+  .nav__search-row-mobile, 
+  .nav__full-search-bar {
+    display: none;
+  }
+  
+  .nav__full-search-bar:active {
+    transform: scale(0.98);
+    background: rgba(255, 255, 255, 0.08);
   }
 
-  .brand-icon {
-    flex-shrink: 0;
+  .nav__full-search-text {
+    color: var(--text-tertiary);
+    font-size: 14px;
+    font-weight: 500;
   }
 
-  .sticky-header__logo {
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    letter-spacing: 0.3px;
-  }
-
-  .logo-accent {
-    color: #22C55E;
-    font-weight: 700;
-  }
-
-  /* ---- Search ---- */
-  .sticky-header__search {
-    flex: 1 1 100%;
-    order: 3;
-    max-width: 100%;
-  }
-
-  @media (min-width: 768px) {
-    .sticky-header__search {
-      flex: 1;
-      order: unset;
-      max-width: 420px;
-    }
-  }
-
-  /* ---- Right Actions ---- */
-  .sticky-header__actions {
+  /* ===== BRAND ===== */
+  .nav__brand {
+    position: relative;
+    z-index: 210;
     display: flex;
     align-items: center;
     gap: 10px;
+    text-decoration: none;
     flex-shrink: 0;
+    background: transparent;
   }
 
-  .whatsapp-header-btn {
+  .nav__logo {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: var(--radius-full);
-    background: #22C55E !important;
-    font-size: 13px;
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    letter-spacing: -0.4px;
+    white-space: nowrap;
+    line-height: 1;
   }
 
-  .whatsapp-text {
-    font-size: 13px;
-    font-weight: 700;
+  .nav__accent-neon {
+    color: #39FF14;
+    text-shadow: 0 0 10px rgba(57, 255, 20, 0.2);
+  }
+
+  /* Status badges removed in favor of TelegramFeed Status Strip */
+  .nav__status-badge, .nav__status-indicator {
     display: none;
   }
 
-  @media (min-width: 480px) {
-    .whatsapp-text {
-      display: inline;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .whatsapp-header-btn {
-      padding: 10px;
-    }
-  }
-
-  /* ---- Chips ---- */
-  .sticky-header__chips {
-    width: 100%;
+  /* ===== DESKTOP NAV LINKS ===== */
+  .nav__links {
     display: flex;
-    overflow-x: auto;
-    gap: 8px;
-    padding-bottom: 8px; /* padding for scrollbar */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
   }
 
-  .sticky-header__chips::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
+  @media (max-width: 768px) {
+    .nav__links {
+      display: none;
+    }
   }
 
-  .chip {
-    padding: 6px 14px;
-    border-radius: 20px;
-    background: var(--surface-color-hover, rgba(255, 255, 255, 0.05));
-    border: 1px solid var(--border-color);
+  .nav__link {
+    position: relative;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.2px;
+    text-transform: none;
     color: var(--text-secondary);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
     white-space: nowrap;
+  }
+
+  .nav__link:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateY(-1px);
+  }
+
+  .nav__link.is-active {
+    color: #39FF14;
+    background: rgba(57, 255, 20, 0.06);
+    box-shadow: 0 0 15px rgba(57, 255, 20, 0.1);
+  }
+
+  /* Quick Commerce nav link — orange accent */
+  .nav__link--qc {
+    color: rgba(252, 128, 25, 0.7);
+  }
+  .nav__link--qc:hover {
+    color: #FC8019;
+    background: rgba(252, 128, 25, 0.08);
+  }
+  .nav__link--qc.is-active {
+    color: #FC8019;
+    background: rgba(252, 128, 25, 0.10);
+    box-shadow: 0 0 15px rgba(252, 128, 25, 0.15);
+  }
+
+  /* Sidebar QC link + badge */
+  .sidebar__link--qc {
+    color: rgba(252, 128, 25, 0.75) !important;
+  }
+  .sidebar__link--qc:hover {
+    color: #FC8019 !important;
+    background: rgba(252, 128, 25, 0.07) !important;
+  }
+  .sidebar__qc-badge {
+    margin-left: auto;
+    padding: 2px 7px;
+    background: rgba(252, 128, 25, 0.12);
+    border: 1px solid rgba(252, 128, 25, 0.25);
+    border-radius: 99px;
+    font-size: 8px;
+    font-weight: 800;
+    color: #FC8019;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* ===== SEARCH / CMD+K TRIGGER ===== */
+  .nav__search {
+    flex: 1;
+    min-width: 180px;
+    max-width: 380px;
+    padding-left: 16px;
+  }
+
+  .nav__cmd-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 16px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    white-space: nowrap;
+    font-family: inherit;
+  }
+
+  .nav__cmd-trigger:hover {
+    background: rgba(255, 255, 255, 0.11);
+    border-color: rgba(57, 255, 20, 0.45);
+    color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 20px rgba(57, 255, 20, 0.12);
+  }
+
+  .nav__cmd-label {
+    flex: 1; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nav__cmd-kbd {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.75);
+    font-family: inherit;
+    flex-shrink: 0;
+    letter-spacing: 0.3px;
+  }
+
+  /* ===== RIGHT AREA & CONTROL CLUSTER ===== */
+  .nav__right {
+    display: flex;
+    align-items: center;
+  }
+
+  .nav__control-cluster {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 100%;
+  }
+
+  .nav__join-btn-icon {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: rgba(34, 197, 94, 0.05); /* very subtle so neon pop feels profound */
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    filter: drop-shadow(0 0 8px rgba(37, 211, 102, 0.2));
+  }
+  
+  .nav__join-btn-icon:hover {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: rgba(34, 197, 94, 0.5);
+    transform: scale(1.1);
+    box-shadow: 0 4px 18px rgba(34, 197, 94, 0.35);
+  }
+
+
+  /* ===== LIVE PILL ===== */
+  .nav__live-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px 1px 8px; /* Matching exact padding with status-badge */
+    border-radius: 9999px;
+    background: rgba(57, 255, 20, 0.1);
+    border: 1px solid rgba(57, 255, 20, 0.2);
+    color: #39FF14;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    line-height: 1; /* Match baseline height */
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: 0 0 10px rgba(74, 222, 128, 0.4);
+    animation: lootPulseGlow 3.5s ease-in-out infinite;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .nav__live-pill:hover {
+    background: rgba(57, 255, 20, 0.18);
+    border-color: rgba(57, 255, 20, 0.6);
+    box-shadow: 0 0 20px rgba(74, 222, 128, 0.6);
+  }
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    background: #22C55E;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    animation: liveDotPing 1.8s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes liveDotPing {
+    0%   { transform: scale(1);    box-shadow: 0 0 0 0   rgba(34, 197, 94, 0.8); }
+    60%  { transform: scale(1.15); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+    100% { transform: scale(1);    box-shadow: 0 0 0 0   rgba(34, 197, 94, 0); }
+  }
+
+  @keyframes lootPulseGlow {
+    0%   { box-shadow: 0 0 0px  rgba(34, 197, 94, 0); }
+    50%  { box-shadow: 0 0 16px rgba(34, 197, 94, 0.45), 0 0 32px rgba(34, 197, 94, 0.15); }
+    100% { box-shadow: 0 0 0px  rgba(34, 197, 94, 0); }
+  }
+
+  /* ===== HAMBURGER ===== */
+  .nav__hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    padding: 0;
+  }
+
+  .nav__hamburger:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .hamburger-bar {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--text-primary);
+    border-radius: 2px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ===== OVERLAY ===== */
+  .nav__overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+  }
+
+  .nav__overlay.is-open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* ===== SIDEBAR ===== */
+  .nav__sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 9999;
+    width: 320px;
+    height: 100dvh;
+    background: rgba(15, 18, 24, 0.85);
+    backdrop-filter: blur(48px) saturate(2.5);
+    -webkit-backdrop-filter: blur(48px) saturate(2.5);
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -8px 0 40px rgba(0, 0, 0, 0.5);
+  }
+
+  @media (max-width: 768px) {
+     .nav__sidebar { width: 100%; border-left: none; }
+  }
+
+  .nav__sidebar.is-open {
+    transform: translateX(0);
+    display: flex !important;
+    visibility: visible !important;
+  }
+
+  .sidebar__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .sidebar__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar__close:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
+    transform: rotate(90deg);
+  }
+
+  .sidebar__divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.06);
+    margin: 8px 16px;
+  }
+
+  .sidebar__nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 16px 12px;
+    gap: 4px;
+    overflow-y: auto;
+  }
+
+  .sidebar__link {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-decoration: none;
     transition: all 0.2s ease;
   }
 
-  .chip:hover {
-    background: rgba(255, 255, 255, 0.1);
+  .sidebar__link:hover {
+    background: rgba(255, 255, 255, 0.06);
     color: var(--text-primary);
+    transform: translateX(4px);
   }
 
-  .chip.active {
+  .sidebar__link.is-active {
+    background: rgba(34, 197, 94, 0.12);
+    color: #22C55E;
+  }
+
+  .sidebar__link svg {
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+
+  .sidebar__link.is-active svg {
+    opacity: 1;
+  }
+
+  .sidebar__footer {
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    padding-bottom: 40px; /* Extra breathing room at bottom */
+  }
+
+  @media (max-width: 768px) {
+    .sidebar__footer {
+      padding-bottom: 100px; /* Clear the mobile bottom dock */
+    }
+  }
+
+  .sidebar__join-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Left align to avoid icon overlap if it happens */
+    gap: 12px;
+    width: calc(100% - 10px); /* Slightly narrower to avoid hugging edge */
+    padding: 14px 20px;
+    border-radius: 12px;
     background: #22C55E;
-    color: #ffffff;
-    border-color: #22C55E;
-    box-shadow: 0 4px 10px rgba(34, 197, 194, 0.3);
-  }
-
-  .chip--tool {
+    color: white;
+    font-weight: 800;
+    font-size: 15px;
     text-decoration: none;
-    background: rgba(34, 197, 94, 0.1);
-    color: #22C55E;
-    border-color: rgba(34, 197, 94, 0.2);
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 20px rgba(34, 197, 94, 0.35);
   }
 
-  .chip--tool:hover {
-    background: rgba(34, 197, 94, 0.2);
-    color: #22C55E;
+  .sidebar__join-btn:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 6px 24px rgba(34, 197, 94, 0.5);
   }
-  
-  [data-theme='light'] .chip {
-    background: rgba(0, 0, 0, 0.05);
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 1024px) {
+    .nav__links {
+      display: none;
+    }
   }
-  
-  [data-theme='light'] .chip.active {
-    background: #22C55E;
-    color: #ffffff; /* ensure white text on green even in light mode */
+
+  @media (max-width: 900px) {
+    .nav__join-btn .nav__join-text {
+      display: none;
+    }
+    .nav__join-btn {
+      padding: 9px 12px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .nav__inner {
+      padding: 0 16px;
+      height: 64px;
+      gap: 12px;
+    }
+
+    .nav__logo {
+      display: none;
+    }
+
+    /* Hide search bar on mobile — bottom dock handles search */
+    .nav__search {
+      display: none;
+    }
+
+    .nav__control-cluster {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      align-self: center;
+    }
+
+    .nav__hamburger {
+      display: none !important;
+    }
+    .nav__join-btn-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.25);
+    }
+
+    .nav__join-btn {
+      display: none;
+    }
+  }
+
+  /* Hide the standalone cp-trigger React button — header bar handles it */
+  :global(.cp-trigger) {
+    display: none !important;
   }
 </style>
+

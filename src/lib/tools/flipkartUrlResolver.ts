@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+
 
 export interface ResolvedFlipkartUrl {
   canonicalUrl: string;
@@ -11,16 +11,25 @@ export interface ResolvedFlipkartUrl {
 /**
  * Resolves short links (like fkrt.cc, dl.flipkart.com) to their absolute target URLs by following redirects.
  */
-export function resolveRedirect(shortUrl: string): string {
+
+
+export async function resolveRedirect(shortUrl: string): Promise<string> {
   try {
-    // We can use a fast curl HEAD request to follow and return the final location URL
-    const cmd = `curl.exe -s -o NUL -w "%{url_effective}" -L "${shortUrl}"`;
-    const finalUrl = execSync(cmd, { encoding: 'utf8', timeout: 5000 }).trim();
-    if (finalUrl && finalUrl.startsWith('http')) {
-      return finalUrl;
-    }
+    const userAgent = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    
+    const res = await fetch(shortUrl, {
+      method: 'GET',
+      headers: { 'User-Agent': userAgent },
+      redirect: 'follow',
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    return res.url || shortUrl;
   } catch (e) {
-    console.error('[flipkartUrlResolver] Failed to resolve redirect via curl:', e);
+    console.error('[flipkartUrlResolver] Failed to resolve redirect via native fetch:', e);
   }
   return shortUrl;
 }
@@ -28,12 +37,12 @@ export function resolveRedirect(shortUrl: string): string {
 /**
  * Parses and canonicalizes any supported Flipkart URL format.
  */
-export function resolveFlipkartUrl(inputUrl: string): ResolvedFlipkartUrl {
+export async function resolveFlipkartUrl(inputUrl: string): Promise<ResolvedFlipkartUrl> {
   let url = inputUrl.trim();
-  const isShort = url.includes('fkrt.cc') || url.includes('dl.flipkart.com/dl/s/') || url.includes('flipkart.com/s/');
+  const isShort = url.includes('fkrt.cc') || url.includes('/s/') || url.includes('/s/ '); // excludes dl.flipkart.com from redirect tracing
   
   if (isShort) {
-    url = resolveRedirect(url);
+    url = await resolveRedirect(url);
   }
 
   // Normalize protocol
@@ -57,7 +66,7 @@ export function resolveFlipkartUrl(inputUrl: string): ResolvedFlipkartUrl {
 
   // Extract itemId starting with 'itm'
   let itemId: string | null = null;
-  const itmMatch = url.match(/(itm[a-f0-9]{16})/i);
+  const itmMatch = url.match(/(itm[a-f0-9]{13,16})/i);
   if (itmMatch) {
     itemId = itmMatch[1];
   }

@@ -1,0 +1,140 @@
+---
+import Layout from '../layouts/Layout.astro';
+import FloatingWhatsApp from '../components/FloatingWhatsApp.astro';
+import TelegramFeed from '../components/TelegramFeed.tsx';
+import PageSubHeader from '../components/PageSubHeader.astro';
+
+// Meta data for SEO
+const title = "Live Loot Feed | Instant Handpicked Shopping Deals";
+const description = "Access a real-time stream of verified price drops and handpicked deals. Search through historical loots and instant alerts with the DealsHub native live feed.";
+---
+
+<Layout title={title} description={description}>
+  <main class="post-layout">
+    <div class="l-container">
+      
+      <PageSubHeader badgeText="LIVE ALERTS" authorText="DEALSHUB" dateText="REAL-TIME" bannerText="Live Deals" navTargetClass=".nav__link--livedeals" />
+      
+      
+
+      {/* Main Feed Section */}
+      <section>
+        <TelegramFeed client:idle />
+      </section>
+
+    </div>
+  </main>
+
+  <FloatingWhatsApp />
+<style>
+  .post-layout {
+    padding-bottom: 4rem;
+  }
+  .l-container {
+    max-width: 900px !important;
+    overflow: visible !important;
+  }
+
+  .blog-sub-menu {
+    position: sticky;
+    top: 12px; /* Close to the top of screen after main header scrolls away */
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 16px;
+    margin: 0 auto 1.5rem auto;
+    max-width: 900px;
+    background: rgba(17, 24, 39, 0.85); /* Translucent dark glass */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-sizing: border-box;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    transition: background-color 0.3s ease;
+  }
+
+  .sub-menu-left {
+    display: flex;
+    align-items: center;
+  }
+
+  .sub-menu-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #94A3B8;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .sub-meta-item.category {
+    color: #22C55E;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    background: rgba(34, 197, 94, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .sub-meta-sep {
+    color: rgba(255, 255, 255, 0.15);
+  }
+
+  @media (max-width: 768px) {
+    .mobile-hide {
+      display: none !important;
+    }
+    .blog-sub-menu {
+      padding: 0.6rem 1rem;
+      margin-bottom: 1rem;
+    }
+    .sub-menu-right {
+      gap: 8px;
+    }
+  }
+
+  .back-to-blog-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 30px;
+    background: rgba(17, 24, 39, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94A3B8;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .back-to-blog-btn .arrow {
+    transition: transform 0.3s ease;
+    display: inline-block;
+  }
+
+  .back-to-blog-btn:hover {
+    color: #ffffff;
+    border-color: rgba(34, 197, 94, 0.4);
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.25);
+    transform: translateY(-1px) scale(1.02);
+  }
+
+  .back-to-blog-btn:hover .arrow {
+    transform: translateX(-4px);
+    color: #22C55E;
+  }
+
+</style>
+</Layout>
+
+
+
+

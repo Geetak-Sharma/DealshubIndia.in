@@ -1,6 +1,16 @@
 {
   "channels": [
     {
+      "id": "-1001782814661",
+      "name": "DealzTrendz 2.0",
+      "url": "https://t.me/+fJX-MfWphoNiZDU6",
+      "enabled": true,
+      "intervalSeconds": 120,
+      "acceptTextOnly": true,
+      "priority": 1,
+      "description": "Private DealzTrendz 2.0 channel with quick-commerce loots"
+    },
+    {
       "id": "dealbeetricks",
       "name": "DealBee Tricks",
       "url": "https://t.me/s/dealbeetricks",
@@ -14,7 +24,7 @@
       "id": "dealbeeofficial",
       "name": "DealBee Official",
       "url": "https://t.me/s/dealbeeofficial",
-      "enabled": true,
+      "enabled": false,
       "intervalSeconds": 120,
       "acceptTextOnly": true,
       "priority": 2,
@@ -34,7 +44,7 @@
       "id": "coolztricks",
       "name": "CoolzTricks Official",
       "url": "https://t.me/s/coolztricks",
-      "enabled": true,
+      "enabled": false,
       "intervalSeconds": 120,
       "acceptTextOnly": true,
       "priority": 4,
@@ -44,7 +54,7 @@
       "id": "indiafreestuff",
       "name": "IndiaFreeStuff",
       "url": "https://t.me/s/indiafreestuff",
-      "enabled": true,
+      "enabled": false,
       "intervalSeconds": 120,
       "acceptTextOnly": true,
       "priority": 5,
@@ -54,7 +64,7 @@
       "id": "gopaisa",
       "name": "GoPaisa",
       "url": "https://t.me/s/gopaisa",
-      "enabled": true,
+      "enabled": false,
       "intervalSeconds": 120,
       "acceptTextOnly": true,
       "priority": 6,

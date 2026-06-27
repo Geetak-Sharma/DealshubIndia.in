@@ -4,14 +4,14 @@
   --primary-color-rgb: 34, 197, 94;
   --accent-color: #0088cc; /* Telegram Blue */
 
-  /* Day Mode (Clean light) */
-  --bg-color: #f1f5f9;
-  --surface-color: #ffffff;
-  --surface-color-hover: #f8fafc;
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --border-color: #e2e8f0;
+  /* Permanent Dark Mode Variables */
+  --bg-color: #0B0E14;
+  --surface-color: #131720;
+  --surface-color-hover: #1a1f2e;
+  --text-primary: #f0f2f5;
+  --text-secondary: #9ca3b0;
+  --text-muted: #5c6370;
+  --border-color: #1e2330;
 
   /* Spacing Scale (8px system) */
   --spacing-1: 8px;
@@ -31,27 +31,16 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.6), 0 4px 8px -2px rgba(0, 0, 0, 0.4);
   
   /* Layout Constants */
   --container-max-width: 1200px;
 }
 
-[data-theme='dark'] {
-  /* Pro Dark Mode */
-  --bg-color: #0B0E14;
-  --surface-color: #131720;
-  --surface-color-hover: #1a1f2e;
-  --text-primary: #f0f2f5;
-  --text-secondary: #9ca3b0;
-  --text-muted: #5c6370;
-  --border-color: #1e2330;
-  
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.6), 0 4px 8px -2px rgba(0, 0, 0, 0.4);
+[data-theme='light'] {
+  /* No longer supported, forcing dark defaults */
 }
 
 /* Base Reset */
@@ -168,4 +157,32 @@ button {
   box-shadow: 0 0 25px rgba(34, 197, 94, 0.2);
   border-color: rgba(34, 197, 94, 0.4);
 }
+
+/* ============================================================
+   GLOBAL Z-INDEX LAYER SYSTEM
+   Ensures mobile dock + sidebar always float above ALL content,
+   even when cards create stacking contexts via:
+     - view-transition-name
+     - transform  (spring-hover, card hover)
+     - backdrop-filter / filter
+   ============================================================ */
+
+/* Isolate page content so card stacking contexts stay contained */
+[style*="view-transition-name: main-content"] {
+  isolation: isolate;
+}
+
+/* Hard guarantee — these always win over everything */
+#mobile-bottom-dock {
+  z-index: 1000 !important;
+}
+
+#nav-sidebar {
+  z-index: 9999 !important;
+}
+
+#nav-overlay {
+  z-index: 9998 !important;
+}
+
 

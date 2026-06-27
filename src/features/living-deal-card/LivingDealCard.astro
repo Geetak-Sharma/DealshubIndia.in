@@ -1,0 +1,102 @@
+---
+import Card from "@/components/foundation/Card.astro";
+import Badge from "@/components/foundation/Badge.astro";
+import Text from "@/components/foundation/Text.astro";
+import Heading from "@/components/foundation/Heading.astro";
+import Price from "@/components/foundation/Price.astro";
+import { ExpandablePanel } from "./components/ExpandablePanel";
+import AnalysisPanel from "./components/AnalysisPanel.astro";
+import type { DealCardDTO } from "./dtos/DealCard.dto";
+
+interface Props {
+  deal: DealCardDTO;
+}
+
+const { deal } = Astro.props;
+const isUnavailable = deal.state === 'expired' || deal.state === 'out_of_stock';
+const analyticsData = `{"id":"${deal.id}","merchant":"${deal.merchant?.id || 'unknown'}"}`;
+---
+
+<Card
+  interactive={!isUnavailable}
+  padding="none"
+  class={`group flex flex-col overflow-hidden bg-card transition-all duration-300 ${isUnavailable ? 'opacity-60 grayscale-[0.6]' : 'hover:border-foreground/20 hover:shadow-lg'}`}
+  data-analytics-view="card_view"
+  data-analytics-payload={analyticsData}
+>
+  <div class="relative w-full aspect-[4/3] bg-muted overflow-hidden flex-shrink-0">
+    <img src={deal.image} alt={deal.title} class="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+    
+    {deal.ai && (
+      <div class="absolute top-3 left-3 z-10 flex flex-col gap-2">
+        <Badge variant="aiDecision" class="shadow-sm backdrop-blur-md bg-primary/95 text-primary-foreground">
+          {deal.ai.decision}
+        </Badge>
+      </div>
+    )}
+    
+    {isUnavailable && (
+      <div class="absolute inset-0 bg-background/60 flex items-center justify-center backdrop-blur-[2px]">
+        <Badge variant="neutral" class="text-sm px-4 py-1.5 shadow-sm font-medium">
+          {deal.state === 'expired' ? 'Deal Expired' : 'Out of Stock'}
+        </Badge>
+      </div>
+    )}
+  </div>
+
+  <div class="p-4 flex flex-col flex-grow gap-3">
+    <div class="space-y-1">
+      {deal.merchant && (
+        <Text size="xs" weight="medium" class="uppercase tracking-widest text-muted-foreground/80">{deal.merchant.name}</Text>
+      )}
+      <Heading level={3} class="line-clamp-2 text-base leading-snug group-hover:text-primary transition-colors" title={deal.title}>
+        {deal.title}
+      </Heading>
+    </div>
+
+    <div class="flex items-baseline flex-wrap gap-x-2 gap-y-1 mt-1">
+      <Price formattedValue={deal.pricing.currentPriceFormatted} size="lg" class="text-foreground tracking-tight" />
+      {deal.pricing.originalPriceFormatted && (
+        <Price formattedValue={deal.pricing.originalPriceFormatted} variant="strike" size="sm" class="text-muted-foreground/60" />
+      )}
+      {deal.pricing.savingsFormatted && (
+        <Text color="success" weight="semibold" size="sm" class="ml-auto shrink-0 bg-success/10 px-1.5 py-0.5 rounded-sm">
+          {deal.pricing.savingsFormatted}
+        </Text>
+      )}
+    </div>
+
+    {deal.ai && deal.ai.reasoning.length > 0 && (
+      <div class="flex gap-1.5 flex-wrap mt-1" aria-label="Deal Insights">
+        {deal.ai.reasoning.slice(0, 2).map((chip) => (
+          <Badge variant="neutral" class="bg-secondary/40 hover:bg-secondary/60 text-[10px] sm:text-xs font-medium px-2 py-0.5 border-none text-muted-foreground transition-colors">
+            {chip}
+          </Badge>
+        ))}
+      </div>
+    )}
+
+    <div class="mt-auto pt-4 flex flex-col gap-2">
+      <a 
+        href={isUnavailable ? "#" : "/redirect"} 
+        data-analytics-click="buy_click"
+        data-analytics-payload={analyticsData}
+        class={`inline-flex w-full items-center justify-center rounded-md text-sm font-semibold transition-all h-10 px-4 py-2 ${
+          isUnavailable 
+            ? 'bg-muted text-muted-foreground cursor-not-allowed border border-transparent' 
+            : 'bg-foreground text-background hover:bg-foreground/90 hover:scale-[1.02] active:scale-[0.98]'
+        }`}
+        aria-disabled={isUnavailable}
+        tabindex={isUnavailable ? -1 : 0}
+      >
+        {isUnavailable ? 'View Alternatives' : 'View Deal'}
+      </a>
+      
+      {!isUnavailable && deal.flags.showAi && (
+        <ExpandablePanel client:visible dealId={deal.id}>
+          <AnalysisPanel deal={deal} class="border-none shadow-none bg-muted/10 p-4" />
+        </ExpandablePanel>
+      )}
+    </div>
+  </div>
+</Card>

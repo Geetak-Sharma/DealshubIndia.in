@@ -1,0 +1,209 @@
+---
+export const prerender = true;
+
+import Layout from '../../layouts/Layout.astro';
+import ToolCard from '../../components/tools/ToolCard.astro';
+
+// Tools List Config
+const tools = [
+  {
+    title: 'Flipkart Review Analyzer',
+    description: 'Paste a Flipkart product link to breakdown ratings, complaints, and real buyer consensus before you order.',
+    href: '/tools/flipkart-review-analyzer',
+    isLive: true,
+    badge: 'LIVE',
+    icon: '📊'
+  },
+  {
+    title: 'Price Drop Checker',
+    description: 'Track price fluctuations over 30 days and discover historical lows instantly.',
+    href: '#',
+    isLive: false,
+    badge: 'COMING SOON',
+    icon: '📉'
+  },
+  {
+    title: 'Coupon Validator',
+    description: 'Verify and scan working cashback coupons, vouchers, and merchant promos.',
+    href: '#',
+    isLive: false,
+    badge: 'COMING SOON',
+    icon: '🎟️'
+  },
+  {
+    title: 'Card Offer Matcher',
+    description: 'Find matching bank card discount rates and EMI calculations for your checkout.',
+    href: '#',
+    isLive: false,
+    badge: 'COMING SOON',
+    icon: '💳'
+  }
+];
+---
+
+<Layout title="Smart Shopping Tools directory | Dealshub India">
+
+  <main class="post-layout">
+    <div class="l-container">
+      
+      <!-- Blog-style Sub-Menu Bar -->
+      <div class="blog-sub-menu glass-panel">
+        <div class="sub-menu-left">
+          <a href="/" class="back-to-blog-btn">
+            <span class="arrow">←</span>
+            <span>Back to Home</span>
+          </a>
+        </div>
+        <div class="sub-menu-right">
+          <span class="sub-meta-item category">SHOPPING TOOLS</span>
+          <span class="sub-meta-sep mobile-hide">•</span>
+          <span class="sub-meta-item author mobile-hide">SMART UTILITIES</span>
+          <span class="sub-meta-sep mobile-hide">•</span>
+          <span class="sub-meta-item date mobile-hide">100% FREE</span>
+        </div>
+      </div>
+      
+      {/* Intro Header */}
+      <div class="text-center max-w-2xl mx-auto space-y-4">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold tracking-wider rounded-full border border-emerald-100 dark:border-emerald-900/30 uppercase">
+          🛡️ Shopping Utilities
+        </span>
+        <h1 class="text-3xl md:text-5xl font-extrabold text-slate-800 dark:text-white tracking-normal">
+          Smart Shopping <span class="text-emerald-500">Tools</span>
+        </h1>
+        <p class="text-sm md:text-base text-slate-500 dark:text-slate-400 leading-relaxed font-normal">
+          Make smarter buying decisions. Use our utility algorithms to analyze listings, verify discount rates, and discover maximum saving consensus.
+        </p>
+      </div>
+
+      {/* Grid */}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {tools.map(tool => (
+          <ToolCard
+            title={tool.title}
+            description={tool.description}
+            href={tool.href}
+            isLive={tool.isLive}
+            badge={tool.badge}
+            icon={tool.icon}
+          />
+        ))}
+      </div>
+
+      {/* Back to Core links */}
+      <div class="pt-8 border-t border-slate-200 dark:border-slate-800 text-center space-x-6 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-600">
+        <a href="/" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">← Back to Deals</a>
+        <a href="/livedeals" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Live Alerts</a>
+        <a href="/blog" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Insights Blog</a>
+      </div>
+
+    </div>
+  </main>
+<style>
+  .post-layout {
+    padding-bottom: 4rem;
+  }
+  .l-container {
+    max-width: 900px !important;
+    overflow: visible !important;
+  }
+
+  .blog-sub-menu {
+    position: sticky;
+    top: 12px; /* Close to the top of screen after main header scrolls away */
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 16px;
+    margin: 0 auto 1.5rem auto;
+    max-width: 900px;
+    background: rgba(17, 24, 39, 0.85); /* Translucent dark glass */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-sizing: border-box;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    transition: background-color 0.3s ease;
+  }
+
+  .sub-menu-left {
+    display: flex;
+    align-items: center;
+  }
+
+  .sub-menu-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #94A3B8;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .sub-meta-item.category {
+    color: #22C55E;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    background: rgba(34, 197, 94, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .sub-meta-sep {
+    color: rgba(255, 255, 255, 0.15);
+  }
+
+  @media (max-width: 768px) {
+    .mobile-hide {
+      display: none !important;
+    }
+    .blog-sub-menu {
+      padding: 0.6rem 1rem;
+      margin-bottom: 1rem;
+    }
+    .sub-menu-right {
+      gap: 8px;
+    }
+  }
+
+  .back-to-blog-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 30px;
+    background: rgba(17, 24, 39, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94A3B8;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .back-to-blog-btn .arrow {
+    transition: transform 0.3s ease;
+    display: inline-block;
+  }
+
+  .back-to-blog-btn:hover {
+    color: #ffffff;
+    border-color: rgba(34, 197, 94, 0.4);
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.25);
+    transform: translateY(-1px) scale(1.02);
+  }
+
+  .back-to-blog-btn:hover .arrow {
+    transform: translateX(-4px);
+    color: #22C55E;
+  }
+
+</style>
+</Layout>

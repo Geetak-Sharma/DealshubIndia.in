@@ -1,0 +1,51 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  href: string;
+  isLive: boolean;
+  icon: string;
+}
+
+const { title, description, href, isLive, icon } = Astro.props;
+---
+
+<div class={`flex flex-col justify-between p-5 bg-white dark:bg-slate-900 border rounded-xl transition-all duration-300 ${isLive ? 'border-slate-200 dark:border-slate-800 hover:shadow-md hover:border-emerald-500/20 group' : 'border-slate-200/60 dark:border-slate-800/60 bg-slate-50/20 dark:bg-slate-950/10'}`}>
+  <div class="space-y-3">
+    
+    <div class="flex items-center justify-between">
+      <span class="text-2xl" aria-hidden="true">{icon}</span>
+      <span class={`text-[9px] font-extrabold tracking-wider uppercase px-2.5 py-0.5 rounded-full ${isLive ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-850 text-slate-400 dark:text-slate-500'}`}>
+        {isLive ? 'LIVE' : 'SOON'}
+      </span>
+    </div>
+
+    <div class="space-y-1">
+      <h3 class="text-xs font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight">
+        {title}
+      </h3>
+      <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+        {description}
+      </p>
+    </div>
+
+  </div>
+
+  <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-850">
+    {isLive ? (
+      <a 
+        href={href} 
+        class="flex items-center justify-center w-full py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] tracking-wider rounded-lg shadow-sm uppercase text-center transition-all"
+      >
+        Launch Tool →
+      </a>
+    ) : (
+      <span 
+        class="flex items-center justify-center w-full py-2 px-4 text-[10px] font-extrabold tracking-wider rounded-lg border border-dashed border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 uppercase text-center select-none bg-slate-50/50 dark:bg-slate-900/10"
+      >
+        Under Development
+      </span>
+    )}
+  </div>
+
+</div>

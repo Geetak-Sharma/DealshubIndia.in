@@ -1,0 +1,182 @@
+﻿---
+export interface Props {
+  backLink?: string;
+  backText?: string;
+  badgeText?: string;
+  authorText?: string;
+  dateText?: string;
+  bannerText?: string;
+  navTargetClass?: string;
+}
+
+const {
+  backLink = "/",
+  backText = "Back to Home",
+  badgeText = "INSIGHTS BLOG",
+  authorText = "DEALSHUB TEAM",
+  dateText = "UPDATED TODAY",
+  bannerText = "",
+  navTargetClass = ""
+} = Astro.props;
+---
+
+<div class="page-sub-header glass-panel">
+  <div class="sub-menu-left">
+    <a href={backLink} class="back-to-home-btn">
+      <span class="arrow">?</span>
+      <span class="mobile-hide">{backText}</span>
+    </a>
+  </div>
+
+  {bannerText && (
+    <div class="hidden md:flex flex-1 justify-center items-center px-4">
+      <div id="page-sticky-banner" class="relative group overflow-hidden rounded-full px-5 py-1.5 border border-white/10 bg-slate-950/50 cursor-default">
+        <div class="absolute inset-0 bg-gradient-to-r from-orange-500/20 via-rose-500/20 to-orange-500/20 animate-pulse"></div>
+        <span class="relative flex items-center gap-2 text-[10px] sm:text-xs font-black uppercase tracking-[0.25em] text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-yellow-200 to-rose-400">
+          <span class="text-orange-400 animate-bounce">?</span>
+          {bannerText}
+        </span>
+      </div>
+    </div>
+  )}
+
+  <div class="sub-menu-right">
+    <span class="sub-meta-item category">{badgeText}</span>
+    <span class="sub-meta-sep mobile-hide">•</span>
+    <span class="sub-meta-item author mobile-hide">{authorText}</span>
+    <span class="sub-meta-sep mobile-hide">•</span>
+    <span class="sub-meta-item date mobile-hide">{dateText}</span>
+  </div>
+</div>
+
+{bannerText && navTargetClass && (
+  <script define:vars={{ navTargetClass }}>
+    // Wait for the DOM to load
+    document.addEventListener("DOMContentLoaded", () => {
+      Promise.all([
+        import('gsap'),
+        import('gsap/ScrollTrigger')
+      ]).then(([{ default: gsap }, { default: ScrollTrigger }]) => {
+        gsap.registerPlugin(ScrollTrigger);
+        const navLink = document.querySelector(navTargetClass);
+        const banner = document.getElementById('page-sticky-banner');
+        if (navLink && banner) {
+          gsap.timeline({
+            scrollTrigger: {
+              trigger: document.body,
+              start: "top top",
+              end: "60px top",
+              scrub: 0.5,
+            }
+          })
+          .to(navLink, { opacity: 0, y: 15, scale: 0.9, duration: 1, transformOrigin: "center bottom" }, 0)
+          .fromTo(banner, 
+            { opacity: 0, y: -20, scale: 0.8 }, 
+            { opacity: 1, y: 0, scale: 1, duration: 1, ease: "power2.out" }, 
+          0);
+        }
+      }).catch(console.error);
+    });
+  </script>
+)}
+
+<style>
+  .page-sub-header {
+    position: sticky;
+    top: 15px;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 16px;
+    margin: 0 auto 1.5rem auto;
+    max-width: 900px;
+    background: rgba(17, 24, 39, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-sizing: border-box;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    transition: background-color 0.3s ease;
+  }
+
+  .sub-menu-left {
+    display: flex;
+    align-items: center;
+  }
+
+  .sub-menu-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #94A3B8;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .sub-meta-item.category {
+    color: #22C55E;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    background: rgba(34, 197, 94, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .sub-meta-sep {
+    color: rgba(255, 255, 255, 0.15);
+  }
+
+  @media (max-width: 768px) {
+    .mobile-hide {
+      display: none !important;
+    }
+    .page-sub-header {
+      padding: 0.6rem 1rem;
+      margin-bottom: 1rem;
+      top: 15px;
+    }
+    .sub-menu-right {
+      gap: 8px;
+    }
+  }
+
+  .back-to-home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 30px;
+    background: rgba(17, 24, 39, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94A3B8;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .back-to-home-btn .arrow {
+    transition: transform 0.3s ease;
+    display: inline-block;
+  }
+
+  .back-to-home-btn:hover {
+    color: #ffffff;
+    border-color: rgba(34, 197, 94, 0.4);
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.25);
+    transform: translateY(-1px) scale(1.02);
+  }
+
+  .back-to-home-btn:hover .arrow {
+    transform: translateX(-4px);
+    color: #22C55E;
+  }
+</style>
+

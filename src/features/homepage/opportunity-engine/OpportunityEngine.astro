@@ -1,0 +1,74 @@
+---
+import Heading from "@/components/foundation/Heading.astro";
+import Text from "@/components/foundation/Text.astro";
+import Badge from "@/components/foundation/Badge.astro";
+import LivingDealCard from "@/features/living-deal-card/LivingDealCard.astro";
+import { getOpportunities } from "./services/OpportunityService";
+import { Star, Clock, Timer, Gem, TrendingUp, Sparkles, ChevronDown } from "lucide-react";
+
+const opportunities = await getOpportunities();
+
+const IconMap: Record<string, any> = {
+  Star, Clock, Timer, Gem, TrendingUp
+};
+---
+
+<section class="w-full max-w-7xl mx-auto px-6 py-16 border-t border-border/40">
+  <div class="mb-10 flex flex-col gap-2">
+    <div class="flex items-center gap-2">
+      <Sparkles className="w-5 h-5 text-primary" />
+      <Heading level={2} class="text-3xl font-bold tracking-tight">Opportunity Engine</Heading>
+    </div>
+    <Text color="muted" class="max-w-2xl text-base">We translate market momentum into actionable intelligence. Don't just browse; invest your money exactly when the data tells you to.</Text>
+  </div>
+
+  <div class="flex flex-col gap-4">
+    {opportunities.map((group, index) => {
+      const GroupIcon = IconMap[group.icon] || Star;
+      return (
+        <details class="group bg-muted/10 border border-border/40 rounded-xl overflow-hidden transition-all [&_summary::-webkit-details-marker]:hidden" open={index === 0}>
+          <summary class="flex items-center justify-between p-6 cursor-pointer hover:bg-muted/20 transition-colors select-none">
+            <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+              <div class="flex items-center gap-3">
+                <div class={`p-2 rounded-lg ${group.id === 'wait-before-buying' ? 'bg-danger/10 text-danger' : group.id === 'rising-prices' ? 'bg-warning/10 text-warning' : 'bg-primary/10 text-primary'}`}>
+                  <GroupIcon className="w-5 h-5" />
+                </div>
+                <Heading level={3} class="text-lg md:text-xl font-bold tracking-tight">{group.title}</Heading>
+              </div>
+              <Text color="muted" class="text-sm md:ml-4">{group.description}</Text>
+            </div>
+            <div class="flex items-center gap-4 text-muted-foreground">
+              <Badge variant="neutral">{group.deals.length} {group.deals.length === 1 ? 'Opportunity' : 'Opportunities'}</Badge>
+              <ChevronDown className="w-5 h-5 transition-transform duration-300 group-open:-rotate-180" />
+            </div>
+          </summary>
+          
+          <div class="p-6 pt-2 bg-background/50 border-t border-border/20">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {group.deals.map(deal => (
+                <div class="flex flex-col gap-3">
+                  <div class={`flex items-start gap-2 p-3 rounded-lg border ${group.id === 'wait-before-buying' ? 'bg-danger/5 border-danger/20 text-danger' : 'bg-primary/5 border-primary/20 text-primary'}`}>
+                    <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />
+                    <Text size="sm" class="font-medium leading-snug">{deal.opportunityInsight}</Text>
+                  </div>
+                  <LivingDealCard deal={deal} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </details>
+      );
+    })}
+  </div>
+</section>
+
+<style>
+  /* Optional graceful animation for standard details element */
+  details > div {
+    animation: slideDown 0.3s ease-out;
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>

@@ -1,0 +1,11 @@
+---
+import { cn } from "@/utils/cn";
+
+interface Props {
+  class?: string;
+  [key: string]: any;
+}
+
+const { class: className, ...rest } = Astro.props;
+---
+<div class={cn("animate-pulse rounded-md bg-muted", className)} aria-hidden="true" {...rest}></div>

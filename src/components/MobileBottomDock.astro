@@ -1,0 +1,261 @@
+---
+---
+
+<!-- Mobile Bottom Dock — visible only on screens ≤ 768px -->
+<nav class="mobile-dock" id="mobile-bottom-dock" aria-label="Mobile navigation dock">
+  <!-- Home -->
+  <a href="/" class="dock-item" id="dock-home" aria-label="Home">
+    <div class="dock-icon-wrap">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+    </div>
+    <span class="dock-label">Home</span>
+  </a>
+
+  <!-- Live -->
+  <a href="/livedeals" class="dock-item" id="dock-live" aria-label="Live Deals">
+    <div class="dock-icon-wrap">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      <span class="dock-live-dot"></span>
+    </div>
+    <span class="dock-label">Live</span>
+  </a>
+
+  <!-- Search — triggers Command Palette -->
+  <button class="dock-item dock-search-btn" id="dock-search" aria-label="Search deals" type="button"
+    onclick="if(navigator.vibrate) navigator.vibrate([40, 60, 40]); window.dispatchEvent(new CustomEvent('open-command-palette'));">
+    <div class="dock-icon-wrap dock-icon-search">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </div>
+    <span class="dock-label">Search</span>
+  </button>
+
+  <!-- Menu — opens sidebar -->
+  <button class="dock-item dock-menu-btn" id="dock-menu" aria-label="Open menu" type="button">
+    <div class="dock-icon-wrap">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="4" y1="6" x2="20" y2="6"/>
+        <line x1="4" y1="12" x2="20" y2="12"/>
+        <line x1="4" y1="18" x2="20" y2="18"/>
+      </svg>
+    </div>
+    <span class="dock-label">Menu</span>
+  </button>
+</nav>
+
+<script is:inline>
+(function () {
+  function initDock() {
+    const dock = document.getElementById('mobile-bottom-dock');
+    if (!dock) return;
+
+    // Highlight active tab
+    const path = window.location.pathname;
+    document.querySelectorAll('.dock-item[href]').forEach(function (item) {
+      const href = item.getAttribute('href');
+      const isActive = href === '/' ? (path === '/' || path === '') : path.startsWith(href);
+      if (isActive) item.classList.add('is-active');
+      else item.classList.remove('is-active');
+    });
+
+    // Haptic on nav links
+    document.querySelectorAll('.dock-item').forEach(function (item) {
+      item.addEventListener('click', function () {
+        if (navigator.vibrate) navigator.vibrate(50);
+      });
+    });
+
+    // Menu button → trigger existing hamburger
+    const menuBtn = document.getElementById('dock-menu');
+    if (menuBtn) {
+      menuBtn.addEventListener('click', function () {
+        if (navigator.vibrate) navigator.vibrate(50);
+        const hamburger = document.getElementById('nav-hamburger');
+        if (hamburger) hamburger.click();
+      });
+    }
+
+    // Hide dock when sidebar/command palette is open to avoid z-index fights
+    window.addEventListener('open-command-palette', function () {
+      dock.classList.add('dock--hidden');
+    });
+    window.addEventListener('close-command-palette', function () {
+      dock.classList.remove('dock--hidden');
+    });
+
+    // Hide dock when sidebar opens, restore when it closes
+    const sidebar = document.getElementById('nav-sidebar');
+    const sidebarObserver = new MutationObserver(function () {
+      if (sidebar && sidebar.classList.contains('is-open')) {
+        dock.classList.add('dock--hidden');
+      } else {
+        dock.classList.remove('dock--hidden');
+      }
+    });
+    if (sidebar) sidebarObserver.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+
+    // Cross-page scroll: hide on scroll down, show on scroll up (native-app feel)
+    let lastY = window.scrollY;
+    window.addEventListener('scroll', function () {
+      const currentY = window.scrollY;
+      if (currentY > lastY + 4 && currentY > 80) {
+        dock.classList.add('dock--scrolled-down');
+      } else if (currentY < lastY - 4) {
+        dock.classList.remove('dock--scrolled-down');
+      }
+      lastY = currentY;
+    }, { passive: true });
+  }
+
+  document.addEventListener('astro:page-load', initDock);
+  initDock();
+}());
+</script>
+
+<style>
+  /* ══════════════════════════════════════════ */
+  /*  MOBILE BOTTOM DOCK  (≤ 768px only)        */
+  /* ══════════════════════════════════════════ */
+
+  .mobile-dock {
+    display: none; /* hidden by default; media query below enables */
+  }
+
+  @media (max-width: 768px) {
+    .mobile-dock {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+
+      /* Positioning */
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+
+      /* Safe-area inset for iOS home bar / Android gesture nav */
+      padding-bottom: max(env(safe-area-inset-bottom), 8px);
+      padding-top: 10px;
+      padding-left: 8px;
+      padding-right: 8px;
+
+      /* Glassmorphism */
+      background: rgba(10, 14, 22, 0.75);
+      backdrop-filter: blur(24px) saturate(2);
+      -webkit-backdrop-filter: blur(24px) saturate(2);
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: 0 -4px 20px rgba(74, 222, 128, 0.15); /* Top Glow */
+      border-radius: 0; /* flat on very bottom */
+
+      /* Transition for hide-on-scroll */
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                  opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .mobile-dock.dock--scrolled-down {
+      transform: translateY(100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .mobile-dock.dock--hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* ── Dock Item ── */
+    .dock-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      flex: 1;
+      padding: 6px 4px;
+      border: none;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.45);
+      cursor: pointer;
+      text-decoration: none;
+      border-radius: 12px;
+      transition: color 0.2s ease, background 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .dock-item:active {
+      background: rgba(255, 255, 255, 0.06);
+      transform: scale(0.93);
+    }
+
+    .dock-item.is-active {
+      color: #22C55E;
+    }
+
+    .dock-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+
+    /* ── Icon wrapper ── */
+    .dock-icon-wrap {
+      position: relative;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Active glow on icon */
+    .dock-item.is-active .dock-icon-wrap svg {
+      filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.7));
+    }
+
+    /* ── Search pill styling ── */
+    .dock-icon-search {
+      background: rgba(139, 92, 246, 0.12);
+      border-radius: 10px;
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      width: 36px;
+      height: 36px;
+    }
+
+    .dock-search-btn {
+      color: rgba(139, 92, 246, 0.85);
+    }
+
+    .dock-search-btn:active {
+      background: rgba(139, 92, 246, 0.15);
+    }
+
+    /* ── Live pulse dot ── */
+    .dock-live-dot {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 7px;
+      height: 7px;
+      background: #22C55E;
+      border-radius: 50%;
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+      animation: dockDotPing 2s ease-in-out infinite;
+    }
+
+    @keyframes dockDotPing {
+      0%   { box-shadow: 0 0 0 0   rgba(34, 197, 94, 0.8); }
+      60%  { box-shadow: 0 0 0 5px rgba(34, 197, 94, 0);   }
+      100% { box-shadow: 0 0 0 0   rgba(34, 197, 94, 0);   }
+    }
+  }
+</style>

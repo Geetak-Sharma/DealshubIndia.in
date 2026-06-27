@@ -19,8 +19,12 @@ function emit(level, tag, msg, meta) {
     msg,
     ...(meta ? { meta } : {}),
   };
-  // Use stderr so it doesn't interfere with SSE/API responses
-  process.stderr.write(`[QC-${tag}] ${level} ${ts()} — ${msg}${meta ? ' ' + JSON.stringify(meta) : ''}\n`);
+  const logStr = `[QC-${tag}] ${level} ${ts()} — ${msg}${meta ? ' ' + JSON.stringify(meta) : ''}\n`;
+  if (level === 'ERROR' || level === 'WARN') {
+    process.stderr.write(logStr);
+  } else {
+    process.stdout.write(logStr);
+  }
 }
 
 export const QCLogger = {

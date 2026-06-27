@@ -2,23 +2,13 @@
   --whatsapp-green: #25D366;
   --telegram-blue: #0088cc;
 
-  /* Day Mode (Pastel Sky Blue) */
-  --bg-color: #E0F2FE;
-  --text-primary: #0F172A;
-  --text-secondary: #334155;
-  --pill-text: #0F172A;
-  /* NO WHITE TEXT in day mode */
-  --card-radius: 32px;
-  --btn-height: 70px;
-}
-
-[data-theme='dark'] {
-  /* Dark Mode (Bluish Grey) */
-  --bg-color: #334155;
+  /* Force Premium Dark Theme Globally */
+  --bg-color: #0a0c10;
   --text-primary: #F8FAFC;
   --text-secondary: #CBD5E1;
   --pill-text: #F8FAFC;
-  /* NO BLACK TEXT in dark mode */
+  --card-radius: 32px;
+  --btn-height: 70px;
 }
 
 * {
@@ -35,17 +25,12 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 main {
-  max-width: 500px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 4rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+  padding: 2rem 1.5rem;
 }
 
 h1 {

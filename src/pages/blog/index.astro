@@ -1,0 +1,362 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Layout from '../../layouts/Layout.astro';
+import megaJulySalesImg from '../../assets/images/assets/mega-july-sales.png';
+import BlogCard from '../../components/BlogCard.astro';
+import PageSubHeader from '../../components/PageSubHeader.astro';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const pageTitle = "Dealshub Blog: Smart Shopping Tips & Loot Guides";
+const pageDescription = "Explore the best deals, shopping hacks, and tech guides. Learn how to save more on Amazon, Flipkart, and other major retailers in India.";
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  
+  <main>
+    <div class="l-container u-mt-4">
+      <!-- Blog-style Sub-Menu Bar -->
+      <div class="blog-sub-menu glass-panel">
+        <div class="sub-menu-left">
+          <a href="/" class="back-to-blog-btn">
+            <span class="arrow">←</span>
+            <span>Back to Home</span>
+          </a>
+        </div>
+        <div class="sub-menu-right">
+          <span class="sub-meta-item category">INSIGHTS BLOG</span>
+          <span class="sub-meta-sep mobile-hide">•</span>
+          <span class="sub-meta-item author mobile-hide">DEALSHUB TEAM</span>
+          <span class="sub-meta-sep mobile-hide">•</span>
+          <span class="sub-meta-item date mobile-hide">UPDATED TODAY</span>
+        </div>
+      </div>
+    </div>
+    <!-- Immersive July Sales Banner -->
+    <div class="sales-banner-section u-mb-8 fade-in-up">
+      <div class="l-container">
+        <div class="section-title-wrap u-mb-5 u-mt-4">
+          <span class="sale-badge">🔥 Mega Shopping Event</span>
+          <h2 class="u-text-2xl u-font-black u-text-white">July Clash of Sales</h2>
+          <p class="u-text-sm u-text-secondary u-mt-1">Amazon Prime Day vs Flipkart G.O.A.T Sale. View loot guides and pricing error trackers.</p>
+        </div>
+
+        <a href="/blog/amazon-prime-day-vs-flipkart-goat-sale-2026" class="immersive-banner-card">
+          <Image src={megaJulySalesImg} alt="Amazon Prime Day vs Flipkart G.O.A.T Sale - Two Epic Sales, One Unbeatable Weekend" class="banner-img" loading="eager" fetchpriority="high" />
+          <div class="banner-glass-overlay"></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="l-container u-mt-6 u-mb-6">
+      <div class="blog-grid">
+        {posts.length > 0 ? (
+          posts.map((post) => (
+            <div class="blog-card-wrapper">
+              <BlogCard 
+                title={post.data.title}
+                description={post.data.description}
+                pubDate={post.data.pubDate}
+                author={post.data.author}
+                image={post.data.image}
+                category={post.data.category}
+                url={`/blog/${post.id.replace(/\.md$/, '')}`}
+              />
+            </div>
+          ))
+        ) : (
+          <div class="no-posts glass-panel">
+            <h3 class="u-text-xl u-font-bold u-mb-2">Coming Soon!</h3>
+            <p class="u-text-secondary">We are crafting some amazing deal-hunting guides for you. Stay tuned!</p>
+          </div>
+        )}
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer-master l-container u-mb-6">
+    <div class="footer-identity">
+      <p>Dealshub Blog - Empowering Indian Shoppers Since 2018</p>
+      <a href="/" class="u-text-green u-font-bold u-mt-3 u-inline-block">Back to Live Deals</a>
+    </div>
+  </footer>
+</Layout>
+
+<style>
+  .l-container {
+    max-width: 900px !important;
+    overflow: visible !important;
+  }
+  main {
+    overflow: visible !important;
+  }
+
+  .blog-sub-menu {
+    position: sticky;
+    top: 12px; /* Close to the top of screen after main header scrolls away */
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 16px;
+    margin: 0 auto 1.5rem auto;
+    max-width: 900px;
+    background: rgba(17, 24, 39, 0.85); /* Translucent dark glass */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-sizing: border-box;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    transition: background-color 0.3s ease;
+  }
+
+  .sub-menu-left {
+    display: flex;
+    align-items: center;
+  }
+
+  .sub-menu-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #94A3B8;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .sub-meta-item.category {
+    color: #22C55E;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    background: rgba(34, 197, 94, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .sub-meta-sep {
+    color: rgba(255, 255, 255, 0.15);
+  }
+
+  @media (max-width: 768px) {
+    .mobile-hide {
+      display: none !important;
+    }
+    .blog-sub-menu {
+      padding: 0.6rem 1rem;
+      margin-bottom: 1rem;
+    }
+    .sub-menu-right {
+      gap: 8px;
+    }
+  }
+
+  .back-to-blog-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 30px;
+    background: rgba(17, 24, 39, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94A3B8;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .back-to-blog-btn .arrow {
+    transition: transform 0.3s ease;
+    display: inline-block;
+  }
+
+  .back-to-blog-btn:hover {
+    color: #ffffff;
+    border-color: rgba(34, 197, 94, 0.4);
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.25);
+    transform: translateY(-1px) scale(1.02);
+  }
+
+  .back-to-blog-btn:hover .arrow {
+    transform: translateX(-4px);
+    color: #22C55E;
+  }
+
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 24px;
+  }
+
+  @media (min-width: 768px) {
+    .blog-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .blog-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .blog-card-wrapper {
+    animation: wrapperFade 0.6s ease both;
+  }
+
+  @keyframes wrapperFade {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .no-posts {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+  }
+
+  .sales-banner-section {
+    margin-top: 1.5rem;
+  }
+
+  .section-title-wrap {
+    text-align: left;
+  }
+
+  .sale-badge {
+    display: inline-block;
+    color: #22C55E;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    background: rgba(34, 197, 94, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 0.35rem;
+  }
+
+  .immersive-banner-card {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    background: rgba(10, 15, 30, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    aspect-ratio: 4.5 / 1; /* Standard desktop layout ratio (wider & slimmer) */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  @media (min-width: 1024px) {
+    .immersive-banner-card {
+      aspect-ratio: 5.5 / 1;
+    }
+  }
+
+  .immersive-banner-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(34, 197, 94, 0.3);
+    box-shadow: 0 16px 40px rgba(34, 197, 94, 0.15);
+  }
+
+  .banner-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 25%;
+    z-index: 1;
+    transition: transform 0.5s ease;
+  }
+
+  .immersive-banner-card:hover .banner-img {
+    transform: scale(1.02);
+  }
+
+  .banner-glass-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(11, 14, 20, 0.95) 0%, rgba(11, 14, 20, 0.3) 50%, transparent 100%);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .banner-actions {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    padding: 2rem;
+    width: 100%;
+    background: linear-gradient(to top, rgba(11, 14, 20, 0.98) 30%, transparent 100%);
+  }
+
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 28px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: 1px solid transparent;
+  }
+
+  .action-btn.fk-btn {
+    background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+  }
+
+  .action-btn.fk-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.6);
+  }
+
+  .action-btn.az-btn {
+    background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  }
+
+  .action-btn.az-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.6);
+  }
+
+  @media (max-width: 640px) {
+    .immersive-banner-card {
+      aspect-ratio: auto;
+      height: 110px;
+    }
+    .banner-actions {
+      padding: 1rem;
+      gap: 10px;
+    }
+    .action-btn {
+      padding: 8px 16px;
+      font-size: 0.75rem;
+      flex: 1;
+    }
+  }
+</style>
+
+

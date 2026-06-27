@@ -17,6 +17,10 @@ export interface NormalizedDeal {
   cleanTextBody?: string;
   isMultiOffer?: boolean;
   subOffers?: { title: string; url: string; price?: string }[];
+  explanation?: string;
+  verdictTier?: string;
+  whatsappShareText?: string;
+  twitterShareText?: string;
 }
 
 export function cleanDealTitle(rawTitle: string): { title: string; offerHighlight?: string } {
@@ -261,6 +265,20 @@ export function normalizeDeal(raw: any): NormalizedDeal | null {
     discountPercent = Math.round(((originalNum - sellingNum) / originalNum) * 100);
   }
 
+  // Fallback: extract discount percentage from offerHighlight or msgText
+  if (discountPercent === 0 && offerHighlight) {
+    const pctMatch = offerHighlight.match(/(\d+)%\s*OFF/i);
+    if (pctMatch) {
+      discountPercent = parseInt(pctMatch[1], 10);
+    }
+  }
+  if (discountPercent === 0) {
+    const textMatch = msgText.match(/(?:Min\.?\s*|\b|Upto\s*)(\d+)%\s*OFF/i);
+    if (textMatch) {
+      discountPercent = parseInt(textMatch[1], 10);
+    }
+  }
+
   // 5. Freshness Time Formatting
   const timestamp = raw.timestamp || Date.now();
   const diffMs = Date.now() - timestamp;
@@ -270,7 +288,8 @@ export function normalizeDeal(raw: any): NormalizedDeal | null {
   else if (mins >= 60 && mins < 1440) timeAgo = `${Math.floor(mins / 60)}h ago`;
   else if (mins >= 1440) timeAgo = `${Math.floor(mins / 1440)}d ago`;
 
-  const isLoot = !!raw.isLoot || discountPercent > 80;
+  const hasLootKeyword = /\bloot\b/i.test(rawTitle) || /\bloot\b/i.test(msgText);
+  const isLoot = !!raw.isLoot || discountPercent >= 70 || hasLootKeyword;
 
   // 6. Badges
   const badges: string[] = ['LIVE'];
@@ -313,5 +332,9 @@ export function normalizeDeal(raw: any): NormalizedDeal | null {
     cleanTextBody: cleanBody || undefined,
     isMultiOffer,
     subOffers: subOffers.length > 0 ? subOffers : undefined,
+    explanation: raw.explanation || raw.aiContext || undefined,
+    verdictTier: raw.verdictTier || 'GOOD_DEAL',
+    whatsappShareText: raw.whatsappShareText || undefined,
+    twitterShareText: raw.twitterShareText || undefined,
   };
 }

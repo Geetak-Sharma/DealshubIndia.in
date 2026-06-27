@@ -46,6 +46,15 @@ export class TelegramDataStore {
         data.posts.push(post);
         existingMap.set(post.id, post);
         addedCount++;
+
+        // Trigger Google Indexing API ping for the newly added deal
+        import('./googleIndexer.js').then(({ pingGoogleIndexing }) => {
+          pingGoogleIndexing(`https://dealshubindia.in/deal/${post.id}`).catch(err => {
+            console.error('[TelegramStore] Indexing ping failed:', err);
+          });
+        }).catch(err => {
+          console.error('[TelegramStore] Failed to load googleIndexer:', err);
+        });
       } else {
         const existing = existingMap.get(post.id);
         const existingTitleClean = (existing.title || "").trim();

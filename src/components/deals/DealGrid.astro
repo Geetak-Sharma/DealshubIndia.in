@@ -1,0 +1,28 @@
+---
+import type { NormalizedDeal } from '../../lib/normalizers/deals';
+import DealCard from './DealCard.astro';
+
+interface Props {
+  deals: NormalizedDeal[];
+}
+
+const { deals } = Astro.props;
+---
+
+<div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+  {deals.map(deal => (
+    <DealCard
+      title={deal.title}
+      image={deal.image}
+      price={deal.price}
+      originalPrice={deal.originalPrice}
+      discountPercent={deal.discountPercent}
+      offerHighlight={deal.offerHighlight}
+      url={deal.url}
+      platform={deal.merchant}
+      isLoot={deal.isLoot}
+      timestamp={deal.timestamp}
+      explanation={deal.explanation}
+    />
+  ))}
+</div>

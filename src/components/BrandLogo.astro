@@ -1,0 +1,59 @@
+---
+// src/components/BrandLogo.astro
+interface Props {
+  size?: number;
+  className?: string;
+  gradientId?: string;
+}
+
+const { size = 30, className = "brand-logo", gradientId = "dh-logo-gradient" } = Astro.props;
+---
+
+<svg 
+  xmlns="http://www.w3.org/2000/svg" 
+  width={size} 
+  height={size} 
+  viewBox="0 0 40 40" 
+  fill="none" 
+  class={className}
+>
+  <defs>
+    <linearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF9933;stop-opacity:1" />
+      <stop offset="60%" style="stop-color:#87CEFA;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Interconnected 'D' -->
+  <path 
+    d="M12 10V30C12 30 20 30 20 20C20 10 12 10 12 10Z" 
+    stroke={`url(#${gradientId})`} 
+    stroke-width="3.5" 
+    stroke-linecap="round" 
+    stroke-linejoin="round"
+  />
+  
+  <!-- Interconnected 'H' -->
+  <path 
+    d="M24 10V30M34 10V30M24 20H34" 
+    stroke={`url(#${gradientId})`} 
+    stroke-width="3.5" 
+    stroke-linecap="round" 
+    stroke-linejoin="round"
+  />
+
+  <!-- Neon Green Hub Nodes -->
+  <circle cx="20" cy="20" r="2.5" fill="#39FF14"/>
+  <circle cx="24" cy="20" r="2.5" fill="#39FF14"/>
+  
+  <!-- Network Connector Line -->
+  <path d="M20 20H24" stroke="#39FF14" stroke-width="2" stroke-linecap="round"/>
+</svg>
+
+<style>
+  .brand-logo {
+    display: block;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    flex-shrink: 0;
+  }
+</style>

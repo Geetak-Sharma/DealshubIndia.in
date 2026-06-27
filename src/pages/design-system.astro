@@ -1,0 +1,69 @@
+---
+import Card from "@/components/foundation/Card.astro";
+import Badge from "@/components/foundation/Badge.astro";
+import Text from "@/components/foundation/Text.astro";
+import Heading from "@/components/foundation/Heading.astro";
+import Price from "@/components/foundation/Price.astro";
+import Divider from "@/components/foundation/Divider.astro";
+import Skeleton from "@/components/foundation/Skeleton.astro";
+import { Button } from "@/components/foundation/Button";
+import { LoadingButton } from "@/components/foundation/LoadingButton";
+import { IconButton } from "@/components/foundation/IconButton";
+import { Check } from "lucide-react";
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Design System</title>
+  </head>
+  <body class="p-8 space-y-12 bg-background text-foreground antialiased">
+    <Heading level={1}>DealsHub Design System</Heading>
+    
+    <section class="space-y-4">
+      <Heading level={2}>Typography</Heading>
+      <Divider />
+      <Text size="lg" weight="bold">Large Bold Text</Text>
+      <Text color="muted">Muted Text</Text>
+    </section>
+
+    <section class="space-y-4">
+      <Heading level={2}>Buttons (React Islands)</Heading>
+      <Divider />
+      <div class="flex gap-4 flex-wrap">
+        <Button variant="default">Base Button</Button>
+        <LoadingButton variant="secondary">Loading State</LoadingButton>
+        <IconButton variant="ghost" icon={Check} aria-label="Confirm" />
+      </div>
+    </section>
+
+    <section class="space-y-4">
+      <Heading level={2}>Badges (Semantic)</Heading>
+      <Divider />
+      <div class="flex gap-4 flex-wrap">
+        <Badge variant="aiDecision">AI: Buy Now</Badge>
+        <Badge variant="coupon">Coupon Available</Badge>
+        <Badge variant="cashback">5% Cashback</Badge>
+        <Badge variant="merchant">Amazon</Badge>
+        <Badge variant="neutral">Neutral Label</Badge>
+      </div>
+    </section>
+
+    <section class="space-y-4">
+      <Heading level={2}>Commerce</Heading>
+      <Divider />
+      <Price formattedValue="₹14,999" />
+      <Price formattedValue="₹20,000" variant="strike" size="sm" />
+    </section>
+
+    <section class="space-y-4">
+      <Heading level={2}>Containers</Heading>
+      <Divider />
+      <Card padding="lg" interactive={true}>
+        <Heading level={3}>Interactive Card</Heading>
+        <Text>Hover me to see the effect.</Text>
+      </Card>
+      
+      <Skeleton class="h-32 w-full mt-4" />
+    </section>
+  </body>
+</html>

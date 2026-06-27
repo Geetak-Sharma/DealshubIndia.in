@@ -1,0 +1,265 @@
+---
+import type { NormalizedDeal } from '../../lib/normalizers/deals';
+
+interface Props {
+  title: string;
+  image: string;
+  price: string;
+  originalPrice?: string;
+  discountPercent?: number;
+  offerHighlight?: string; // e.g., "UPTO 75% OFF"
+  url: string;
+  platform?: string; // Merchant
+  isLoot?: boolean;
+  timestamp?: number;
+  insightBadge?: string;
+}
+
+const {
+  title,
+  image,
+  price,
+  originalPrice,
+  discountPercent,
+  offerHighlight,
+  url,
+  platform = 'Other',
+  isLoot = false,
+  timestamp = Date.now(),
+  insightBadge
+} = Astro.props;
+
+// ---- Compute "Posted X mins ago" ----
+let timeAgo = '';
+const diffMs = Date.now() - timestamp;
+const mins = Math.max(0, Math.floor(diffMs / 60000));
+if (mins < 1) timeAgo = 'Just now';
+else if (mins < 60) timeAgo = `${mins}m ago`;
+else if (mins < 1440) timeAgo = `${Math.floor(mins / 60)}h ago`;
+else timeAgo = `${Math.floor(mins / 1440)}d ago`;
+
+// ---- Smart Discount Calculation ----
+const sellingNum = parseFloat(price.replace(/[^\d.]/g, '')) || 0;
+const originalNum = parseFloat(originalPrice?.replace(/[^\d.]/g, '') || '') || 0;
+
+let smartDiscount = 0;
+if (originalNum > 0 && sellingNum > 0 && originalNum > sellingNum) {
+  smartDiscount = Math.round(((originalNum - sellingNum) / originalNum) * 100);
+}
+if (smartDiscount === 0 && discountPercent) {
+  smartDiscount = discountPercent;
+}
+
+const showDiscount = smartDiscount > 10;
+const isDealLoot = isLoot || smartDiscount > 90;
+
+// ---- Platform color map ----
+function getPlatformColor(p: string): string {
+  switch (p) {
+    case 'Amazon': return '#ff9900';
+    case 'Flipkart': return '#2874f0';
+    case 'Myntra': return '#ff3f6c';
+    case 'Ajio': return '#d4a015';
+    default: return '#22C55E';
+  }
+}
+
+const platformColor = getPlatformColor(platform);
+const hasImage = image && !image.includes('dummyimage') && !image.includes('placehold');
+
+const transitionSlug = url
+  .replace(/^https?:\/\//, '')
+  .replace(/[^a-z0-9]/gi, '-')
+  .replace(/-+/g, '-')
+  .slice(0, 60);
+
+// ---- Loot-o-Meter ----
+const _ageHrs = (Date.now() - timestamp) / 3_600_000;
+const lootHeat = Math.max(0, Math.min(100, Math.round(100 - (_ageHrs / 24) * 100)));
+
+const lootBarColor = lootHeat >= 70
+  ? `linear-gradient(90deg, #F59E0B, #EF4444 ${lootHeat}%)`
+  : lootHeat >= 40
+    ? `linear-gradient(90deg, #22C55E, #F59E0B ${lootHeat}%)`
+    : 'linear-gradient(90deg, #22C55E, #4ADE80)';
+
+const lootLabel = lootHeat >= 70 ? '🔥 HOT' : lootHeat >= 40 ? '⚡ WARM' : '✅ LIVE';
+
+// Share data
+const shareTitle = title;
+const shareUrl = url;
+
+const p = (platform || '').toLowerCase();
+const u = (url || '').toLowerCase();
+const isAmazon = p.includes('ama') || u.includes('amazon') || u.includes('amazn.to') || u.includes('amzn.to') || u.includes('amazn.lt');
+const isFlipkart = p.includes('fl') || p.includes('fk') || u.includes('flipkart') || u.includes('fkrt.co') || u.includes('bitli.in');
+const isMyntra = p.includes('myntra') || u.includes('myntra') || u.includes('myntr.it');
+const isAjio = p.includes('ajio') || u.includes('ajio') || u.includes('ajiio.in');
+
+let storeLogo = '';
+let storeName = platform === 'Deal' ? 'DEAL' : platform;
+if (isAmazon) { storeLogo = 'https://www.google.com/s2/favicons?sz=64&domain=amazon.in'; storeName = 'AMAZON'; }
+else if (isFlipkart) { storeLogo = 'https://www.google.com/s2/favicons?sz=64&domain=flipkart.com'; storeName = 'FLIPKART'; }
+else if (isMyntra) { storeLogo = 'https://www.google.com/s2/favicons?sz=64&domain=myntra.com'; storeName = 'MYNTRA'; }
+else if (isAjio) { storeLogo = 'https://www.google.com/s2/favicons?sz=64&domain=ajio.com'; storeName = 'AJIO'; }
+
+---
+
+<div
+  class={`m3-vcard ${isDealLoot ? 'm3-vcard--loot' : ''}`}
+  style={`view-transition-name: deal-card-${transitionSlug}; --acc: ${platformColor};`}
+>
+  <!-- M3 state layer for hover -->
+  <div class="m3-vcard__state-layer" aria-hidden="true"></div>
+
+  <!-- Header: M3 Assist Chip row — store logo + live label -->
+  <div class="m3-vcard__header">
+    <div class="m3-vcard__store-chip">
+      {storeLogo ? (
+        <img src={storeLogo} alt={storeName} class="m3-vcard__store-logo" width="16" height="16" loading="lazy" decoding="async" />
+      ) : (
+        <span class="material-symbols-outlined" style="font-size:14px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 20;">store</span>
+      )}
+      <span class="m3-vcard__store-name" style={`color: ${platformColor}`}>{storeName}</span>
+    </div>
+    <div class="m3-vcard__live-badge">
+      <span class="m3-vcard__live-dot" aria-hidden="true"></span>
+      <span class="m3-vcard__live-label">LIVE</span>
+    </div>
+  </div>
+
+  <!-- Image: M3 shape-small container (12dp) -->
+  <a
+    href={url}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="m3-vcard__img-wrap"
+    data-deal-id={transitionSlug}
+    data-deal-url={url}
+    onclick="if(navigator.vibrate) navigator.vibrate(40);"
+  >
+    <!-- Skeleton -->
+    <div class="m3-skeleton" aria-hidden="true"><div class="m3-skeleton__shimmer"></div></div>
+
+    {hasImage ? (
+      <img
+        src={image}
+        alt={title}
+        loading="lazy"
+        decoding="async"
+        class="m3-vcard__img dc-img-loadable"
+        style={`view-transition-name: deal-img-${transitionSlug}`}
+        data-skeleton-target
+      />
+    ) : (
+      <div class="m3-vcard__img-fallback">
+        <span class="material-symbols-outlined" style="font-size:32px;opacity:0.35;">local_offer</span>
+      </div>
+    )}
+
+    {insightBadge && (
+      <div class="m3-vcard__insight-badge">
+        <span class="material-symbols-outlined" style="font-size:11px;font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 20;">auto_awesome</span>
+        {insightBadge}
+      </div>
+    )}
+  </a>
+
+  <!-- Metadata row (under image) -->
+  <div class="m3-vcard__meta-row">
+    <span class="m3-vcard__meta-chip m3-vcard__meta-chip--time">
+      <span class="material-symbols-outlined" style="font-size:12px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">schedule</span>
+      {timeAgo}
+    </span>
+    {showDiscount && (
+      <span class="m3-vcard__meta-chip m3-vcard__meta-chip--discount">
+        {smartDiscount}% OFF
+      </span>
+    )}
+  </div>
+
+  <!-- Content body -->
+  <div class="m3-vcard__body">
+
+    <!-- Title: M3 Body Medium -->
+    <h3 class="m3-vcard__title">
+      <a href={url} target="_blank" rel="noopener noreferrer">{title}</a>
+    </h3>
+
+    <!-- Offer highlight chip -->
+    {offerHighlight && (
+      <div class="m3-vcard__offer-chip">
+        <span class="material-symbols-outlined" style="font-size:12px;font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 20;">sell</span>
+        <span>{offerHighlight.toUpperCase()}</span>
+      </div>
+    )}
+
+    <!-- Price row -->
+    <div class="m3-vcard__price-row">
+      {isDealLoot && (
+        <span class="material-symbols-outlined" style="font-size:16px;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 20;color:#F2B8B5;">local_fire_department</span>
+      )}
+      <span class="m3-vcard__price">{price.includes('₹') ? price : `₹${price}`}</span>
+      {originalPrice && originalPrice !== price && (
+        <span class="m3-vcard__orig">{originalPrice.includes('₹') ? originalPrice : `₹${originalPrice}`}</span>
+      )}
+    </div>
+
+    <!-- Footer: CTA + share -->
+    <div class="m3-vcard__cta-row">
+      <!-- M3 Filled Button -->
+      <a href={url} target="_blank" rel="noopener noreferrer" class="m3-vcard__cta" style={`--m3-btn-color: ${platformColor};`}>
+        <span class="material-symbols-outlined" style="font-size:14px;font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 20;">shopping_cart</span>
+        Get Deal
+      </a>
+      <!-- M3 Outlined Icon Button: share -->
+      <button
+        class="m3-vcard__share deal-share-btn"
+        data-share-title={shareTitle}
+        data-share-url={shareUrl}
+        data-title={title}
+        data-image={image}
+        data-price={price}
+        data-original-price={originalPrice}
+        data-discount={smartDiscount}
+        data-url={url}
+        data-platform={platform}
+        data-loot={isDealLoot ? "true" : "false"}
+        data-slug={transitionSlug}
+        aria-label="Share deal"
+        type="button"
+      >
+        <span class="material-symbols-outlined" style="font-size:16px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 20;">share</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+(function () {
+  function initSkeletons() {
+    document.querySelectorAll('[data-skeleton-target]').forEach(function (img) {
+      const wrap = img.closest('.m3-vcard__img-wrap');
+      const skel = wrap && wrap.querySelector('.m3-skeleton');
+      if (!skel) return;
+      function dissolve() {
+        skel.classList.add('m3-skeleton--done');
+        img.removeEventListener('load', dissolve);
+        img.removeEventListener('error', dissolve);
+      }
+      if (img.complete && img.naturalWidth > 0) dissolve();
+      else {
+        img.addEventListener('load', dissolve, { once: true });
+        img.addEventListener('error', dissolve, { once: true });
+      }
+    });
+  }
+  document.addEventListener('astro:page-load', initSkeletons);
+  initSkeletons();
+}());
+</script>
+
+<style is:global>
+/* Styles moved to components.css */
+</style>
+

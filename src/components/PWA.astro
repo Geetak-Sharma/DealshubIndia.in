@@ -1,0 +1,376 @@
+---
+---
+
+<!-- ═══════════════════════════════════════════════════
+     PWA INSTALL BANNER + PULL-TO-REFRESH + SW REGISTER
+     ═══════════════════════════════════════════════════ -->
+
+<!-- Install Banner -->
+<div id="pwa-install-banner" class="pwa-banner" role="dialog" aria-label="Install app" aria-hidden="true">
+  <div class="pwa-banner__icon">
+    <img src="/images/icon-192.png" alt="DealsHub India" width="44" height="44" />
+  </div>
+  <div class="pwa-banner__text">
+    <span class="pwa-banner__title">Install DealsHub India</span>
+    <span class="pwa-banner__sub">Get instant loot alerts on your home screen</span>
+  </div>
+  <div class="pwa-banner__actions">
+    <button id="pwa-install-btn" class="pwa-banner__install" aria-label="Install app">Install</button>
+    <button id="pwa-dismiss-btn" class="pwa-banner__dismiss" aria-label="Dismiss install banner">✕</button>
+  </div>
+</div>
+
+<!-- Pull-to-Refresh Indicator -->
+<div id="ptr-indicator" class="ptr-indicator" aria-hidden="true" aria-live="polite">
+  <div class="ptr-spinner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+      <path d="M21 3v5h-5"/>
+      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+      <path d="M8 16H3v5"/>
+    </svg>
+  </div>
+  <span class="ptr-label">Pull to refresh</span>
+</div>
+
+<script is:inline>
+(function () {
+
+  /* ─── 1. SERVICE WORKER REGISTRATION ─── */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').then(function (reg) {
+        console.log('[SW] Registered, scope:', reg.scope);
+      }).catch(function (err) {
+        console.warn('[SW] Registration failed:', err);
+      });
+    });
+  }
+
+  /* ─── 2. PWA INSTALL BANNER ─── */
+  let deferredPrompt = null;
+  const banner  = document.getElementById('pwa-install-banner');
+  const installBtn = document.getElementById('pwa-install-btn');
+  const dismissBtn = document.getElementById('pwa-dismiss-btn');
+  const DISMISSED_KEY = 'dh_pwa_dismissed';
+
+  // Don't show if already dismissed within 7 days
+  function wasDismissed() {
+    try {
+      const ts = localStorage.getItem(DISMISSED_KEY);
+      if (!ts) return false;
+      return Date.now() - parseInt(ts) < 7 * 24 * 60 * 60 * 1000;
+    } catch { return false; }
+  }
+
+  function showBanner() {
+    if (!banner || wasDismissed()) return;
+    setTimeout(function () {
+      banner.classList.add('pwa-banner--visible');
+      banner.setAttribute('aria-hidden', 'false');
+    }, 3000); // Show after 3s on page
+  }
+
+  function hideBanner() {
+    if (!banner) return;
+    banner.classList.remove('pwa-banner--visible');
+    banner.setAttribute('aria-hidden', 'true');
+  }
+
+  // Capture install prompt
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    showBanner();
+  });
+
+  // Install button click
+  if (installBtn) {
+    installBtn.addEventListener('click', function () {
+      if (!deferredPrompt) return;
+      hideBanner();
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function (choice) {
+        if (choice.outcome === 'accepted') {
+          console.log('[PWA] User accepted install');
+        }
+        deferredPrompt = null;
+      });
+    });
+  }
+
+  // Dismiss button click
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', function () {
+      hideBanner();
+      try { localStorage.setItem(DISMISSED_KEY, Date.now().toString()); } catch {}
+    });
+  }
+
+  // Hide banner once app is installed
+  window.addEventListener('appinstalled', hideBanner);
+
+  /* ─── 3. PULL-TO-REFRESH ─── */
+  const indicator  = document.getElementById('ptr-indicator');
+  const label      = indicator ? indicator.querySelector('.ptr-label') : null;
+  const spinner    = indicator ? indicator.querySelector('.ptr-spinner') : null;
+
+  const THRESHOLD  = 80;   // px drag needed to trigger refresh
+  const MAX_PULL   = 120;  // max visual drag distance
+
+  let touchStartY  = 0;
+  let pulling      = false;
+  let refreshing   = false;
+
+  function canPull() {
+    // Only pull when at the very top AND on mobile
+    return window.scrollY <= 0 && window.innerWidth <= 900;
+  }
+
+  document.addEventListener('touchstart', function (e) {
+    if (!canPull()) return;
+    touchStartY = e.touches[0].clientY;
+    pulling = true;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', function (e) {
+    if (!pulling || refreshing || !indicator) return;
+    const dy = e.touches[0].clientY - touchStartY;
+    if (dy <= 0) { pulling = false; return; }
+
+    const clamped = Math.min(dy, MAX_PULL);
+    const progress = clamped / THRESHOLD; // 0 → 1+
+
+    // Show indicator
+    indicator.style.transform = `translateX(-50%) translateY(${Math.min(clamped * 0.7, 60)}px)`;
+    indicator.style.opacity = Math.min(progress, 1).toString();
+
+    if (spinner) {
+      spinner.style.transform = `rotate(${clamped * 2.5}deg)`;
+    }
+
+    if (label) {
+      label.textContent = dy >= THRESHOLD ? '↑ Release to refresh' : '↓ Pull to refresh';
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', function (e) {
+    if (!pulling || refreshing || !indicator) return;
+    pulling = false;
+
+    const dy = e.changedTouches[0].clientY - touchStartY;
+
+    if (dy >= THRESHOLD) {
+      // Trigger refresh!
+      refreshing = true;
+      if (label) label.textContent = 'Refreshing…';
+      if (spinner) {
+        spinner.style.animation = 'ptr-spin 0.6s linear infinite';
+      }
+      indicator.style.transform = 'translateX(-50%) translateY(48px)';
+      indicator.style.opacity = '1';
+
+      if (navigator.vibrate) navigator.vibrate(40);
+
+      // Actual reload after brief pause so animation is visible
+      setTimeout(function () { window.location.reload(); }, 700);
+    } else {
+      // Snap back
+      indicator.style.transform = 'translateX(-50%) translateY(-60px)';
+      indicator.style.opacity = '0';
+      if (spinner) spinner.style.transform = 'rotate(0deg)';
+      if (label) label.textContent = 'Pull to refresh';
+    }
+  }, { passive: true });
+
+  // Re-init on Astro page transitions
+  document.addEventListener('astro:page-load', function () {
+    if (indicator) {
+      indicator.style.transform = 'translateX(-50%) translateY(-60px)';
+      indicator.style.opacity = '0';
+    }
+    refreshing = false;
+    pulling    = false;
+  });
+
+}());
+</script>
+
+<style>
+  /* ═══ PWA INSTALL BANNER ═══ */
+  .pwa-banner {
+    position: fixed;
+    bottom: 90px; /* Sits above mobile dock */
+    left: 12px;
+    right: 12px;
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: rgba(15, 20, 30, 0.95);
+    backdrop-filter: blur(24px) saturate(2);
+    -webkit-backdrop-filter: blur(24px) saturate(2);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    border-radius: 18px;
+    box-shadow:
+      0 8px 32px rgba(0,0,0,0.5),
+      0 0 0 1px rgba(34,197,94,0.08),
+      0 0 30px rgba(34,197,94,0.08);
+
+    /* Hidden by default */
+    transform: translateY(20px);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                opacity 0.3s ease;
+  }
+
+  .pwa-banner--visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .pwa-banner__icon img {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+
+  .pwa-banner__text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .pwa-banner__title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #f0f2f5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .pwa-banner__sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .pwa-banner__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .pwa-banner__install {
+    background: #22C55E;
+    color: #021a0a;
+    font-weight: 800;
+    font-size: 12px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    box-shadow: 0 2px 12px rgba(34,197,94,0.4);
+  }
+
+  .pwa-banner__install:hover {
+    filter: brightness(1.1);
+    transform: scale(1.04);
+  }
+
+  .pwa-banner__dismiss {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.35);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: color 0.2s;
+    line-height: 1;
+  }
+
+  .pwa-banner__dismiss:hover {
+    color: rgba(255,255,255,0.7);
+  }
+
+  /* On desktop, banner is wider and centered */
+  @media (min-width: 769px) {
+    .pwa-banner {
+      bottom: 24px;
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%) translateY(20px);
+      width: 420px;
+    }
+    .pwa-banner--visible {
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
+  /* ═══ PULL-TO-REFRESH INDICATOR ═══ */
+  .ptr-indicator {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(-60px);
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: rgba(15, 20, 30, 0.9);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(34,197,94,0.2);
+    border-radius: 99px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    opacity: 0;
+    transition: none; /* Controlled by JS during drag */
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .ptr-spinner {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+
+  .ptr-spinner svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+  }
+
+  @keyframes ptr-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  .ptr-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.7);
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+  }
+
+  /* Only show pull-to-refresh on mobile */
+  @media (min-width: 901px) {
+    .ptr-indicator { display: none; }
+  }
+</style>

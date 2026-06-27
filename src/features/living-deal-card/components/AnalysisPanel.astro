@@ -1,0 +1,112 @@
+---
+import Card from "@/components/foundation/Card.astro";
+import Badge from "@/components/foundation/Badge.astro";
+import Text from "@/components/foundation/Text.astro";
+import Heading from "@/components/foundation/Heading.astro";
+import Price from "@/components/foundation/Price.astro";
+import Divider from "@/components/foundation/Divider.astro";
+import type { DealCardDTO } from "../dtos/DealCard.dto";
+
+interface Props {
+  deal: DealCardDTO;
+  class?: string;
+}
+
+const { deal, class: className = "" } = Astro.props;
+---
+
+<Card class={`flex flex-col gap-5 p-5 bg-card/50 backdrop-blur-sm border-muted ${className}`}>
+  {deal.ai && (
+    <>
+      <section class="space-y-2">
+        <Heading level={4} class="flex items-center justify-between text-sm uppercase tracking-wider text-muted-foreground">
+          <span class="flex items-center gap-2"><Badge variant="aiDecision" class="px-1.5 py-0.5 text-[10px]">AI</Badge> Analysis</span>
+          <Badge variant={deal.ai.confidenceScore > 90 ? 'success' : 'neutral'} class="text-[10px]">{deal.ai.confidenceScore}% Confidence</Badge>
+        </Heading>
+        <Text color="default" class="leading-relaxed text-sm font-medium">
+          {deal.ai.summary}
+        </Text>
+      </section>
+      <Divider class="opacity-50" />
+    </>
+  )}
+
+  {deal.flags.showCoupons && (
+    <>
+      <section class="space-y-3">
+        <Heading level={5} class="text-sm">Final Price Breakdown</Heading>
+        <div class="bg-muted/20 rounded-lg p-3 space-y-2 text-sm border border-border/50">
+          <div class="flex justify-between items-center">
+            <Text color="muted">Base Price</Text>
+            <Text weight="medium">{deal.pricing.basePriceFormatted}</Text>
+          </div>
+          {deal.pricing.couponFormatted && (
+            <div class="flex justify-between items-center">
+              <Text color="success">Coupon</Text>
+              <Text color="success" weight="medium">{deal.pricing.couponFormatted}</Text>
+            </div>
+          )}
+          {deal.pricing.bankOfferFormatted && (
+            <div class="flex justify-between items-center">
+              <Text color="success">Bank Offer</Text>
+              <Text color="success" weight="medium">{deal.pricing.bankOfferFormatted}</Text>
+            </div>
+          )}
+          <div class="pt-3 mt-1 border-t border-border/50 flex justify-between items-center">
+            <Text weight="bold" class="text-base">Effective Price</Text>
+            <Price formattedValue={deal.pricing.effectivePriceFormatted} size="default" />
+          </div>
+        </div>
+      </section>
+      <Divider class="opacity-50" />
+    </>
+  )}
+
+  {deal.flags.showAlternatives && deal.alternatives.length > 0 && (
+    <>
+      <section class="space-y-4">
+        <Heading level={5} class="text-sm">Consider These Alternatives</Heading>
+        <div class="space-y-3">
+          {deal.alternatives.map(alt => (
+            <a href="#" data-analytics-click="alternative_click" data-analytics-payload={`{"id":"${alt.id}"}`} class="flex gap-3 items-center group p-2 -mx-2 rounded-lg hover:bg-muted/30 transition-colors">
+              <div class="w-14 h-14 shrink-0 rounded-md bg-muted overflow-hidden border border-border/50">
+                <img src={alt.image} alt={alt.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy" />
+              </div>
+              <div class="flex-grow space-y-0.5">
+                <Heading level={6} class="line-clamp-1 group-hover:text-primary transition-colors text-sm">{alt.title}</Heading>
+                <div class="flex items-center gap-2">
+                  <Price formattedValue={alt.priceFormatted} size="sm" />
+                  <Text size="xs" color="muted" class="line-clamp-1 border-l border-border pl-2">{alt.reason}</Text>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+      <Divider class="opacity-50" />
+    </>
+  )}
+
+  {deal.flags.showMerchant && deal.merchant && (
+    <section class="space-y-3 bg-muted/10 rounded-lg p-3 border border-border/50">
+      <div class="flex items-center justify-between mb-2">
+        <Heading level={5} class="text-sm">Merchant Confidence</Heading>
+        {deal.merchant.trustLevel && (
+          <Badge variant={deal.merchant.trustLevel === 'High' ? 'success' : 'neutral'} class="px-1.5 py-0.5 text-[10px] uppercase">
+            {deal.merchant.trustLevel} Trust
+          </Badge>
+        )}
+      </div>
+      <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+        <div class="space-y-0.5">
+          <Text color="muted" size="xs">Sold By</Text>
+          <Text weight="medium" class="line-clamp-1">{deal.merchant.name}</Text>
+        </div>
+        <div class="space-y-0.5">
+          <Text color="muted" size="xs">Delivery</Text>
+          <Text weight="medium">{deal.merchant.deliveryEstimate}</Text>
+        </div>
+      </div>
+    </section>
+  )}
+</Card>

@@ -7,6 +7,7 @@ interface Props {
   ogTitle?: string;
   ogType?: string;
   canonical?: string;
+  image?: string;
 }
 
 const { 
@@ -14,12 +15,15 @@ const {
   description = "DealshubIndia.in: Best Loot Deals Since 2018. Scouring the internet for the biggest price drops from Amazon, Flipkart, Myntra & more.",
   ogTitle,
   ogType = "website",
-  canonical
+  canonical,
+  image
 } = Astro.props;
 
 const siteUrl = "https://dealshubindia.in";
 const currentCanonical = canonical || new URL(Astro.url.pathname, siteUrl).toString();
-const ogImage = new URL("/og-image.png", siteUrl).toString();
+const ogImage = image 
+  ? (image.startsWith('http') ? image : new URL(image, siteUrl).toString()) 
+  : new URL("/og-image.png", siteUrl).toString();
 ---
 
 <AstroSEO
@@ -49,6 +53,7 @@ const ogImage = new URL("/og-image.png", siteUrl).toString();
     meta: [
       { name: "viewport", content: "width=device-width, initial-scale=1.0" },
       { name: "generator", content: Astro.generator },
+      { name: "robots", content: "max-image-preview:large" },
     ],
     link: [
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },

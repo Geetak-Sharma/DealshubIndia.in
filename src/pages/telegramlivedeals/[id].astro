@@ -1,0 +1,289 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { TelegramDataStore } from '../../lib/telegramStore.js';
+
+// --- ENHANCEMENT: Switch to SSR for real-time accessibility ---
+export const prerender = false;
+
+const { id } = Astro.params;
+const data = TelegramDataStore.load();
+const post = data.posts.find(p => p.id === id);
+
+if (!post) {
+  return Astro.redirect('/404');
+}
+
+const formatDate = (ts) => {
+  return new Date(ts).toLocaleString('en-IN', { 
+    day: 'numeric', 
+    month: 'long', 
+    year: 'numeric',
+    hour: '2-digit', 
+    minute: '2-digit'
+  });
+};
+
+const pageTitle = `${post.title} | DealsHub India`;
+const pageDescription = post.text ? post.text.slice(0, 160) : post.title;
+---
+
+<Layout title={pageTitle} description={pageDescription} image={post.image}>
+  <main class="l-container u-py-8">
+    <!-- Blog-style Sub-Menu Bar -->
+    <div class="blog-sub-menu glass-panel">
+      <div class="sub-menu-left">
+        <a href="/telegramlivedeals" class="back-to-blog-btn">
+          <span class="arrow">←</span>
+          <span>Back to Live Stream</span>
+        </a>
+      </div>
+      <div class="sub-menu-right">
+        <span class="sub-meta-item category">LIVE DEAL</span>
+        <span class="sub-meta-sep mobile-hide">•</span>
+        <span class="sub-meta-item author mobile-hide">DEALSHUB TEAM</span>
+        <span class="sub-meta-sep mobile-hide">•</span>
+        <span class="sub-meta-item date mobile-hide">{formatDate(post.timestamp)}</span>
+      </div>
+    </div>
+
+    <div class="deal-detail-wrap glass-3d fade-in-up">
+       <div class="deal-main-card">
+          <div class="detail-header">
+             <div class="channel-info">
+                <div class="avatar">DH</div>
+                <div>
+                   <h2 class="u-text-lg u-font-bold u-text-white">DealsHub India</h2>
+                   <p class="u-text-xs u-text-secondary">{formatDate(post.timestamp)}</p>
+                </div>
+             </div>
+             {post.isLoot && <span class="loot-tag">🔥 VERIFIED LOOT</span>}
+          </div>
+
+          <div class="detail-content">
+             {post.image && (
+               <div class="detail-hero-img">
+                  <img src={post.image} alt={post.title} />
+               </div>
+             )}
+
+             <div class="detail-text-wrap u-mt-6">
+                <h1 class="u-text-3xl u-font-black u-text-white u-mb-4">{post.title}</h1>
+                
+                <div class="price-bubble u-mb-6">
+                   <span class="p-label">CURRENT PRICE</span>
+                   <span class="p-value">{post.price || 'Check Deal'}</span>
+                </div>
+
+                <div 
+                  class="telegram-formatted-text u-text-lg"
+                  dangerouslySetInnerHTML={{ __html: post.msgHtml || post.text }}
+                />
+
+                {post.aiContext && (
+                  <div class="detail-ai-block u-mt-8">
+                     <span class="ai-icon">🪄 AI INSIGHT</span>
+                     <p>{post.aiContext}</p>
+                  </div>
+                )}
+             </div>
+
+             <div class="detail-footer u-mt-10">
+                <a href={post.checkoutUrl || post.url} target="_blank" rel="noopener noreferrer" class="primary-checkout pulse-button">
+                   BUY NOW AT {post.platform.toUpperCase()}
+                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                </a>
+                
+                <a href={post.url} target="_blank" rel="noopener noreferrer" class="secondary-tg u-mt-4">
+                   VIEW SOURCE ON TELEGRAM
+                </a>
+                
+                <button
+                   type="button"
+                   class="deal-share-btn primary-checkout u-mt-4"
+                   data-title={post.title}
+                   data-image={post.image}
+                   data-price={post.price}
+                   data-platform={post.platform}
+                   data-loot={post.isLoot ? "true" : "false"}
+                   data-slug={post.id}
+                   style="background: rgba(255,255,255,0.06); color: white; border: 1px solid rgba(255,255,255,0.12); cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; font-size: 14px;"
+                >
+                   📢 SHARE DEAL SCREENSHOT
+                </button>
+             </div>
+          </div>
+       </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .post-layout {
+    padding-bottom: 4rem;
+  }
+  .l-container {
+    max-width: 900px !important;
+    overflow: visible !important;
+  }
+
+  .blog-sub-menu {
+    position: sticky;
+    top: 12px; /* Close to the top of screen after main header scrolls away */
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 16px;
+    margin: 0 auto 1.5rem auto;
+    max-width: 900px;
+    background: rgba(17, 24, 39, 0.85); /* Translucent dark glass */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-sizing: border-box;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    transition: background-color 0.3s ease;
+  }
+
+  .sub-menu-left {
+    display: flex;
+    align-items: center;
+  }
+
+  .sub-menu-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #94A3B8;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .sub-meta-item.category {
+    color: #22C55E;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    background: rgba(34, 197, 94, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .sub-meta-sep {
+    color: rgba(255, 255, 255, 0.15);
+  }
+
+  @media (max-width: 768px) {
+    .mobile-hide {
+      display: none !important;
+    }
+    .blog-sub-menu {
+      padding: 0.6rem 1rem;
+      margin-bottom: 1rem;
+    }
+    .sub-menu-right {
+      gap: 8px;
+    }
+  }
+
+  .back-to-blog-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 30px;
+    background: rgba(17, 24, 39, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94A3B8;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .back-to-blog-btn .arrow {
+    transition: transform 0.3s ease;
+    display: inline-block;
+  }
+
+  .back-to-blog-btn:hover {
+    color: #ffffff;
+    border-color: rgba(34, 197, 94, 0.4);
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.25);
+    transform: translateY(-1px) scale(1.02);
+  }
+
+  .back-to-blog-btn:hover .arrow {
+    transform: translateX(-4px);
+    color: #22C55E;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-weight: 800;
+    font-size: 13px;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    transition: color 0.3s;
+  }
+  .back-link:hover { color: #22C55E; }
+
+  .deal-detail-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    background: rgba(20, 25, 35, 0.7);
+    border-radius: 32px;
+    padding: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+  .channel-info { display: flex; align-items: center; gap: 16px; }
+  .avatar { width: 52px; height: 52px; background: #0088cc; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; }
+  
+  .loot-tag { background: #EF4444; color: white; font-size: 11px; font-weight: 900; padding: 6px 16px; border-radius: 99px; }
+
+  .detail-hero-img { border-radius: 20px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.05); }
+  .detail-hero-img img { width: 100%; height: auto; object-fit: contain; max-height: 500px; }
+
+  .price-bubble { display: inline-flex; flex-direction: column; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); padding: 12px 30px; border-radius: 16px; }
+  .p-label { font-size: 10px; font-weight: 800; color: #22C55E; opacity: 0.7; letter-spacing: 1px; }
+  .p-value { font-size: 32px; font-weight: 900; color: #39FF14; }
+
+  .telegram-formatted-text { line-height: 1.8; color: rgba(255, 255, 255, 0.9); }
+  
+  .detail-ai-block { background: rgba(57, 255, 20, 0.03); border-left: 4px solid #39FF14; padding: 24px; border-radius: 0 20px 20px 0; }
+  .ai-icon { font-size: 11px; font-weight: 900; color: #39FF14; display: block; margin-bottom: 8px; }
+
+  .primary-checkout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: #39FF14;
+    color: #000;
+    height: 64px;
+    border-radius: 20px;
+    font-weight: 900;
+    font-size: 18px;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+  .primary-checkout:hover { transform: scale(1.02); box-shadow: 0 20px 40px rgba(57, 255, 20, 0.3); }
+
+  .secondary-tg { display: block; text-align: center; color: var(--text-secondary); font-size: 12px; font-weight: 700; text-decoration: none; }
+  .secondary-tg:hover { color: #0088cc; }
+
+  @media (max-width: 640px) {
+    .deal-detail-wrap { padding: 20px; }
+    .price-bubble { width: 100%; text-align: center; }
+  }
+</style>

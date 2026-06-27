@@ -1,0 +1,116 @@
+---
+export const prerender = false; // Enable SSR for dynamic meta tags
+import Layout from '../../layouts/Layout.astro';
+import SEO from '../../components/SEO.astro';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+const { id } = Astro.params;
+
+// 1. Fetch deal data from cache with robust path resolution
+let deal = null;
+try {
+  // Use fileURLToPath for absolute path resolution that works in Node SSR
+  const cacheURL = new URL('../../data/deals_cache.json', import.meta.url);
+  const cacheData = await fs.readFile(cacheURL, 'utf-8');
+  const { deals } = JSON.parse(cacheData);
+  deal = deals.find(d => d.id === id);
+} catch (e) {
+  console.error(`[Deal Route] Fetch failed for ID ${id}:`, e.message);
+}
+
+// 2. Redirect URL
+const homeRedirectUrl = `/?dealId=${id}`;
+
+// 3. SEO Metadata configuration
+const title = deal ? `${deal.title} - ${deal.price}` : "DealshubIndia.in: Best Loot Deals";
+const description = deal ? `Don't miss out! Get ${deal.title} for ${deal.price}. Verified by DealsHub India.` : "Discover the latest loot deals and offers in India.";
+---
+
+<Layout title={title} description={description} ogTitle={title} image={deal?.image}>
+  
+  <div class="redirect-container">
+    <div class="glass-panel">
+      <h2>🚀 Fetching your deal...</h2>
+      <p>Redirecting you to the latest loots on Dealshub India. One moment please!</p>
+      
+      {deal && (
+        <div class="deal-preview">
+          <img src={deal.image} alt={deal.title} />
+          <div class="deal-meta">
+            <h3>{deal.title}</h3>
+            <span class="price">{deal.price}</span>
+          </div>
+        </div>
+      )}
+      
+      <a href={homeRedirectUrl} class="manual-btn">Open Homepage</a>
+    </div>
+  </div>
+
+  <script define:vars={{ homeRedirectUrl }}>
+    // Perform instant redirect
+    window.location.href = homeRedirectUrl;
+  </script>
+
+  <style>
+    .redirect-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top right, #001a1a 0%, #000 70%);
+      padding: 20px;
+      color: white;
+      text-align: center;
+    }
+    .glass-panel {
+      max-width: 500px;
+      padding: 40px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .deal-preview {
+      margin: 30px 0;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      display: flex;
+      gap: 15px;
+      text-align: left;
+      align-items: center;
+    }
+    .deal-preview img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+    .deal-meta h3 {
+      font-size: 14px;
+      margin: 0 0 5px 0;
+      opacity: 0.9;
+    }
+    .price {
+      font-weight: 800;
+      color: #22C55E;
+    }
+    .manual-btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 24px;
+      background: #22C55E;
+      color: black;
+      font-weight: 700;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: transform 0.2s;
+    }
+    .manual-btn:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</Layout>

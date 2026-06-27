@@ -1,0 +1,80 @@
+---
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import fs from 'fs';
+import path from 'path';
+
+// This page is strictly for local dev. In production, we'd return a 404.
+const isProd = import.meta.env.PROD;
+if (isProd) {
+  return new Response(null, { status: 404, statusText: 'Not found' });
+}
+
+const budgetPath = path.resolve('./performance-budgets.json');
+let budgets = {};
+try {
+  budgets = JSON.parse(fs.readFileSync(budgetPath, 'utf8'));
+} catch (e) {}
+
+const reportPath = path.resolve('./docs/reports/build-report.md');
+let buildReport = 'No report found. Run `npm run build` first.';
+try {
+  buildReport = fs.readFileSync(reportPath, 'utf8');
+} catch (e) {}
+---
+
+<Layout title="Developer Dashboard - ES-004">
+  <main class="dashboard-container">
+    <h1>ES-004 Local Developer Dashboard</h1>
+    <p>This dashboard is for local development only and returns 404 in production.</p>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Performance Budgets</h2>
+        <pre>{JSON.stringify(budgets, null, 2)}</pre>
+      </div>
+
+      <div class="card">
+        <h2>Latest Build Report</h2>
+        <pre>{buildReport}</pre>
+      </div>
+
+      <div class="card">
+        <h2>Lazy Features</h2>
+        <p>Check the browser console to see hydration marks for active Lazy Features.</p>
+        <button onclick="console.table(performance.getEntriesByType('measure').filter(e => e.name.includes('LazyFeature')))">Print Hydration Marks</button>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    font-family: system-ui, sans-serif;
+  }
+  h1 { color: #f0f2f5; margin-bottom: 8px; }
+  p { color: #94a3b8; margin-bottom: 24px; }
+  
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  
+  .card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  
+  .card h2 { color: #fff; font-size: 1.2rem; margin-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 8px; }
+  pre { background: #0f172a; padding: 16px; border-radius: 6px; color: #a5b4fc; font-size: 0.9rem; overflow-x: auto; white-space: pre-wrap; }
+  button {
+    background: #3b82f6; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;
+  }
+  button:hover { background: #2563eb; }
+</style>

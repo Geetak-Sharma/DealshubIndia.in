@@ -1,0 +1,245 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const directoryLinks = [
+  { label: '🔥 Live Deals Feed', href: '/livedeals', desc: 'Real-time verified price drops & loot offers' },
+  { label: '🛒 Quick Commerce', href: '/quick-commerce', desc: 'Groceries, food delivery & coupon trackers' },
+  { label: '📚 Shopping Blog & Guides', href: '/blog', desc: 'Money-saving hacks, CC guides & sale analysis' },
+  { label: '🔍 Flipkart Review Analyzer', href: '/tools/flipkart-review-analyzer', desc: 'Verify product review authenticity with AI' },
+  { label: '🏢 About Dealshub', href: '/about', desc: 'Who we are & how we verify deals' },
+  { label: '📞 Contact Support', href: '/contact', desc: 'Get in touch for questions or business' },
+  { label: '⚖️ Affiliate Disclosure', href: '/disclosure', desc: 'Transparency & commission info' },
+  { label: '🛡️ DMCA Protection Policy', href: '/dmca', desc: 'Copyright protection & takedown requests' }
+];
+---
+
+<Layout title="404: Page Not Found | DealshubIndia">
+  <main class="error-page">
+    <div class="error-container">
+      
+      <!-- Icon/Illustration Area -->
+      <div class="illustration-box">
+        <div class="glowing-orb"></div>
+        <div class="error-number">404</div>
+      </div>
+
+      <!-- Text Content -->
+      <div class="error-content">
+        <h1 class="error-title">Lost in the Deal-verse?</h1>
+        <p class="error-subtitle">
+          The page you are looking for has expired or moved. Explore our directory below to find the best live loots and saving tools!
+        </p>
+      </div>
+
+      <!-- Website Directory Map Grid -->
+      <div class="directory-section">
+        <h2 class="directory-title">Explore Dealshub Directory</h2>
+        <div class="directory-grid">
+          {directoryLinks.map((link) => (
+            <a href={link.href} class="directory-card">
+              <div class="directory-label">{link.label}</div>
+              <div class="directory-desc">{link.desc}</div>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <!-- CTAs -->
+      <div class="error-actions">
+        <a href="/" class="btn-primary">
+          <span class="pulse-dot"></span>
+          Back to Homepage
+        </a>
+      </div>
+
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .error-page {
+    min-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+    color: #f1f5f9;
+    padding: 4rem 1.5rem;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  .error-container {
+    max-width: 720px;
+    width: 100%;
+    text-align: center;
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+    border-radius: 28px;
+    padding: 3rem 2rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Decorative glow */
+  .illustration-box {
+    position: relative;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .glowing-orb {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: pulseOrb 4s infinite alternate;
+  }
+
+  .error-number {
+    font-size: 4.5rem;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 10px rgba(16, 185, 129, 0.2));
+    z-index: 1;
+  }
+
+  @keyframes pulseOrb {
+    0% { transform: scale(0.95); opacity: 0.7; }
+    100% { transform: scale(1.05); opacity: 1; }
+  }
+
+  /* Content */
+  .error-content {
+    margin-bottom: 2.5rem;
+  }
+
+  .error-title {
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+
+  .error-subtitle {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    line-height: 1.55;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  /* Directory Grid */
+  .directory-section {
+    margin-bottom: 2.5rem;
+    text-align: left;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 2rem;
+  }
+
+  .directory-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+
+  .directory-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  @media (min-width: 600px) {
+    .directory-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .directory-card {
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    text-decoration: none;
+    transition: all 0.25s;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .directory-card:hover {
+    border-color: rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.04);
+    transform: translateY(-1px);
+  }
+
+  .directory-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .directory-card:hover .directory-label {
+    color: #34d399;
+  }
+
+  .directory-desc {
+    font-size: 0.72rem;
+    color: #64748b;
+    line-height: 1.4;
+  }
+
+  /* Actions */
+  .error-actions {
+    display: flex;
+    justify-content: center;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #020617;
+    font-weight: 800;
+    font-size: 0.85rem;
+    border: none;
+    border-radius: 12px;
+    padding: 0.8rem 2rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+  }
+
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    background-color: #020617;
+    border-radius: 50%;
+    animation: flashDot 1.5s infinite alternate;
+  }
+
+  @keyframes flashDot {
+    0% { opacity: 0.3; }
+    100% { opacity: 1; }
+  }
+</style>

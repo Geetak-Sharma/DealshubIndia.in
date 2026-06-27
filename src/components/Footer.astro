@@ -1,0 +1,73 @@
+---
+import BrandLogo from './BrandLogo.astro';
+---
+
+<footer class="w-full bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800/80 transition-colors duration-200" aria-labelledby="footer-heading">
+  <h2 id="footer-heading" class="sr-only">Site Footer</h2>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+    
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 mb-12">
+      
+      {/* Brand Profile */}
+      <div class="space-y-3">
+        <a href="/" class="flex items-center gap-2.5 group decoration-transparent" aria-label="DealsHub India Home">
+          <BrandLogo size={28} gradientId="footer-logo-grad" />
+          <span class="text-base font-black tracking-tight text-slate-800 dark:text-slate-100 uppercase">
+            DealsHub<span class="text-emerald-600">India</span>
+          </span>
+        </a>
+        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+          India's trusted hub for verified online discounts. Monitoring prices daily since 2018.
+        </p>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold rounded-lg border border-emerald-100 dark:border-emerald-900/30">
+          🛡️ 100% Verified Deals Only
+        </div>
+      </div>
+
+      {/* Nav links */}
+      <div>
+        <h3 class="text-xs font-bold text-slate-800 dark:text-slate-100 tracking-widest uppercase mb-3">Nav</h3>
+        <ul class="flex flex-wrap gap-x-4 gap-y-2 md:block md:space-y-2.5 text-xs text-slate-500 dark:text-slate-400 font-semibold">
+          <li><a href="/" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Latest Deals</a></li>
+          <li><a href="/livedeals" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Live Alerts</a></li>
+          <li><a href="/blog" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Insights Blog</a></li>
+          <li><a href="/about" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Our Mission</a></li>
+        </ul>
+      </div>
+
+      {/* Networks */}
+      <div>
+        <h3 class="text-xs font-bold text-slate-800 dark:text-slate-100 tracking-widest uppercase mb-3">Networks</h3>
+        <ul class="flex flex-wrap gap-x-4 gap-y-2 md:block md:space-y-2.5 text-xs text-slate-500 dark:text-slate-400 font-semibold">
+          <li><a href="https://whatsapp.com/channel/0029Va8sOrp4SpkEQKVElV1i" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">WhatsApp Alerts</a></li>
+          <li><a href="https://t.me/DealsHubIndiaa" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Telegram Alerts</a></li>
+          <li><a href="https://www.instagram.com/dealshubindia.in" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Instagram</a></li>
+          <li><a href="https://www.youtube.com/@geetaksharma" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">YouTube</a></li>
+        </ul>
+      </div>
+
+      {/* Disclosures & Legal */}
+      <div>
+        <h3 class="text-xs font-bold text-slate-800 dark:text-slate-100 tracking-widest uppercase mb-3">Legal</h3>
+        <ul class="flex flex-wrap gap-x-4 gap-y-2 md:block md:space-y-2.5 text-xs text-slate-500 dark:text-slate-400 font-semibold">
+          <li><a href="/disclosure" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Paid Disclosure</a></li>
+          <li><a href="/dmca" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">DMCA Policy</a></li>
+          <li><a href="/privacy" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Privacy Notice</a></li>
+          <li><a href="/contact" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Get in Touch</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    {/* Affiliate Disclosure Strip */}
+    <div class="pt-8 border-t border-slate-200 dark:border-slate-800 text-[10px] text-slate-400 dark:text-slate-600 leading-relaxed text-center max-w-3xl mx-auto space-y-2">
+      <p>
+        <strong>Affiliate Disclosure:</strong> DealshubIndia.in is a participant in affiliate advertising programs (including Amazon Services LLC Associates Program, Flipkart, Ajio, and Myntra programs) designed to provide a means for sites to earn advertising fees by advertising and linking to online storefronts. When you click outbound deals links, we may earn a small qualifying commission at no additional cost to you. Thank you for supporting our independent platform!
+      </p>
+      <p class="font-bold">
+        &copy; {new Date().getFullYear()} DealshubIndia.in &middot; Curated with ❤️ in Amritsar, India 🇮🇳
+      </p>
+    </div>
+
+  </div>
+</footer>

@@ -22,6 +22,11 @@ export function normalizeFlipkartReview(raw: any, index: number): NormalizedRevi
   const isVerified = !!raw.isVerified;
   const helpfulCount = parseInt(raw.helpfulCount, 10) || 0;
 
+  const location = trimOrEmpty(raw.location) || '';
+
+  const permalink = trimOrEmpty(raw.permalink) || '';
+  const images = Array.isArray(raw.images) ? raw.images.map(String).filter(Boolean) : [];
+
   return {
     id: raw.id || `review-${index}-${Date.now()}`,
     title,
@@ -31,6 +36,9 @@ export function normalizeFlipkartReview(raw: any, index: number): NormalizedRevi
     date,
     isVerified,
     helpfulCount,
+    ...(location ? { location } : {}),
+    ...(permalink ? { permalink } : {}),
+    ...(images.length > 0 ? { images } : {}),
   };
 }
 

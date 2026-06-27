@@ -1,0 +1,25 @@
+---
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/utils/cn";
+
+const textVariants = cva("text-foreground", {
+  variants: {
+    size: { xs: "text-xs", sm: "text-sm", base: "text-base", lg: "text-lg" },
+    weight: { regular: "font-normal", medium: "font-medium", semibold: "font-semibold", bold: "font-bold" },
+    color: { default: "text-foreground", muted: "text-muted-foreground", success: "text-success", danger: "text-danger" },
+    align: { left: "text-left", center: "text-center", right: "text-right" },
+  },
+  defaultVariants: { size: "base", weight: "regular", color: "default", align: "left" },
+});
+
+interface Props extends VariantProps<typeof textVariants> {
+  as?: "p" | "span" | "div";
+  class?: string;
+  [key: string]: any;
+}
+
+const { size, weight, color, align, as: Component = "p", class: className, ...rest } = Astro.props;
+---
+<Component class={cn(textVariants({ size, weight, color, align }), className)} {...rest}>
+  <slot />
+</Component>

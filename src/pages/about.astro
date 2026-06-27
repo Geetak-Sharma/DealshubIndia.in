@@ -1,18 +1,241 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import StickyFooter from '../components/StickyFooter.astro';
+import FlashTicker from '../components/FlashTicker.astro';
+import PageSubHeader from '../components/PageSubHeader.astro';
+
+// We'll use a custom structure for the About page to make it more visually engaging
 ---
 
-<Layout title="About Us | DealsHub India">
-  <main class="prose reveal">
-    <h1 class="text-5xl mb-12">About Us</h1>
-    <p class="font-bold text-xl mb-8">Back in 2018, DealsHub was initially started from a WhatsApp group as a team of dedicated bargain hunters.</p>
-    <p>We are a team that scours the internet to bring you the best deals and discounts on a wide range of products—from fashion and beauty to home and garden, we cover it all. Our goal is simple: to help you save money on the things you love. We do the legwork, so you don’t have to.</p>
-    <p>We search high and low for discounts, coupons, and promotions, and compile them all in one convenient place for you. We are constantly updating our website with the latest deals and offers, so be sure to check back often. Thank you for visiting DealsHub. Happy shopping!</p>
-    
-    <div class="mt-16 pt-8 border-t border-gray-100">
-      <a href="/" class="text-whatsapp-green font-bold text-sm tracking-widest uppercase no-underline hover:opacity-80 transition-opacity">&larr; Back to Home</a>
-    </div>
-  </main>
-  <StickyFooter />
+<Layout title="About Us | DealsHub India" description="DealsHub India: Dedicated to helping people save their hard-earned money by finding the most genuine deals and price drops.">
+  <div class="about-page-wrapper">
+
+    <main class="about-container relative z-10">
+      <div class="glass-panel fade-in">
+        <header class="about-header section-spacing">
+          <span class="category-badge">Since 2018</span>
+          <h1 class="about-h1">Saving Your Hard-Earned Money</h1>
+          <p class="about-lead">We do the legwork to find genuine price drops, so you don’t have to.</p>
+        </header>
+
+        <section class="story-section section-spacing">
+          <div class="content-max-width centered">
+            <h2 class="about-h2">The Mission Behind the Hunt</h2>
+            <p>DealsHub started with a simple observation: the internet is full of deals, but finding the ones that actually save you money is harder than it looks. We began as a small group of shoppers who were tired of seeing "fake sales" and manufactured hype.</p>
+            <p>Our goal is straightforward: to help people save their hard-earned money. We believe that everyone deserves to get the best value for every rupee they spend. Whether it's a major appliance or a daily essential, if there's a way to pay less, we'll find it and share it with you.</p>
+          </div>
+        </section>
+
+        <section class="pillars-section section-spacing">
+          <div class="content-max-width centered">
+            <h2 class="about-h2">Our Approach</h2>
+            <div class="pillars-grid">
+              <div class="pillar-card">
+                <div class="pillar-icon">🔍</div>
+                <h3>Honest Research</h3>
+                <p>We monitor prices across various platforms to ensure the deals we share represent a genuine saving.</p>
+              </div>
+              <div class="pillar-card">
+                <div class="pillar-icon">🛡️</div>
+                <h3>Hype Filtering</h3>
+                <p>We filter out the noise and only share offers that we would personally use.</p>
+              </div>
+              <div class="pillar-card">
+                <div class="pillar-icon">🚀</div>
+                <h3>Real-Time Alerts</h3>
+                <p>We provide instant updates through our community channels so you never miss a loot.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="about-cta-section section-spacing">
+          <div class="cta-block glass-panel--inner">
+            <h2 class="about-h2 u-mt-0">Join our Community</h2>
+            <p>Get instant alerts on verified price drops and save more on every purchase.</p>
+            <div class="cta-buttons">
+              <a href="https://t.me/DealsHubIndiaa" id="about-telegram-channel-btn" class="c-btn c-btn--primary telegram">Telegram Channel</a>
+              <a href="https://whatsapp.com/channel/0029Va8sOrp4SpkEQKVElV1i" id="about-whatsapp-channel-btn" class="c-btn c-btn--primary whatsapp">WhatsApp Channel</a>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
 </Layout>
+
+<style is:global>
+  .about-page-wrapper {
+    min-height: 100vh;
+    background-color: var(--bg-color);
+    color: #94A3B8;
+  }
+
+  .about-container {
+    max-width: 68rem;
+    margin: 3rem auto;
+    padding: 0 1.5rem;
+  }
+  
+  @media (min-width: 768px) {
+    .about-container {
+      margin: 6rem auto;
+    }
+  }
+
+  .section-spacing {
+    margin-bottom: 6rem;
+  }
+
+  .content-max-width {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .centered {
+    text-align: center;
+  }
+
+  .glass-panel {
+    background-color: rgba(19, 23, 32, 0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 2rem 1.5rem;
+    border-radius: 2rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+  }
+
+  @media (min-width: 768px) {
+    .glass-panel {
+      padding: 5rem;
+    }
+  }
+
+  .category-badge {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ADE80;
+    padding: 6px 16px;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    display: inline-block;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+  }
+
+  .about-h1 {
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    font-weight: 900;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+  }
+
+  .about-lead {
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
+    color: #94A3B8;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .about-h2 {
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    font-weight: 900;
+    color: #ffffff;
+    margin-bottom: 2rem;
+    letter-spacing: -0.02em;
+  }
+
+  .text-content p, .centered p {
+    margin-bottom: 2rem;
+    line-height: 1.8;
+    font-size: 1.15rem;
+    color: #CBD5E1;
+  }
+
+  .pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .pillar-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 2.5rem 1.5rem;
+    border-radius: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+  }
+
+  .pillar-card:hover {
+    transform: translateY(-10px);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(34, 197, 94, 0.3);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+  }
+
+  .pillar-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    display: inline-block;
+  }
+
+  .pillar-card h3 {
+    color: #ffffff;
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+  }
+
+  .pillar-card p {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 0;
+    color: #94A3B8;
+  }
+
+  .cta-buttons {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-top: 3rem;
+    flex-wrap: wrap;
+  }
+
+  .c-btn {
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+  }
+
+  .c-btn.telegram { background: #0088cc !important; box-shadow: 0 4px 14px rgba(0, 136, 204, 0.3); }
+  .c-btn.whatsapp { background: #25d366 !important; box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3); }
+
+  .c-btn:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+  }
+
+  .back-link {
+    color: #4ADE80;
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-decoration: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .back-link:hover {
+    opacity: 0.8;
+  }
+</style>
+

@@ -1,48 +1,58 @@
-import { getCollection } from 'astro:content';
+import { getCachedDeals, getCacheMeta, startScraper, fetchAndCacheDeals } from '../../lib/scraper.js';
 
-export const prerender = false; // Force SSR
+// Boot the scraper poller whenever this API is initialized by the Node process
+startScraper();
 
-export async function GET() {
-  try {
-    let deals = await getCollection('deals');
-    
-    // Sort deals by date (Newest First)
-    deals.sort((a, b) => {
-      const dateA = a.data.date instanceof Date ? a.data.date.getTime() : 0;
-      const dateB = b.data.date instanceof Date ? b.data.date.getTime() : 0;
-      return dateB - dateA;
-    });
+export const GET = async ({ url }) => {
+  const limit = parseInt(url.searchParams.get('limit') || '24');
+  const page = parseInt(url.searchParams.get('page') || '1');
+  const customOffset = url.searchParams.get('offset');
+  const offset = customOffset !== null ? parseInt(customOffset) : (page - 1) * limit;
 
-    if (!deals || deals.length === 0) {
-      return new Response(JSON.stringify({ 
-        message: "No deals found in content collection",
-        timestamp: new Date().toISOString() 
-      }), { status: 200, headers: { "Content-Type": "application/json" } });
+  let allDeals = getCachedDeals();
+
+  if (allDeals.length === 0) {
+    try {
+      await fetchAndCacheDeals();
+      allDeals = getCachedDeals();
+    } catch(err) {
+      console.error(err);
     }
-
-    // Map to simplified JSON for serializability
-    const payload = deals.map(d => ({
-      id: d.id,
-      slug: d.slug,
-      title: d.data.title,
-      price: d.data.price,
-      originalPrice: d.data.originalPrice,
-      link: d.data.link,
-      category: d.data.category,
-      image: d.data.image,
-      isLoot: d.data.isLoot,
-      date: d.data.date instanceof Date ? d.data.date.toISOString() : new Date().toISOString()
-    }));
-
-    return new Response(JSON.stringify(payload), {
-      status: 200,
-      headers: { 
-        "Content-Type": "application/json",
-        "Cache-Control": "public, max-age=60"
-      }
-    });
-  } catch (error) {
-    console.error("[SERVER ERROR]:", error);
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
-}
+
+  // Fallback deal if completely empty
+  if (allDeals.length === 0) {
+    allDeals.push({
+      id: "manual-deal-1", title: "🔥 MEGA DEAL: Local Setup Works!",
+      url: "https://t.me/DealsHubIndiaa", platform: "Telegram",
+      price: "₹0", priceNum: 0, category: "other", originalPrice: "₹999",
+      discount: "100%", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/512px-Telegram_logo.svg.png",
+      badge: "🔥 Super Loot", timestamp: Date.now(), isLoot: true
+    });
+  }
+
+  const { lastUpdated } = getCacheMeta();
+  const totalSavingsToday = allDeals.reduce((sum, deal) => {
+    const savings = (deal.originalPriceNum || 0) - (deal.priceNum || 0);
+    return sum + (savings > 0 ? savings : 0);
+  }, 0);
+
+  // Paginate
+  const paginatedDeals = allDeals.slice(offset, offset + limit);
+
+  return new Response(JSON.stringify({
+    deals: paginatedDeals,
+    total: allDeals.length,
+    page,
+    limit,
+    totalPages: Math.ceil(allDeals.length / limit),
+    lastUpdated,
+    totalSavingsToday
+  }), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "public, max-age=60"
+    }
+  });
+};

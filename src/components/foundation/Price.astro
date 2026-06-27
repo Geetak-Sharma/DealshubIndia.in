@@ -1,0 +1,29 @@
+---
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/utils/cn";
+
+const priceVariants = cva("font-bold tracking-tight", {
+  variants: {
+    size: { sm: "text-sm", default: "text-xl", lg: "text-3xl" },
+    variant: {
+      default: "text-foreground",
+      strike: "text-muted-foreground line-through decoration-muted-foreground/50 font-medium",
+      success: "text-success",
+    },
+  },
+  defaultVariants: { size: "default", variant: "default" },
+});
+
+interface Props extends VariantProps<typeof priceVariants> {
+  formattedValue: string;
+  class?: string;
+  [key: string]: any;
+}
+
+const { formattedValue, size, variant, class: className, ...rest } = Astro.props;
+const isStrike = variant === "strike";
+---
+<span class={cn(priceVariants({ size, variant }), className)} {...rest}>
+  <span class="sr-only">{isStrike ? "Original price is" : "Current price is"} {formattedValue}</span>
+  <span aria-hidden="true">{formattedValue}</span>
+</span>

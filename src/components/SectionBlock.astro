@@ -2,16 +2,25 @@
 export interface Props {
   title: string;
   icon?: string;
+  actionUrl?: string;
+  actionLabel?: string;
 }
 
-const { title, icon } = Astro.props;
+const { title, icon, actionUrl, actionLabel } = Astro.props;
 ---
 
 <section class="l-section">
   <div class="l-container">
-    <div class="section-header u-flex u-items-center u-mb-3">
-      {icon && <span class="section-icon">{icon}</span>}
-      <h2 class="section-title">{title}</h2>
+    <div class="section-header">
+      <div class="section-header-title">
+        {icon && <span class="section-icon">{icon}</span>}
+        <h2 class="section-title">{title}</h2>
+      </div>
+      {actionUrl && (
+        <a href={actionUrl} class="section-action-link">
+          {actionLabel || 'View All'} &rarr;
+        </a>
+      )}
     </div>
     
     <div class="l-grid">
@@ -22,7 +31,34 @@ const { title, icon } = Astro.props;
 
 <style>
   .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+  
+  .section-header-title {
+    display: flex;
+    align-items: center;
     gap: 12px;
+  }
+
+  .section-action-link {
+    display: flex;
+    align-items: center;
+    padding: 6px 14px;
+    background: rgba(139, 92, 246, 0.1);
+    color: #A78BFA; 
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+  }
+  .section-action-link:hover {
+    background: rgba(139, 92, 246, 0.2);
+    transform: scale(1.05);
   }
 
   .section-icon {

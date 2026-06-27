@@ -1,6 +1,5 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import StickyHeader from '../../components/StickyHeader.astro';
 import ReviewList from '../../components/ReviewList.astro';
 import { getCollection, getEntry } from 'astro:content';
 
@@ -17,7 +16,6 @@ const { title, price, link, image, date } = deal.data;
 ---
 
 <Layout title={`${title} - Dealshub India`}>
-  <StickyHeader />
   
   <main class="container">
     <nav class="breadcrumb">

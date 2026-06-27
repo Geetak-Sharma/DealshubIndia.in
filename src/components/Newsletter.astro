@@ -1,0 +1,210 @@
+---
+---
+<section class="newsletter-section glass-panel u-my-6">
+  <div class="newsletter-inner">
+    <div class="newsletter-content">
+      <div class="newsletter-icon">📬</div>
+      <h2 class="newsletter-title">Join the <span class="u-text-green">Loot Alert</span> List</h2>
+      <p class="newsletter-desc">Get the best price-drop alerts, secret coupons, and shopping hacks delivered once a week. No spam, just pure loots.</p>
+    </div>
+    
+    <form class="newsletter-form" id="newsletter-form">
+      <div class="input-group">
+        <input 
+          type="email" 
+          id="newsletter-email" 
+          placeholder="Enter your email" 
+          required 
+          class="newsletter-input"
+        />
+        <button type="submit" class="newsletter-btn">
+          <span>JOIN NOW</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        </button>
+      </div>
+      <p class="newsletter-privacy">Join 10k+ subscribers. Unsubscribe anytime.</p>
+    </form>
+    
+    <div id="newsletter-success" class="newsletter-success" style="display: none;">
+      <div class="success-icon">✅</div>
+      <h3>You're on the list!</h3>
+      <p>Check your inbox for a special welcome guide.</p>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('newsletter-form');
+    const success = document.getElementById('newsletter-success');
+    
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('newsletter-email').value;
+        
+        // Visual feedback
+        const btn = form.querySelector('.newsletter-btn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span>SUBMITTING...</span>';
+        btn.disabled = true;
+
+        // Mock API call
+        setTimeout(() => {
+          form.style.display = 'none';
+          success.style.display = 'block';
+        }, 1000);
+      });
+    }
+  });
+</script>
+
+<style>
+  .newsletter-section {
+    padding: 3rem 2rem;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(11, 14, 20, 0.8) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  [data-theme='light'] .newsletter-section {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(255, 255, 255, 0.9) 100%);
+    border-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .newsletter-inner {
+    max-width: 800px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    align-items: center;
+    text-align: center;
+  }
+
+  @media (min-width: 768px) {
+    .newsletter-inner {
+      grid-template-columns: 1.2fr 1fr;
+      text-align: left;
+    }
+  }
+
+  .newsletter-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .newsletter-title {
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 0.75rem;
+    line-height: 1.1;
+  }
+
+  .newsletter-desc {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    line-height: 1.5;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  @media (min-width: 480px) {
+    .input-group {
+      flex-direction: row;
+      gap: 0;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.03);
+    }
+  }
+
+  [data-theme='light'] .input-group {
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  .newsletter-input {
+    flex: 1;
+    padding: 16px 20px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 15px;
+    outline: none;
+    transition: all 0.3s ease;
+  }
+
+  @media (min-width: 480px) {
+    .newsletter-input {
+      border: none;
+      border-radius: 0;
+    }
+  }
+
+  .newsletter-input:focus {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .newsletter-btn {
+    padding: 16px 24px;
+    background: #22C55E;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+  }
+
+  @media (min-width: 480px) {
+    .newsletter-btn {
+      border-radius: 0;
+    }
+  }
+
+  .newsletter-btn:hover {
+    background: #16a34a;
+    transform: scale(1.02);
+  }
+
+  .newsletter-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  .newsletter-privacy {
+    margin-top: 12px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .newsletter-success {
+    text-align: center;
+    padding: 1rem;
+    animation: fadeIn 0.5s ease both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .success-icon {
+    font-size: 3rem;
+    margin-bottom: 0.75rem;
+  }
+</style>

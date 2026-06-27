@@ -1,0 +1,27 @@
+---
+import Heading from "@/components/foundation/Heading.astro";
+import Text from "@/components/foundation/Text.astro";
+import LivingDealCard from "@/features/living-deal-card/LivingDealCard.astro";
+import AppShell from "@/layouts/AppShell.astro";
+import { buildDealCardData } from "@/features/living-deal-card/services/DealCardService";
+
+// Service will be updated to consume Platform SDK inside DealCardService later
+const deal = await buildDealCardData("product_123");
+---
+
+<AppShell title="Infrastructure Layer V1 - Living Deal Card">
+  <header class="bg-background/80 backdrop-blur-md border-b px-6 py-8 mb-8 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div>
+        <Heading level={1} class="text-2xl">Infrastructure V1</Heading>
+        <Text color="muted" size="sm" class="mt-1">AppShell • Cache • SDK • Request Pipeline</Text>
+      </div>
+    </div>
+  </header>
+  
+  <div class="max-w-7xl mx-auto px-6 w-full">
+    <div class="max-w-sm mx-auto">
+      <LivingDealCard deal={deal} />
+    </div>
+  </div>
+</AppShell>

@@ -43,28 +43,7 @@ export async function isImageCleanOCR(imageUrl) {
       'coolztricks',
       '@desidime',
       '@dealbee',
-      '@coolztricks',
-      'grand total',
-      'order total',
-      'order successful',
-      'payment successful',
-      'checkout',
-      'place order',
-      'deliver to',
-      'select address',
-      'total amount',
-      'total payable',
-      'payment details',
-      'bill details',
-      'coupon applied',
-      'promo applied',
-      'payment options',
-      'cart',
-      'cashback savings',
-      'marketplace fee',
-      'delivery fee',
-      'bill amount',
-      'invoice'
+      '@coolztricks'
     ];
 
     const hasBranding = blacklist.some(term => lower.includes(term));
@@ -77,5 +56,53 @@ export async function isImageCleanOCR(imageUrl) {
     console.error(`[OCR-WARN] OCR execution failed for ${imageUrl.slice(0, 50)}...:`, e.message);
     // Safe default: if OCR fails to load/read, fallback to true so we don't block valid images
     return true;
+  }
+}
+
+/**
+ * Runs OCR on the image URL or local path to extract text details
+ * @param {string} imageUrlOrPath The URL or local path of the image to scan
+ * @returns {Promise<string>} Extracted text
+ */
+export async function extractTextFromImage(imageUrlOrPath) {
+  if (!imageUrlOrPath || typeof imageUrlOrPath !== 'string') return '';
+  try {
+    let buffer;
+    if (imageUrlOrPath.startsWith('/uploads/')) {
+      const fsModule = await import('fs');
+      const pathModule = await import('path');
+      const { fileURLToPath } = await import('url');
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = pathModule.dirname(__filename);
+      
+      const localDir = pathModule.resolve(__dirname, '../public');
+      const serverDir = pathModule.resolve(__dirname, '../../client');
+      const baseDir = fsModule.existsSync(serverDir) ? serverDir : localDir;
+      const absoluteImagePath = pathModule.join(baseDir, imageUrlOrPath);
+      
+      if (fsModule.existsSync(absoluteImagePath)) {
+        buffer = fsModule.readFileSync(absoluteImagePath);
+      } else {
+        return '';
+      }
+    } else {
+      const response = await axios({
+        method: 'GET',
+        url: imageUrlOrPath,
+        responseType: 'arraybuffer',
+        timeout: 5000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+        }
+      });
+      buffer = Buffer.from(response.data);
+    }
+
+    if (!buffer) return '';
+    const result = await Tesseract.recognize(buffer, 'eng');
+    return result?.data?.text || '';
+  } catch (e) {
+    console.error(`[OCR-TEXT-EXTRACT-WARN] Extraction failed for ${imageUrlOrPath.slice(0, 50)}...:`, e.message);
+    return '';
   }
 }

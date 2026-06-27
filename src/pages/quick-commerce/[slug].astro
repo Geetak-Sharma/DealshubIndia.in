@@ -5,6 +5,7 @@ import Layout from '../../layouts/Layout.astro';
 import { QCDataStore } from '../../lib/qcStore.js';
 import { startQCScraper } from '../../lib/qcScraper.js';
 import FloatingWhatsApp from '../../components/FloatingWhatsApp.astro';
+import { formatTimeAgo } from '../../lib/qc/normalizeDeal';
 
 // Boot scraper when any deal page is hit
 startQCScraper();
@@ -126,11 +127,17 @@ const canonicalUrl = `https://dealshubindia.in/quick-commerce/${slug}`;
                 <span>{deal.merchantEmoji}</span>
                 <span>{deal.merchant || 'Quick Commerce'}</span>
               </span>
-              <span class="qcd-time">🕒 {deal.timeAgo}</span>
+              <span class="qcd-time">🕒 {formatTimeAgo(deal.timestamp)}</span>
             </div>
 
             <!-- Title (h1 for SEO) -->
             <h1 class="qcd-title">{deal.title}</h1>
+
+            {deal.explanation && (
+              <div class="qcd-ai" style="margin-top: 8px;">
+                <span>✨ <b>Why it's a good deal:</b> {deal.explanation}</span>
+              </div>
+            )}
 
             <!-- Badges -->
             <div class="qcd-badges">
@@ -201,13 +208,15 @@ const canonicalUrl = `https://dealshubindia.in/quick-commerce/${slug}`;
                 </button>
               )}
               <button
-                class="qcd-btn qcd-btn--share"
-                id="share-btn"
+                class="qcd-btn qcd-btn--share deal-share-btn"
                 data-id={deal.id}
                 data-title={deal.title}
                 data-slug={deal.slug}
-                data-coupon={deal.couponCode || ''}
-                data-aicontext={deal.aiContext || ''}
+                data-image={deal.image}
+                data-price={deal.finalPrice}
+                data-discount={deal.discount}
+                data-platform={deal.merchant}
+                data-loot={deal.isLoot ? "true" : "false"}
               >
                 📢 Share Deal
               </button>
@@ -374,7 +383,7 @@ const canonicalUrl = `https://dealshubindia.in/quick-commerce/${slug}`;
 
   document.addEventListener('astro:page-load', () => {
     initCopyButtons();
-    initShareButton();
+
     initNoLinkButton();
   });
   initCopyButtons();
