@@ -1,0 +1,71 @@
+---
+// LiveStatBar — shows pulsing live indicator + deal count credibility line
+// No emojis, no props needed — static credibility signal
+---
+
+<div class="lsb">
+  <span class="lsb__live">
+    <span class="lsb__dot" aria-hidden="true"></span>
+    Live
+  </span>
+  <span class="lsb__sep" aria-hidden="true">·</span>
+  <span class="lsb__stat">50+ deals</span>
+  <span class="lsb__sep" aria-hidden="true">·</span>
+  <span class="lsb__stat">Updated every few minutes</span>
+</div>
+
+<style>
+  .lsb {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    padding: 5px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    background: var(--surface-color);
+    box-shadow: var(--shadow-sm);
+    letter-spacing: 0.1px;
+  }
+
+  .lsb__live {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #16a34a;
+  }
+
+  [data-theme='dark'] .lsb__live {
+    color: #22C55E;
+  }
+
+  .lsb__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #22C55E;
+    flex-shrink: 0;
+    animation: lsbPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes lsbPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
+  .lsb__sep {
+    color: var(--border-color);
+    font-weight: bold;
+    user-select: none;
+  }
+
+  .lsb__stat {
+    color: var(--text-secondary);
+  }
+</style>

@@ -1,0 +1,183 @@
+---
+// CommunityJoinSection — pure Astro, no Svelte dependency
+// 4 network cards with inline SVG icons (brand-accurate), benefit line, CTA link
+
+const networks = [
+  {
+    name: "WhatsApp",
+    href: "https://whatsapp.com/channel/0029Va8sOrp4SpkEQKVElV1i",
+    color: "#25D366",
+    benefit: "Instant deal alerts. Be the first to know.",
+    cta: "Join Channel",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>`,
+  },
+  {
+    name: "Telegram",
+    href: "https://t.me/DealsHubIndiaa",
+    color: "#0088cc",
+    benefit: "Live deal thread. Active community, real-time drops.",
+    cta: "Join Group",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.891 8.146l-2.103 9.917c-.159.709-.579.887-1.175.55l-3.204-2.359-1.545 1.488c-.171.171-.315.315-.644.315l.23-3.268 5.948-5.375c.258-.23-.057-.357-.401-.122l-7.35 4.629-3.164-1.009c-.688-.216-.701-.689.144-1.02l12.37-4.767c.571-.216 1.07.126.864 1.022z"/></svg>`,
+  },
+  {
+    name: "Instagram",
+    href: "https://www.instagram.com/dealshubindia.in",
+    color: "#E1306C",
+    benefit: "Visual deal cards. Swipe through the best drops.",
+    cta: "Follow",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.17.054 1.805.249 2.227.412.558.217.957.477 1.377.896.419.42.679.819.896 1.377.164.422.359 1.057.412 2.227.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.054 1.17-.249 1.805-.412 2.227-.217.558-.477.957-.896 1.377-.42.419-.819.679-1.377.896-.422.164-1.057.359-2.227.412-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.17-.054-1.805-.249-2.227-.412-.558-.217-.957-.477-1.377-.896-.419-.42-.679-.819-.896-1.377-.164-.422-.359-1.057-.412-2.227-.058-1.266-.07-1.646-.07-4.85s.012-3.584.07-4.85c.054-1.17.249-1.805.412-2.227.217-.558.477-.957.896-1.377.42-.419.819-.679 1.377-.896.422-.164 1.057-.359 2.227-.412 1.266-.058 1.646-.07 4.85-.07zm0-2.163c-3.259 0-3.667.014-4.947.072-1.277.057-2.15.26-2.914.557-.79.306-1.459.717-2.126 1.384-.667.667-1.078 1.336-1.384 2.126-.296.764-.499 1.637-.557 2.914-.059 1.28-.073 1.688-.073 4.947s.014 3.667.072 4.947c.057 1.277.26 2.15.557 2.914.306.79.717 1.459 1.384 2.126.667.667 1.336 1.078 2.126 1.384.764.296 1.637.499 2.914.557 1.28.059 1.688.073 4.947.073s3.667-.014 4.947-.072c1.277-.057 2.15-.26 2.914-.557.79-.306 1.459-.717 2.126-1.384.667-.667 1.078-1.336 1.384-2.126.296-.764.499-1.637.557-2.914.059-1.28.073-1.688.073-4.947-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.791-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.209-1.791 4-4 4zm6.406-11.845c.796 0 1.441.645 1.441 1.44s-.645 1.44-1.441 1.44c-.795 0-1.44-.645-1.44-1.44s.645-1.44 1.44-1.44z"/></svg>`,
+  },
+  {
+    name: "YouTube",
+    href: "https://www.youtube.com/@geetaksharma",
+    color: "#FF0000",
+    benefit: "Deep-dive reviews and tech buying guides.",
+    cta: "Subscribe",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186c-.272-1.023-1.078-1.83-2.102-2.102C19.53 3.68 12 3.68 12 3.68s-7.53 0-9.396.404c-1.024.272-1.83 1.079-2.102 2.102-.404 1.866-.404 5.75-.404 5.75s0 3.884.404 5.75c.272 1.024 1.078 1.83 2.102 2.102 1.866.405 9.396.405 9.396.405s7.53 0 9.396-.405c1.024-.272 1.83-1.078 2.102-2.102.404-1.866.404-5.75.404-5.75s0-3.884-.404-5.75zM9.597 14.85V7.022l6.404 3.914-6.404 3.914z"/></svg>`,
+  },
+];
+---
+
+<section class="cjs" aria-labelledby="cjs-heading">
+  <div class="cjs__header">
+    <h2 class="cjs__heading" id="cjs-heading">Stay in the Loop</h2>
+    <p class="cjs__sub">Get alerts before deals sell out. Join on your preferred platform.</p>
+  </div>
+
+  <div class="cjs__grid">
+    {networks.map(n => (
+      <a 
+        href={n.href} 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        class="cjs__card"
+        style={`--network-color: ${n.color}`}
+        aria-label={`${n.cta} on ${n.name}`}
+      >
+        <div class="cjs__icon" set:html={n.icon} />
+        <div class="cjs__info">
+          <span class="cjs__name">{n.name}</span>
+          <span class="cjs__benefit">{n.benefit}</span>
+        </div>
+        <span class="cjs__cta">{n.cta} →</span>
+      </a>
+    ))}
+  </div>
+</section>
+
+<style>
+  .cjs {
+    margin-top: var(--spacing-5);
+    padding-top: var(--spacing-4);
+    border-top: 1px solid var(--border-color);
+  }
+
+  .cjs__header {
+    margin-bottom: var(--spacing-3);
+  }
+
+  .cjs__heading {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
+  }
+
+  .cjs__sub {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  .cjs__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  @media (min-width: 480px) {
+    .cjs__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 900px) {
+    .cjs__grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .cjs__card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    position: relative;
+  }
+
+  .cjs__card:hover {
+    border-color: var(--network-color);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--network-color) 15%, transparent);
+    transform: translateY(-2px);
+  }
+
+  .cjs__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--network-color);
+    background: color-mix(in srgb, var(--network-color) 10%, transparent);
+  }
+
+  .cjs__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .cjs__name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .cjs__benefit {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (max-width: 900px) {
+    .cjs__benefit {
+      white-space: normal;
+    }
+  }
+
+  .cjs__cta {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--network-color);
+    white-space: nowrap;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.18s ease;
+  }
+
+  .cjs__card:hover .cjs__cta {
+    opacity: 1;
+  }
+</style>

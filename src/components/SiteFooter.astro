@@ -1,0 +1,146 @@
+---
+// SiteFooter — shared footer for all pages
+// Extracted from index.astro inline footer with copy/link fixes
+---
+
+<footer class="sf">
+  <div class="l-container">
+    <div class="sf__grid">
+      <!-- Brand -->
+      <div class="sf__col sf__col--brand">
+        <a href="/" class="sf__brand" aria-label="DealshubIndia Home">
+          DealshubIndia<span class="sf__accent">.in</span>
+        </a>
+        <p class="sf__tagline">Handpicked deals from Amazon, Flipkart & more. Since 2018.</p>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="sf__col">
+        <h3 class="sf__heading">Navigate</h3>
+        <nav aria-label="Footer navigation">
+          <a href="/" class="sf__link">Latest Deals</a>
+          <a href="/livedeals" class="sf__link">Live Deals Archive</a>
+          <a href="/qc" class="sf__link">Quick Commerce</a>
+          <a href="/blog" class="sf__link">Blog</a>
+        </nav>
+      </div>
+
+      <!-- Community -->
+      <div class="sf__col">
+        <h3 class="sf__heading">Community</h3>
+        <nav aria-label="Community links">
+          <a href="https://whatsapp.com/channel/0029Va8sOrp4SpkEQKVElV1i" target="_blank" rel="noopener noreferrer" class="sf__link">WhatsApp Channel</a>
+          <a href="https://t.me/DealsHubIndiaa" target="_blank" rel="noopener noreferrer" class="sf__link">Telegram Group</a>
+          <a href="https://www.instagram.com/dealshubindia.in" target="_blank" rel="noopener noreferrer" class="sf__link">Instagram</a>
+          <a href="https://www.youtube.com/@geetaksharma" target="_blank" rel="noopener noreferrer" class="sf__link">YouTube</a>
+        </nav>
+      </div>
+
+      <!-- Trust -->
+      <div class="sf__col">
+        <h3 class="sf__heading">Trust & Legal</h3>
+        <p class="sf__text">Deals verified by our community scouts. Prices change fast — always check before buying.</p>
+        <nav aria-label="Legal links">
+          <a href="/disclosure" class="sf__link">Affiliate Disclaimer</a>
+          <a href="/dmca" class="sf__link">DMCA & Policy</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="sf__bottom">
+      <p class="sf__copy">Made for deal hunters in India &nbsp;&middot;&nbsp; &copy; {new Date().getFullYear()} DealshubIndia.in</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .sf {
+    margin-top: var(--spacing-6);
+    padding: var(--spacing-5) 0 var(--spacing-4);
+    border-top: 1px solid var(--border-color);
+    background-color: var(--surface-color);
+  }
+
+  .sf__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-4);
+    padding-bottom: var(--spacing-4);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-3);
+  }
+
+  @media (min-width: 600px) {
+    .sf__grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (min-width: 960px) {
+    .sf__grid { grid-template-columns: 2fr 1fr 1fr 1.5fr; }
+  }
+
+  .sf__col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .sf__brand {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-primary);
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 4px;
+  }
+
+  .sf__accent {
+    color: var(--primary-color);
+  }
+
+  .sf__tagline {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    max-width: 240px;
+    margin: 0;
+  }
+
+  .sf__heading {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 4px 0;
+  }
+
+  .sf__link {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    line-height: 1.6;
+    display: block;
+    transition: color 0.15s ease;
+  }
+
+  .sf__link:hover {
+    color: var(--primary-color);
+  }
+
+  .sf__text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    margin: 0 0 6px 0;
+  }
+
+  .sf__bottom {
+    text-align: center;
+  }
+
+  .sf__copy {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+</style>

@@ -1,0 +1,45 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import SEO from '../components/SEO.astro';
+import '../styles/base.css';
+import '../styles/layout.css';
+import '../styles/components.css';
+import '../styles/utilities.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  class?: string;
+}
+
+const { 
+  title, 
+  description = "DealshubIndia.in: Best Loot Deals Since 2018. Scouring the internet for the biggest price drops.",
+  class: className = '' 
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <SEO title={title} description={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <ClientRouter />
+    
+    <script is:inline>
+      // Blocking script to prevent theme flash
+      (function() {
+        const savedTheme = localStorage.getItem('theme');
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme || systemTheme);
+      })();
+    </script>
+  </head>
+  <body class:list={["min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary/20", className]}>
+    <slot />
+  </body>
+</html>
