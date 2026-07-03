@@ -152,7 +152,7 @@ export default function SearchBar() {
           <input
             ref={inputRef}
             type="text"
-            className="bs-form-control"
+            id="deals-search" className="bs-form-control"
             placeholder="Search loots..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}

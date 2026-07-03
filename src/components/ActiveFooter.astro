@@ -1,0 +1,183 @@
+﻿---
+// ActiveFooter.astro - Reusable global footer for DealsHub India
+import BrandLogo from "./BrandLogo.astro";
+---
+
+<footer class="site-footer" aria-labelledby="footer-heading">
+  <h2 id="footer-heading" class="sr-only">Site Footer</h2>
+  <div class="site-footer__inner">
+    <div class="site-footer__grid">
+      {/* Column 1: Brand & Bio */}
+      <div class="site-footer__col site-footer__col--brand">
+        <a href="/" class="footer-brand" aria-label="DealsHub India Home">
+          DealsHub<span class="footer-brand__accent">India</span>
+        </a>
+        <p class="footer-tagline">
+          India&apos;s trusted independent directory for verified online shopping drops and deals. Saving you money daily since 2018.
+        </p>
+        <div class="footer-badge">
+          🛡️ 100% Verified Community Scouted
+        </div>
+      </div>
+
+      {/* Column 2: Navigate */}
+      <div class="site-footer__col">
+        <h3 class="footer-heading">Explore</h3>
+        <nav class="footer-links" aria-label="Footer Nav Links">
+          <a href="/" class="footer-link">Latest Drops</a>
+          <a href="/livedeals" class="footer-link">Live Alerts</a>
+          <a href="/quick-commerce" class="footer-link">Quick Commerce</a>
+          <a href="/blog" class="footer-link">Insights Blog</a>
+          <a href="/about" class="footer-link">Our Story</a>
+        </nav>
+      </div>
+
+      {/* Column 3: Community channels */}
+      <div class="site-footer__col">
+        <h3 class="footer-heading">Join Us</h3>
+        <nav class="footer-links" aria-label="Footer Community Links">
+          <a href="https://whatsapp.com/channel/0029Va8sOrp4SpkEQKVElV1i" target="_blank" rel="noopener noreferrer" class="footer-link">WhatsApp Channel</a>
+          <a href="https://t.me/DealsHubIndia" target="_blank" rel="noopener noreferrer" class="footer-link">Telegram Alerts</a>
+          <a href="https://www.instagram.com/dealshubindia.in" target="_blank" rel="noopener noreferrer" class="footer-link">Instagram feed</a>
+          <a href="https://www.youtube.com/@geetaksharma" target="_blank" rel="noopener noreferrer" class="footer-link">YouTube Guides</a>
+        </nav>
+      </div>
+
+      {/* Column 4: Legal / Policies */}
+      <div class="site-footer__col">
+        <h3 class="footer-heading">Legal</h3>
+        <nav class="footer-links" aria-label="Footer Legal Links">
+          <a href="/disclosure" class="footer-link">Affiliate Disclosure</a>
+          <a href="/dmca" class="footer-link">DMCA Notice</a>
+          <a href="/privacy" class="footer-link">Privacy Policy</a>
+          <a href="/contact" class="footer-link">Get in Touch</a>
+        </nav>
+      </div>
+    </div>
+
+    {/* Affiliate disclaimer disclosure strip */}
+    <div class="site-footer__disclaimer">
+      <p>
+        <strong>Affiliate Disclaimer:</strong> DealshubIndia.in is a participant in affiliate advertising programs (including Amazon Services LLC Associates, Flipkart, Ajio, and Myntra programs) designed to provide a means to earn advertising fees by linking to storefronts. Outbound links may earn us commissions at no additional cost to you.
+      </p>
+      <p class="copyright-text">
+        &copy; {new Date().getFullYear()} DealsHub India. Handcrafted in India. All rights reserved.
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    width: 100%;
+    background-color: var(--surface-color);
+    border-top: 1px solid var(--border-color);
+    padding: var(--spacing-4) 0;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .site-footer__inner {
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 0 var(--spacing-2);
+  }
+
+  .site-footer__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-3);
+    margin-bottom: var(--spacing-4);
+  }
+
+  @media (min-width: 600px) {
+    .site-footer__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 900px) {
+    .site-footer__grid {
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: var(--spacing-4);
+    }
+  }
+
+  .site-footer__col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .footer-brand {
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--text-primary);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: -0.2px;
+  }
+
+  .footer-brand__accent {
+    color: var(--primary-color);
+  }
+
+  .footer-tagline {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    max-width: 280px;
+  }
+
+  .footer-badge {
+    align-self: flex-start;
+    padding: 6px 12px;
+    background-color: var(--surface-color-hover);
+    border: 1px solid var(--border-color);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+  }
+
+  .footer-heading {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .footer-link {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .footer-link:hover {
+    color: var(--primary-color);
+  }
+
+  .site-footer__disclaimer {
+    border-top: 1px solid var(--border-color);
+    padding-top: var(--spacing-3);
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .copyright-text {
+    margin-top: 12px;
+    font-weight: 700;
+  }
+</style>

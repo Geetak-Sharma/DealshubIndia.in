@@ -15,11 +15,7 @@ interface Props {
   insightBadge?: string;
 }
 
-const {
-  title,
-  image,
-  price,
-  originalPrice,
+function cleanTitle(str: string): string { if (!str) return ""; let val = str.replace(/#\w+/gi, ""); val = val.replace(/sale\s*-/gi, ""); return val.replace(/\s+/g, " ").trim(); } function cleanPriceString(pStr: string): string { if (!pStr) return ""; let cleaned = String(pStr).replace(/[₹\s]/g, "").trim(); if (cleaned.startsWith("₹")) { cleaned = cleaned.substring(1).trim(); } return cleaned; } const { title: rawTitle, image, price: rawPrice, originalPrice: rawOriginalPrice,
   discountPercent,
   offerHighlight,
   url,
@@ -64,7 +60,7 @@ function getPlatformColor(p: string): string {
   }
 }
 
-const platformColor = getPlatformColor(platform);
+const title = cleanTitle(rawTitle); const price = cleanPriceString(rawPrice); const originalPrice = rawOriginalPrice ? cleanPriceString(rawOriginalPrice) : undefined; const platformColor = getPlatformColor(platform);
 const hasImage = image && !image.includes('dummyimage') && !image.includes('placehold');
 
 const transitionSlug = url
@@ -199,9 +195,9 @@ else if (isAjio) { storeLogo = 'https://www.google.com/s2/favicons?sz=64&domain=
       {isDealLoot && (
         <span class="material-symbols-outlined" style="font-size:16px;font-variation-settings:'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 20;color:#F2B8B5;">local_fire_department</span>
       )}
-      <span class="m3-vcard__price">{price.includes('₹') ? price : `₹${price}`}</span>
+      <span class="m3-vcard__price">{price ? "₹" + price : "Check Price"}</span>
       {originalPrice && originalPrice !== price && (
-        <span class="m3-vcard__orig">{originalPrice.includes('₹') ? originalPrice : `₹${originalPrice}`}</span>
+        <span class="m3-vcard__orig">{originalPrice ? "₹" + originalPrice : ""}</span>
       )}
     </div>
 
@@ -210,7 +206,7 @@ else if (isAjio) { storeLogo = 'https://www.google.com/s2/favicons?sz=64&domain=
       <!-- M3 Filled Button -->
       <a href={url} target="_blank" rel="noopener noreferrer" class="m3-vcard__cta" style={`--m3-btn-color: ${platformColor};`}>
         <span class="material-symbols-outlined" style="font-size:14px;font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 20;">shopping_cart</span>
-        Get Deal
+        View Deal
       </a>
       <!-- M3 Outlined Icon Button: share -->
       <button

@@ -1,1 +1,7 @@
-export default new Map();
+
+import __ASTRO_IMAGE_IMPORT_2e5Rsy from "../../assets/images/amazon_prime_trick_header.jpg?astroContentImageFlag=&importer=src%2Fcontent%2Fblog%2Ffree-amazon-prime-shopping-edition.md";
+import __ASTRO_IMAGE_IMPORT_1z62oY from "../../assets/images/blog/amazon-prime-day-vs-flipkart-goat-sale-2026.jpg?astroContentImageFlag=&importer=src%2Fcontent%2Fblog%2Famazon-prime-day-vs-flipkart-goat-sale-2026.md";
+import __ASTRO_IMAGE_IMPORT_18emM3 from "../../assets/images/blog/flipkart-june-epic-sale-2026.png?astroContentImageFlag=&importer=src%2Fcontent%2Fblog%2Fflipkart-june-epic-sale-2026.md";
+import __ASTRO_IMAGE_IMPORT_Z23vSku from "../../assets/images/blog/telegram-not-working-india.png?astroContentImageFlag=&importer=src%2Fcontent%2Fblog%2Ftelegram-not-working-india.md";
+export default new Map([["../../assets/images/amazon_prime_trick_header.jpg?astroContentImageFlag=&importer=src%2Fcontent%2Fblog%2Ffree-amazon-prime-shopping-edition.md", __ASTRO_IMAGE_IMPORT_2e5Rsy], ["../../assets/images/blog/amazon-prime-day-vs-flipkart-goat-sale-2026.jpg?astroContentImageFlag=&importer=src%2Fcontent%2Fblog%2Famazon-prime-day-vs-flipkart-goat-sale-2026.md", __ASTRO_IMAGE_IMPORT_1z62oY], ["../../assets/images/blog/flipkart-june-epic-sale-2026.png?astroContentImageFlag=&importer=src%2Fcontent%2Fblog%2Fflipkart-june-epic-sale-2026.md", __ASTRO_IMAGE_IMPORT_18emM3], ["../../assets/images/blog/telegram-not-working-india.png?astroContentImageFlag=&importer=src%2Fcontent%2Fblog%2Ftelegram-not-working-india.md", __ASTRO_IMAGE_IMPORT_Z23vSku]]);
+		

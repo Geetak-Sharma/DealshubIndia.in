@@ -169,9 +169,7 @@ export default function TelegramFeed({ hideSearch = false, showTitle = false, is
   }, [page]);
 
   // 5. Client Rendering Logic
-  const filteredDeals = useMemo(() => {
-    return deals;
-  }, [deals]);
+  const cleanTitle = (str: string) => { if (!str) return ""; let val = str.replace(/#\w+/gi, ""); val = val.replace(/sale\s*-/gi, ""); return val.replace(/\s+/g, " ").trim(); }; const cleanPriceString = (pStr: string) => { if (!pStr) return ""; let cleaned = String(pStr).replace(/[₹\s]/g, "").trim(); if (cleaned.startsWith("₹")) { cleaned = cleaned.substring(1).trim(); } return cleaned; }; const filteredDeals = useMemo(() => { const seen = new Set(); const unique = deals.filter(item => { const titleKey = cleanTitle(item.title || "").toLowerCase().replace(/\s+/g, ""); const linkKey = (item.url || "").trim(); const dedupeKey = titleKey + "|" + linkKey; if (seen.has(dedupeKey)) { return false; } seen.add(dedupeKey); return true; }); return unique.map(item => { const cleanPrice = cleanPriceString(item.price); const cleanOriginal = item.originalPrice ? cleanPriceString(item.originalPrice) : undefined; return { ...item, title: cleanTitle(item.title), price: cleanPrice ? "₹" + cleanPrice : "Check Price", originalPrice: cleanOriginal ? "₹" + cleanOriginal : undefined }; }); }, [deals]);
 
   const SkeletonCard = () => (
     <div className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm flex flex-col md:flex-row gap-4 animate-pulse">
@@ -319,16 +317,16 @@ export default function TelegramFeed({ hideSearch = false, showTitle = false, is
                     {isDealLoot && (
                       <span className="material-symbols-outlined" style={{fontSize:'16px', fontVariationSettings:"'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 20", color:'#F2B8B5'}}>local_fire_department</span>
                     )}
-                    <span className="m3-vcard__price">{deal.price.includes('₹') ? deal.price : `₹${deal.price}`}</span>
+                    <span className="m3-vcard__price">{deal.price}</span>
                     {deal.originalPrice && deal.originalPrice !== deal.price && (
-                      <span className="m3-vcard__orig">{deal.originalPrice.includes('₹') ? deal.originalPrice : `₹${deal.originalPrice}`}</span>
+                      <span className="m3-vcard__orig">{deal.originalPrice}</span>
                     )}
                   </div>
 
                   <div className="m3-vcard__cta-row">
                     <a href={deal.url} target="_blank" rel="noopener noreferrer" className="m3-vcard__cta" style={{'--m3-btn-color': platformColor} as React.CSSProperties}>
                       <span className="material-symbols-outlined" style={{fontSize:'14px', fontVariationSettings:"'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 20"}}>shopping_cart</span>
-                      Get Deal
+                      View Deal
                     </a>
                     <button
                       className="m3-vcard__share deal-share-btn"

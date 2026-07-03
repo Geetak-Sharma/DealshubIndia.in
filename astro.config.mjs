@@ -6,7 +6,7 @@ import node from '@astrojs/node';
 
 export default defineConfig({
   site: 'https://dealshubindia.in',
-  integrations: [sitemap(), /*react(),*/ svelte()],
+  integrations: [sitemap(), react(), svelte()],
   output: 'server',
   adapter: node({ mode: 'standalone' }),
   vite: {

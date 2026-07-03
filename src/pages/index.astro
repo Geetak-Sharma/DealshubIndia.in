@@ -1,17 +1,18 @@
 ---
 export const prerender = false;
-import { getCollection } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import StickyHeader from '../components/StickyHeader.astro';
-import FloatingWhatsApp from '../components/FloatingWhatsApp.astro';
-import StructuredData from '../components/StructuredData.astro';
-import LiveStatBar from '../components/home/LiveStatBar.astro';
-import HomeDealCard from '../components/home/HomeDealCard.astro';
-import CommunityJoinSection from '../components/home/CommunityJoinSection.astro';
-import SiteFooter from '../components/SiteFooter.astro';
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import FloatingWhatsApp from "../components/FloatingWhatsApp.astro";
+import StructuredData from "../components/StructuredData.astro";
+import HomeHero from "../components/home/HomeHero.astro";
+import CategoryStrip from "../components/home/CategoryStrip.astro";
+import HomeDealCard from "../components/ActiveDealCard.astro";
+import CommunityJoinSection from "../components/home/CommunityJoinSection.astro";
+import SiteFooter from "../components/ActiveFooter.astro";
 
 // Fetch static deals for SSR / SEO
-const deals = await getCollection('deals');
+const deals = await getCollection("deals");
 deals.sort((a, b) => {
   const da = a.data.date instanceof Date ? a.data.date.getTime() : 0;
   const db = b.data.date instanceof Date ? b.data.date.getTime() : 0;
@@ -19,53 +20,40 @@ deals.sort((a, b) => {
 });
 ---
 
-<BaseLayout title="DealshubIndia.in — Best Deals & Offers in India Today">
-  <StickyHeader />
+<BaseLayout title="DealsHubIndia.in — Best Deals &amp; Offers in India Today">
+  <SiteHeader />
 
   <main id="main-content">
+    {/* ===== HERO ===== */}
+    <div class="l-container">
+      <HomeHero />
+    </div>
 
-    <!-- ===== HERO ===== -->
-    <section class="home-hero" aria-labelledby="hero-heading">
-      <div class="l-container hero-inner">
-        <div class="hero-stat">
-          <LiveStatBar />
-        </div>
-        <h1 class="hero-heading" id="hero-heading">
-          Best Deals &amp; Offers<br />
-          <span class="hero-heading__accent">in India</span>
-        </h1>
-        <p class="hero-sub">
-          Handpicked price drops from Amazon, Flipkart &amp; more — verified by our community since 2018.
-        </p>
-      </div>
-    </section>
+    {/* ===== CATEGORY FILTER STRIP ===== */}
+    <CategoryStrip />
 
-    <!-- ===== DEAL FEED ===== -->
+    {/* ===== DEAL FEED ===== */}
     <div class="l-container">
       <section class="deals-section" aria-labelledby="deals-heading">
-
         <div class="deals-section__header">
           <h2 class="section-label" id="deals-heading">Latest Drops</h2>
           <span class="section-count" id="deals-count" aria-live="polite"></span>
         </div>
 
-        <!-- No-results state (shown by JS when search/filter yields nothing) -->
+        {/* No-results state (shown by JS when search/filter yields nothing) */}
         <div id="no-search-results" class="no-results" style="display:none" role="status">
           <p>No deals match your filter. Try another category or clear the search.</p>
         </div>
 
-        <!-- Live deal grid — hydrated client-side -->
+        {/* Live deal grid — hydrated client-side */}
         <div id="deals-grid" class="deals-grid" aria-label="Live deals">
-          <!-- Loading skeleton -->
-          <div class="deal-skeleton"></div>
-          <div class="deal-skeleton"></div>
           <div class="deal-skeleton"></div>
           <div class="deal-skeleton"></div>
           <div class="deal-skeleton"></div>
           <div class="deal-skeleton"></div>
         </div>
 
-        <!-- SSR content for search engines (visually hidden, semantically present) -->
+        {/* SSR content for search engines (visually hidden, semantically present) */}
         {deals.length > 0 && (
           <div class="seo-deals" aria-hidden="true" tabindex="-1">
             {deals.map(deal => (
@@ -76,213 +64,255 @@ deals.sort((a, b) => {
                 link={deal.data.link}
                 category={deal.data.category}
                 isLoot={deal.data.isLoot}
+                merchant={deal.data.platform}
+                image={deal.data.image}
               />
             ))}
           </div>
         )}
       </section>
 
-      <!-- ===== COMMUNITY ===== -->
+      {/* ===== COMMUNITY ===== */}
       <CommunityJoinSection />
     </div>
   </main>
 
-  <!-- ===== FOOTER ===== -->
   <SiteFooter />
-
   <FloatingWhatsApp />
   <StructuredData deals={deals} />
 </BaseLayout>
 
-<!-- Deal feed fetch + filter logic -->
+{/* Client-side live data fetching, rendering, search & category filter logic */}
 <script is:inline>
   (function () {
-    const grid = document.getElementById('deals-grid');
-    const countEl = document.getElementById('deals-count');
-    const noResults = document.getElementById('no-search-results');
+    const grid = document.getElementById("deals-grid");
+    const countEl = document.getElementById("deals-count");
+    const noResults = document.getElementById("no-search-results");
     let allWrappers = [];
 
-    /* ---- Render deal card ---- */
+    // Title and Text Cleanup Helper
+    function cleanTitle(str) {
+      if (!str) return "";
+      let val = str;
+      // Remove raw hashtag tails
+      val = val.replace(/#\w+/gi, "");
+      // Remove "sale -" common raw prefixes/delimiters
+      val = val.replace(/sale\s*-/gi, "");
+      // Remove whitespace
+      val = val.replace(/\s+/g, " ").trim();
+      return val;
+    }
+
+    // Price Sanitizer to avoid double ₹₹ symbols and verify raw inputs
+    function cleanUrl(url) { if (!url) return ""; let val = String(url).trim(); return val.replace(/t\.me\/DealsHubIndiaa/gi, "t.me/DealsHubIndia"); } function cleanPriceString(pStr) {
+      if (!pStr) return "";
+      let cleaned = String(pStr).replace(/[₹\s]/g, "").trim();
+      return cleaned;
+    }
+
     function renderCard(deal) {
-      const priceStr = deal.price && deal.price !== 'Check Price'
-        ? '&#8377;' + deal.price
-        : 'Check Price';
-      const origStr = deal.originalPrice
-        ? `<span class="dc__price-orig">&#8377;${deal.originalPrice}</span>`
-        : '';
-      const link = deal.link || deal.url || '#';
-      const cat = deal.category || 'deal';
-      const catLabel = cat.charAt(0).toUpperCase() + cat.slice(1);
-      const isLoot = String(deal.isLoot) === 'true';
-      const pricePlain = deal.price ? String(deal.price).replace(/[^0-9]/g, '') : '0';
+      const cleanPrice = cleanPriceString(deal.price);
+      const cleanOriginal = deal.originalPrice ? cleanPriceString(deal.originalPrice) : "";
+
+      const priceStr = cleanPrice ? "₹" + cleanPrice : "Check Price";
+      const origStr = cleanOriginal
+        ? `<span class="hd-card__price-orig">₹${cleanOriginal}</span>`
+        : "";
+
+      const link = cleanUrl(deal.link || deal.url || "#");
+      const cat = deal.category || "deal";
+      const catLabel = cat.toUpperCase();
+      const isLoot = String(deal.isLoot) === "true";
+      
+      const pricePlain = cleanPrice.replace(/[^0-9]/g, "");
+      const originalPlain = cleanOriginal.replace(/[^0-9]/g, "");
+      
+      const sellingNum = parseFloat(pricePlain) || 0;
+      const originalNum = parseFloat(originalPlain) || 0;
+      let discountPill = "";
+      if (originalNum > 0 && sellingNum > 0 && originalNum > sellingNum) {
+        const pct = Math.round(((originalNum - sellingNum) / originalNum) * 100);
+        if (pct > 10) {
+          discountPill = `<span class="hd-card__discount-pill">${pct}% OFF</span>`;
+        }
+      }
+
+      const imgHtml = deal.image 
+        ? `<div class="hd-card__image-container"><img src="${deal.image}" alt="" loading="lazy" class="hd-card__image" /></div>` 
+        : "";
+
+      const cleanedTitleText = cleanTitle(deal.title || "");
 
       return `<div class="deal-card-wrapper"
-          data-title="${(deal.title || '').toLowerCase().replace(/"/g, '&quot;')}"
+          data-title="${cleanedTitleText.toLowerCase().replace(/"/g, "&quot;")}"
           data-category="${cat}"
           data-price="${pricePlain}"
           data-is-loot="${isLoot}">
-        <div class="dc">
-          <span class="dc__badge${isLoot ? ' dc__badge--loot' : ''}">${catLabel}</span>
-          <h3 class="dc__title">${deal.title || ''}</h3>
-          <div class="dc__price-row">
-            <span class="dc__price">${priceStr}</span>
-            ${origStr}
+        <div class="home-deal-card${isLoot ? " home-deal-card--loot" : ""}">
+          <div class="hd-card__header">
+            <div class="hd-card__merchant-tag">
+              <span class="hd-card__merchant-badge">${(deal.platform || "STORE").toUpperCase()}</span>
+              <span class="hd-card__cat-badge">${catLabel}</span>
+            </div>
+            <span class="hd-card__time">LIVE</span>
           </div>
-          <a href="${link}" target="_blank" rel="noopener noreferrer" class="dc__cta">View Deal</a>
+          <div class="hd-card__content">
+            ${imgHtml}
+            <div class="hd-card__details">
+              <h3 class="hd-card__title">
+                <a href="${link}" target="_blank" rel="noopener noreferrer">${cleanedTitleText}</a>
+              </h3>
+              <div class="hd-card__price-row">
+                <span class="hd-card__price">${priceStr}</span>
+                ${origStr}
+                ${discountPill}
+              </div>
+            </div>
+          </div>
+          <div class="hd-card__actions">
+            <a href="${link}" target="_blank" rel="noopener noreferrer" class="hd-card__cta-btn">
+              <span>View Deal</span>
+            </a>
+            <button class="hd-card__share-btn deal-share-btn" data-title="${cleanedTitleText}" data-url="${link}" type="button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>`;
     }
 
-    /* ---- Load deals ---- */
+    // Deduplication logic to avoid rendering duplicate items
+    function deduplicateDeals(dealsList) {
+      const seen = new Set();
+      return dealsList.filter(item => {
+        // Unique key based on link/url and cleaned title
+        const titleKey = cleanTitle(item.title || "").toLowerCase().replace(/\s+/g, "");
+        const linkKey = (item.link || item.url || "").trim();
+        const dedupeKey = titleKey + "|" + linkKey;
+        if (seen.has(dedupeKey)) {
+          return false;
+        }
+        seen.add(dedupeKey);
+        return true;
+      });
+    }
+
     async function loadDeals() {
       try {
-        const res = await fetch('/api/deals');
+        const res = await fetch("/api/deals");
         const data = await res.json();
         const list = Array.isArray(data) ? data : (data.deals || []);
 
-        if (!list.length) {
-          grid.innerHTML = '<p class="feed-empty">No live deals at the moment. Check back soon!</p>';
+        const uniqueList = deduplicateDeals(list);
+
+        if (!uniqueList.length) {
+          grid.innerHTML = "<p class=\"feed-empty\">No live drops right now. Check back soon!</p>";
           return;
         }
 
-        grid.innerHTML = list.map(renderCard).join('');
-        allWrappers = Array.from(grid.querySelectorAll('.deal-card-wrapper'));
+        grid.innerHTML = uniqueList.map(renderCard).join("");
+        allWrappers = Array.from(grid.querySelectorAll(".deal-card-wrapper"));
 
         if (countEl) {
-          countEl.textContent = list.length + ' deals';
+          countEl.textContent = uniqueList.length + " deals";
         }
       } catch (err) {
-        console.error('[DealsFeed]', err);
-        grid.innerHTML = '<p class="feed-empty">Could not load deals. Please refresh the page.</p>';
+        console.error("[DealsFeed]", err);
+        grid.innerHTML = "<p class=\"feed-empty\">Could not refresh feed. Try reloading.</p>";
       }
     }
 
     loadDeals();
 
-    /* ---- Search filter ---- */
-    window.addEventListener('deals-search', (e) => {
-      const query = (e.detail.query || '').toLowerCase().trim();
+    // Event listener for search events
+    window.addEventListener("deals-search", (e) => {
+      const query = (e.detail.query || "").toLowerCase().trim();
       let visible = 0;
       allWrappers.forEach(w => {
-        const title = w.getAttribute('data-title') || '';
+        const title = w.getAttribute("data-title") || "";
         const show = !query || title.includes(query);
-        w.classList.toggle('is-hidden', !show);
+        w.classList.toggle("is-hidden", !show);
         if (show) visible++;
       });
-      if (noResults) noResults.style.display = (query && visible === 0) ? 'block' : 'none';
+      if (noResults) noResults.style.display = (query && visible === 0) ? "block" : "none";
     });
 
-    /* ---- Category filter ---- */
-    window.addEventListener('deals-category', (e) => {
+    // Event listener for categories
+    window.addEventListener("deals-category", (e) => {
       const cat = e.detail.category;
       let visible = 0;
       allWrappers.forEach(w => {
-        const itemCat = w.getAttribute('data-category') || '';
-        const itemPrice = parseInt(w.getAttribute('data-price') || '0', 10);
-        const itemIsLoot = w.getAttribute('data-is-loot') === 'true';
+        const itemCat = w.getAttribute("data-category") || "";
+        const itemPrice = parseInt(w.getAttribute("data-price") || "0", 10);
+        const itemIsLoot = w.getAttribute("data-is-loot") === "true";
 
         let show = false;
-        if (cat === 'all') show = true;
-        else if (cat === 'tech' && itemCat === 'tech') show = true;
-        else if (cat === 'fashion' && itemCat === 'fashion') show = true;
-        else if (cat === 'home' && itemCat === 'home') show = true;
-        else if (cat === 'under-99' && itemPrice > 0 && itemPrice < 99) show = true;
-        else if (cat === 'loots' && itemIsLoot) show = true;
+        if (cat === "all") show = true;
+        else if (cat === "tech" && itemCat === "tech") show = true;
+        else if (cat === "fashion" && itemCat === "fashion") show = true;
+        else if (cat === "home" && itemCat === "home") show = true;
+        else if (cat === "under-99" && itemPrice > 0 && itemPrice < 99) show = true;
+        else if (cat === "loots" && itemIsLoot) show = true;
 
-        w.classList.toggle('is-hidden', !show);
+        w.classList.toggle("is-hidden", !show);
         if (show) visible++;
       });
-
-      if (noResults) noResults.style.display = (visible === 0) ? 'block' : 'none';
+      if (noResults) noResults.style.display = (visible === 0) ? "block" : "none";
     });
   })();
 </script>
 
 <style>
-  /* ===== HERO ===== */
-  .home-hero {
-    padding: var(--spacing-5) 0 var(--spacing-4);
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: var(--spacing-4);
-  }
-
-  .hero-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-2);
-  }
-
-  .hero-stat {
-    margin-bottom: 4px;
-  }
-
-  .hero-heading {
-    font-size: clamp(1.75rem, 5vw, 2.75rem);
-    font-weight: 900;
-    line-height: 1.15;
-    color: var(--text-primary);
-    margin: 0;
-    letter-spacing: -0.5px;
-  }
-
-  .hero-heading__accent {
-    color: var(--primary-color);
-  }
-
-  .hero-sub {
-    font-size: 15px;
-    color: var(--text-secondary);
-    line-height: 1.55;
-    max-width: 520px;
-    margin: 0;
-  }
-
-  /* ===== DEAL FEED ===== */
   .deals-section {
-    padding-top: var(--spacing-2);
+    padding-top: var(--spacing-3);
   }
 
   .deals-section__header {
     display: flex;
-    align-items: baseline;
-    gap: 10px;
-    margin-bottom: var(--spacing-3);
+    align-items: center;
+    gap: 12px;
+    margin-bottom: var(--spacing-2);
   }
 
   .section-label {
-    font-size: 1.1rem;
-    font-weight: 800;
+    font-size: 16px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.2px;
     color: var(--text-primary);
     margin: 0;
   }
 
   .section-count {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-muted);
-    background: var(--surface-color-hover);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    background-color: var(--surface-color-hover);
     border: 1px solid var(--border-color);
+    padding: 2px 8px;
     border-radius: var(--radius-full);
-    padding: 1px 9px;
   }
 
-  /* ===== DEAL GRID ===== */
   .deals-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: 1fr;
     gap: 12px;
-    min-height: 200px;
   }
 
-  @media (max-width: 480px) {
+  @media (min-width: 600px) {
     .deals-grid {
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      grid-template-columns: repeat(2, 1fr);
     }
   }
 
-  /* ===== SEO DEALS (hidden from users) ===== */
+  @media (min-width: 900px) {
+    .deals-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
   .seo-deals {
     position: absolute;
     width: 1px;
@@ -293,8 +323,7 @@ deals.sort((a, b) => {
     border: 0;
   }
 
-  /* ===== MAIN ===== */
   #main-content {
-    padding-bottom: var(--spacing-6);
+    padding-bottom: var(--spacing-5);
   }
 </style>

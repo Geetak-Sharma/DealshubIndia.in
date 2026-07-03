@@ -1,0 +1,295 @@
+---
+// ActiveDealCard.astro - Unified, clean deal card component
+import { cleanTitle, cleanPriceString, cleanUrl } from "../lib/dealNormalizer.js";
+
+interface Props {
+  title: string;
+  price: string;
+  originalPrice?: string;
+  link: string;
+  category: string;
+  isLoot?: boolean;
+  merchant?: string;
+  timeLabel?: string;
+  image?: string;
+}
+
+const { 
+  title: rawTitle, 
+  price: rawPrice, 
+  originalPrice: rawOriginalPrice, 
+  link, 
+  category, 
+  isLoot = false, 
+  merchant = "Store", 
+  timeLabel = "Just now",
+  image
+} = Astro.props;
+
+const title = cleanTitle(rawTitle); const cleanLink = cleanUrl(link);
+const cleanPrice = cleanPriceString(rawPrice);
+const cleanOriginal = rawOriginalPrice ? cleanPriceString(rawOriginalPrice) : undefined;
+
+const displayCategory = (category || "deal").toUpperCase();
+const displayMerchant = (merchant || "Store").toUpperCase();
+
+const sellingNum = parseFloat(cleanPrice.replace(/[^\d.]/g, "")) || 0;
+const originalNum = parseFloat(cleanOriginal?.replace(/[^\d.]/g, "") || "") || 0;
+
+let discountPercent = 0;
+if (originalNum > 0 && sellingNum > 0 && originalNum > sellingNum) {
+  discountPercent = Math.round(((originalNum - sellingNum) / originalNum) * 100);
+}
+---
+
+<div class={`home-deal-card ${isLoot ? "home-deal-card--loot" : ""}`}>
+  {/* Card Header metadata */}
+  <div class="hd-card__header">
+    <div class="hd-card__merchant-tag">
+      <span class="hd-card__merchant-badge">{displayMerchant}</span>
+      <span class="hd-card__cat-badge">{displayCategory}</span>
+    </div>
+    <span class="hd-card__time">{timeLabel}</span>
+  </div>
+
+  {/* Card Content Row */}
+  <div class="hd-card__content">
+    {image && (
+      <div class="hd-card__image-container">
+        <img src={image} alt={title} loading="lazy" class="hd-card__image" />
+      </div>
+    )}
+    
+    <div class="hd-card__details">
+      <h3 class="hd-card__title">
+        <a href={cleanLink} target="_blank" rel="noopener noreferrer">{title}</a>
+      </h3>
+
+      <div class="hd-card__price-row">
+        {cleanPrice ? (
+          <span class="hd-card__price">₹{cleanPrice}</span>
+        ) : (
+          <span class="hd-card__price hd-card__price--empty">Check Price</span>
+        )}
+        {cleanOriginal && cleanOriginal !== cleanPrice && (
+          <span class="hd-card__price-orig">₹{cleanOriginal}</span>
+        )}
+        {discountPercent > 10 && (
+          <span class="hd-card__discount-pill">{discountPercent}% OFF</span>
+        )}
+      </div>
+    </div>
+  </div>
+
+  {/* Card Footer Actions */}
+  <div class="hd-card__actions">
+    <a href={cleanLink} target="_blank" rel="noopener noreferrer" class="hd-card__cta-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="cta-btn-icon">
+        <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+      </svg>
+      <span>View Deal</span>
+    </a>
+    
+    <button 
+      class="hd-card__share-btn deal-share-btn" 
+      data-title={title}
+      data-url={cleanLink}
+      aria-label="Share deal"
+      type="button"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<style>
+  .home-deal-card {
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .home-deal-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--text-muted);
+    box-shadow: var(--shadow-md);
+  }
+
+  .home-deal-card--loot {
+    border-left: 3px solid var(--primary-color);
+  }
+
+  .hd-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .hd-card__merchant-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .hd-card__merchant-badge {
+    color: var(--primary-color);
+  }
+
+  .hd-card__cat-badge {
+    color: var(--text-secondary);
+    background-color: var(--surface-color-hover);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .hd-card__time {
+    color: var(--text-muted);
+  }
+
+  .hd-card__content {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .hd-card__image-container {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background-color: #ffffff;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+  }
+
+  .hd-card__image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .hd-card__details {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .hd-card__title {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--text-primary);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .hd-card__title a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .hd-card__title a:hover {
+    color: var(--primary-color);
+  }
+
+  .hd-card__price-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .hd-card__price {
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--text-primary);
+  }
+
+  .hd-card__price--empty {
+    color: var(--text-muted);
+    font-weight: 700;
+  }
+
+  .hd-card__price-orig {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-decoration: line-through;
+  }
+
+  .hd-card__discount-pill {
+    font-size: 9px;
+    font-weight: 900;
+    color: var(--primary-color);
+    background-color: rgba(34, 197, 94, 0.1);
+    padding: 2px 6px;
+    border-radius: var(--radius-full);
+  }
+
+  .hd-card__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+  }
+
+  .hd-card__cta-btn {
+    flex: 1;
+    height: 36px;
+    background-color: var(--primary-color);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    transition: filter 0.15s ease;
+  }
+
+  .hd-card__cta-btn:hover {
+    filter: brightness(1.08);
+  }
+
+  .cta-btn-icon {
+    flex-shrink: 0;
+  }
+
+  .hd-card__share-btn {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background-color: transparent;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .hd-card__share-btn:hover {
+    background-color: var(--surface-color-hover);
+    color: var(--text-primary);
+  }
+</style>

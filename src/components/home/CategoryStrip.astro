@@ -1,0 +1,112 @@
+﻿---
+// CategoryStrip.astro - Horizontal scrollable filter strip for mobile, sticky on scroll
+---
+
+<div class="category-strip-container">
+  <div class="l-container">
+    <div class="category-strip" role="group" aria-label="Filter deals by category">
+      <button class="category-chip category-chip--active" data-category="all" type="button">
+        All Drops
+      </button>
+      <button class="category-chip" data-category="tech" type="button">
+        Tech
+      </button>
+      <button class="category-chip" data-category="fashion" type="button">
+        Fashion
+      </button>
+      <button class="category-chip" data-category="home" type="button">
+        Home &amp; Kitchen
+      </button>
+      <button class="category-chip" data-category="under-99" type="button">
+        Under ₹99
+      </button>
+      <button class="category-chip" data-category="loots" type="button">
+        Loot Deals 🔥
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function setupCategoryFiltering() {
+    const chips = document.querySelectorAll(".category-chip");
+    
+    chips.forEach(chip => {
+      chip.addEventListener("click", () => {
+        // Toggle active style locally
+        chips.forEach(c => c.classList.remove("category-chip--active"));
+        chip.classList.add("category-chip--active");
+
+        const cat = chip.getAttribute("data-category");
+        // Dispatch filtering custom event parsed by HomeFeed and Search logic
+        window.dispatchEvent(new CustomEvent("deals-category", { detail: { category: cat } }));
+
+        // Smooth scroll chip into center viewport if overflowing
+        chip.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      });
+    });
+  }
+
+  setupCategoryFiltering();
+  document.addEventListener("astro:after-swap", setupCategoryFiltering);
+</script>
+
+<style>
+  .category-strip-container {
+    position: sticky;
+    top: 56px; /* Sits exactly below sticky header */
+    z-index: 90;
+    background-color: var(--bg-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 10px 0;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+
+  @media (min-width: 768px) {
+    .category-strip-container {
+      top: 64px;
+      padding: 12px 0;
+    }
+  }
+
+  .category-strip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 2px; /* Avoid clipping drop shadows if any */
+  }
+
+  .category-strip::-webkit-scrollbar {
+    display: none;
+  }
+
+  .category-chip {
+    flex-shrink: 0;
+    height: 36px;
+    padding: 0 16px;
+    background-color: var(--surface-color-hover);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .category-chip:hover {
+    color: var(--text-primary);
+    border-color: var(--text-muted);
+  }
+
+  .category-chip--active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #ffffff !important;
+    box-shadow: 0 4px 10px rgba(34, 197, 94, 0.2);
+  }
+</style>
