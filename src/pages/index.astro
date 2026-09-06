@@ -1,329 +1,471 @@
 ---
 export const prerender = false;
-import { getCollection } from "astro:content";
-import BaseLayout from "../layouts/BaseLayout.astro";
-import SiteHeader from "../components/SiteHeader.astro";
-import FloatingWhatsApp from "../components/FloatingWhatsApp.astro";
-import StructuredData from "../components/StructuredData.astro";
-import HomeHero from "../components/home/HomeHero.astro";
-import CategoryStrip from "../components/home/CategoryStrip.astro";
-import HomeDealCard from "../components/ActiveDealCard.astro";
-import CommunityJoinSection from "../components/home/CommunityJoinSection.astro";
-import SiteFooter from "../components/ActiveFooter.astro";
+import fs from 'node:fs/promises';
+import { getCollection } from 'astro:content';
+import { TelegramDataStore } from '../lib/telegramStore.js';
+import { extractCoupon, extractBankOffer, extractVariants, getBudgetTier } from '../lib/dealNormalizer.js';
+import Layout from '../layouts/Layout.astro';
+import LootTicker from '../components/LootTicker.astro';
+import Header from '../components/Header.astro';
+import EditorialHero from '../components/EditorialHero.astro';
+import EditorialDealCard from '../components/EditorialDealCard.astro';
+import BlogCard from '../components/BlogCard.astro';
+import Footer from '../components/Footer.astro';
 
-// Fetch static deals for SSR / SEO
-const deals = await getCollection("deals");
-deals.sort((a, b) => {
-  const da = a.data.date instanceof Date ? a.data.date.getTime() : 0;
-  const db = b.data.date instanceof Date ? b.data.date.getTime() : 0;
-  return db - da;
-});
+// 1. Fetch content collection deals
+let contentDeals: any[] = [];
+try {
+  contentDeals = await getCollection('deals');
+} catch (e) {
+  console.warn('[Home] Content deals error:', e);
+}
+
+// 2. Fetch fresh deals from telegram_posts.json (via TelegramDataStore)
+let rawDeals: any[] = [];
+try {
+  const storeData = TelegramDataStore.load();
+  if (storeData && Array.isArray(storeData.posts) && storeData.posts.length > 0) {
+    rawDeals = storeData.posts;
+  } else {
+    const tgURL = new URL('../data/telegram_posts.json', import.meta.url);
+    const tgData = await fs.readFile(tgURL, 'utf-8');
+    const parsed = JSON.parse(tgData);
+    rawDeals = parsed.posts || [];
+  }
+} catch (e) {
+  console.warn('[Home] Could not load telegram_posts.json, trying deals_cache.json fallback:', e);
+  try {
+    const cacheURL = new URL('../data/deals_cache.json', import.meta.url);
+    const cacheData = await fs.readFile(cacheURL, 'utf-8');
+    const parsed = JSON.parse(cacheData);
+    rawDeals = parsed.deals || [];
+  } catch (err) {
+    console.warn('[Home] Could not load deals_cache.json fallback:', err);
+  }
+}
+
+// Ensure deals are sorted by timestamp descending (newest first)
+rawDeals.sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0));
+
+// 3. Normalize deals with proper merchant, price, and clean product title extraction
+const normalizedDeals = rawDeals
+  .map((item: any) => {
+    let rawTitle = (item.title || "").replace(/[\u200e\u200f\u200b\uFEFF]/g, "").trim();
+    let merchant = item.platform || "Amazon";
+
+    // Clean title: remove emojis, hashtags, spam suffixes, store prefixes
+    let title = rawTitle
+      .replace(/^[\p{Emoji}\s]+/gu, "")
+      .replace(/#\w+/gi, "")
+      .replace(/^(?:amazon|flipkart|myntra|ajio|croma|meesho)\s*[:|\-–]\s*/i, "")
+      .replace(/sale\s*-/gi, "")
+      .replace(/cashback card on all online transactions-?/gi, "")
+      .replace(/for under 99 deals join-?.*/gi, "")
+      .replace(/under 99 deals join-?.*/gi, "")
+      .replace(/_______________________________.*/gi, "")
+      .replace(/Master Link\s*:?.*/gi, "")
+      .replace(/\s*\.?\s*Apply\s*(?:₹\s*\d+|\d+%)\s*Off\s*Coupon.*$/i, "")
+      .replace(/\s*(?:@|at\s*|Rs\.?\s*|₹)\s*[0-9,]+\s*$/i, "")
+      .replace(/[:\.\-\s|–]+$/, "")
+      .trim();
+
+    if (title.includes("\n")) {
+      title = title.split("\n")[0].trim();
+    }
+
+    // Smart merchant detection
+    const fullText = `${item.checkoutUrl || ''} ${item.url || ''} ${rawTitle} ${item.text || ''}`.toLowerCase();
+    if (fullText.includes("amazon") || fullText.includes("amazn") || fullText.includes("amzn")) merchant = "Amazon";
+    else if (fullText.includes("flipkart") || fullText.includes("fkrt")) merchant = "Flipkart";
+    else if (fullText.includes("myntra") || fullText.includes("myntr")) merchant = "Myntra";
+    else if (fullText.includes("ajio") || fullText.includes("ajiio")) merchant = "Ajio";
+    else if (fullText.includes("croma")) merchant = "Croma";
+    else if (fullText.includes("meesho")) merchant = "Meesho";
+    else if (fullText.includes("tatacliq")) merchant = "Tata CLiQ";
+    else if (merchant === "Deal") merchant = "Amazon";
+
+    // Price extraction: match @123, at 123, ₹123, Rs. 123
+    let price = item.price;
+    const priceMatch = rawTitle.match(/(?:@|at\s*|₹|Rs\.?\s*)([0-9,]+)/i);
+    if ((!price || price === "Check Price") && priceMatch) {
+      price = priceMatch[1].replace(/,/g, "");
+    } else if (!price || price === "Check Price") {
+      price = item.priceNum && item.priceNum > 0 ? String(item.priceNum) : "Check Price";
+    }
+
+    // Discount extraction: match 34% Off, etc.
+    let discount = item.discount || "";
+    if (!discount) {
+      const discountMatch = rawTitle.match(/(\d+)%\s*(?:off|discount|coupon)/i) || (item.text || "").match(/(\d+)%\s*(?:off|discount|coupon)/i);
+      if (discountMatch) {
+        discount = `${discountMatch[1]}%`;
+      }
+    }
+
+    const numPrice = parseFloat(String(price).replace(/[^0-9.]/g, "")) || 0;
+    const discPct = parseInt(discount) || 0;
+    let originalPrice = item.originalPrice;
+    if (!originalPrice && numPrice > 0 && discPct > 0 && discPct < 100) {
+      originalPrice = String(Math.round(numPrice / (1 - discPct / 100)));
+    }
+
+    // Category detection
+    let category = item.category || "General";
+    const lowerCheck = `${rawTitle} ${item.text || ''} ${category}`.toLowerCase();
+    if (lowerCheck.match(/laptop|phone|smartphone|smartwatch|earbuds|headphones|mouse|keyboard|cpu|gpu|storage|ram|gadget|charger|geyser|fan|electronics|heater|cooler/)) {
+      category = "Tech";
+    } else if (lowerCheck.match(/shirt|jeans|clothing|shoes|t-shirt|kurta|dress|jacket|pants|sneakers|apparel|footwear/)) {
+      category = "Fashion";
+    } else if (lowerCheck.match(/bedsheet|cooker|bottle|kitchen|home|curtain|mop|light|decor|pillow|pan|induction/)) {
+      category = "Home";
+    } else if (item.isLoot) {
+      category = "Loot";
+    }
+
+    // 4 Visual Format Upgrades: Coupon, Bank Offer, Variants & Budget Tagging
+    const couponText = extractCoupon(rawTitle, item.text);
+    const bankOffer = extractBankOffer(rawTitle, item.text);
+    const variants = extractVariants(item, item.checkoutUrl || item.url);
+    const budgetTier = getBudgetTier(numPrice);
+
+    return {
+      id: item.id || `deal-${Math.random().toString(36).substring(7)}`,
+      title,
+      price,
+      numPrice,
+      originalPrice: originalPrice || (item.originalPriceNum ? String(item.originalPriceNum) : ""),
+      discount,
+      discPct,
+      link: item.checkoutUrl || item.url || "#",
+      image: item.image || "",
+      merchant,
+      category,
+      isLoot: Boolean(item.isLoot || lowerCheck.includes("loot") || discPct >= 60 || budgetTier === 'under99'),
+      date: item.timestamp ? new Date(item.timestamp) : new Date(),
+      couponText,
+      bankOffer,
+      variants,
+      budgetTier,
+    };
+  })
+  .filter((d: any) =>
+    d.title &&
+    d.title.length >= 6 &&
+    !d.title.toLowerCase().startsWith("apply ") &&
+    d.image &&
+    typeof d.image === "string" &&
+    d.image.startsWith("http") &&
+    !d.image.includes("example.com") &&
+    !d.image.includes("Telegram_logo") &&
+    d.numPrice > 0
+  );
+
+// Helper to ensure deal images are valid, real URLs
+const isValidDealImage = (img: any): boolean => {
+  return Boolean(
+    img &&
+    typeof img === "string" &&
+    img.startsWith("http") &&
+    !img.includes("example.com") &&
+    !img.includes("Telegram_logo")
+  );
+};
+
+// Map content collection deals
+const mappedContentDeals = contentDeals
+  .map((d: any) => {
+    const numPrice = parseFloat(String(d.data.price).replace(/[^0-9.]/g, "")) || 0;
+    const numOriginal = parseFloat(String(d.data.originalPrice || "").replace(/[^0-9.]/g, "")) || 0;
+    let discount = "";
+    let discPct = 0;
+    if (numOriginal > numPrice && numPrice > 0) {
+      discPct = Math.round(((numOriginal - numPrice) / numOriginal) * 100);
+      discount = `${discPct}%`;
+    }
+
+    return {
+      id: d.id,
+      title: d.data.title,
+      price: d.data.price,
+      numPrice,
+      originalPrice: d.data.originalPrice || "",
+      discount,
+      discPct,
+      link: d.data.link,
+      image: d.data.image,
+      merchant: "Amazon",
+      category: d.data.category || "Tech",
+      isLoot: d.data.isLoot,
+      date: d.data.date,
+      budgetTier: getBudgetTier(numPrice),
+    };
+  })
+  .filter((d: any) =>
+    d.title &&
+    isValidDealImage(d.image) &&
+    d.numPrice > 0
+  );
+
+// Combine deals: fresh live telegram deals first
+const allDeals = [...normalizedDeals, ...mappedContentDeals];
+
+// Curate top 8 Handpicked Drops for Today's Live Deals (2 rows = 8 deals):
+// Ensure ANY deal curated for the homepage MUST have a valid, verified image
+const editorialDeals = [...allDeals]
+  .filter((d: any) => isValidDealImage(d.image))
+  .sort((a, b) => {
+    const timeA = new Date(a.date).getTime() || 0;
+    const timeB = new Date(b.date).getTime() || 0;
+    const isRecentA = (Date.now() - timeA) < 7 * 24 * 60 * 60 * 1000;
+    const isRecentB = (Date.now() - timeB) < 7 * 24 * 60 * 60 * 1000;
+
+    // 1. Fresh live drops from today/this week always take precedence
+    if (isRecentA && !isRecentB) return -1;
+    if (!isRecentA && isRecentB) return 1;
+
+    // 2. Loot drops prioritized
+    if (a.isLoot && !b.isLoot) return -1;
+    if (!a.isLoot && b.isLoot) return 1;
+
+    // 3. Highest discount percentage
+    if (b.discPct !== a.discPct) return b.discPct - a.discPct;
+
+    return timeB - timeA;
+  })
+  .slice(0, 8);
+
+// 4. Fetch curated top featured field guides & shopping hacks
+let featuredGuides: any[] = [];
+try {
+  const rawPosts = await getCollection('blog');
+  
+  const curatedDefinitions = [
+    {
+      slug: 'amazon-prime-day-vs-flipkart-goat-sale-2026',
+      badge: 'SALE PLAYBOOK',
+      readingTime: '5 min read',
+    },
+    {
+      slug: 'sbi-cashback-credit-card',
+      badge: '5% CASHBACK HACK',
+      readingTime: '4 min read',
+    },
+    {
+      slug: 'how-to-spot-fake-sales',
+      badge: 'FIELD MANUAL',
+      readingTime: '5 min read',
+    },
+  ];
+
+  featuredGuides = curatedDefinitions
+    .map((curated) => {
+      const post = rawPosts.find((p) => {
+        const cleanId = p.id.replace(/\.md$/, '').replace(/\\/g, '/');
+        return cleanId === curated.slug || cleanId.endsWith(curated.slug);
+      });
+      if (!post) return null;
+
+      return {
+        ...post,
+        readingTime: curated.readingTime,
+        editorialBadge: curated.badge,
+        cleanUrl: `/blog/${post.id.replace(/\.md$/, '').replace(/\\/g, '/')}`,
+      };
+    })
+    .filter(Boolean);
+
+  // Fallback if any missing
+  if (featuredGuides.length < 3) {
+    const existingIds = new Set(featuredGuides.map((g) => g.id));
+    const remaining = rawPosts
+      .filter((p) => !existingIds.has(p.id))
+      .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+    for (const post of remaining) {
+      if (featuredGuides.length >= 3) break;
+      const wordCount = post.body ? post.body.trim().split(/\s+/).length : 800;
+      const readingMinutes = Math.max(3, Math.ceil(wordCount / 220));
+      featuredGuides.push({
+        ...post,
+        readingTime: `${readingMinutes} min read`,
+        editorialBadge: 'EDITORIAL GUIDE',
+        cleanUrl: `/blog/${post.id.replace(/\.md$/, '').replace(/\\/g, '/')}`,
+      });
+    }
+  }
+} catch (e) {
+  console.warn('[Home] Blog fetch error:', e);
+}
+
+const pageTitle = "DealsHub India — Hand-Verified Curated Deals & Price Errors";
+const pageDescription = "Bespoke editorial deal intelligence. Automated scrapers track 200+ drops daily across Amazon & Flipkart. We filter out the noise and publish lowest-ever price drops.";
 ---
 
-<BaseLayout title="DealsHubIndia.in — Best Deals &amp; Offers in India Today">
-  <SiteHeader />
+<Layout
+  title={pageTitle}
+  description={pageDescription}
+  includeHeader={false}
+  includeFooter={false}
+  deals={editorialDeals}
+  activePath="/"
+>
+  <!-- 1. Top Announcement Marquee -->
+  <LootTicker />
 
-  <main id="main-content">
-    {/* ===== HERO ===== */}
-    <div class="l-container">
-      <HomeHero />
-    </div>
+  <!-- 2. Sticky Glass Header -->
+  <Header activePath="/" />
 
-    {/* ===== CATEGORY FILTER STRIP ===== */}
-    <CategoryStrip />
+  <main id="main-content" class="w-full">
+    
+    <!-- 3. Clean Editorial Hero Section -->
+    <EditorialHero
+      memberCount="15,000+"
+      totalSaved="₹2.5 Cr+"
+    />
 
-    {/* ===== DEAL FEED ===== */}
-    <div class="l-container">
-      <section class="deals-section" aria-labelledby="deals-heading">
-        <div class="deals-section__header">
-          <h2 class="section-label" id="deals-heading">Latest Drops</h2>
-          <span class="section-count" id="deals-count" aria-live="polite"></span>
-        </div>
-
-        {/* No-results state (shown by JS when search/filter yields nothing) */}
-        <div id="no-search-results" class="no-results" style="display:none" role="status">
-          <p>No deals match your filter. Try another category or clear the search.</p>
-        </div>
-
-        {/* Live deal grid — hydrated client-side */}
-        <div id="deals-grid" class="deals-grid" aria-label="Live deals">
-          <div class="deal-skeleton"></div>
-          <div class="deal-skeleton"></div>
-          <div class="deal-skeleton"></div>
-          <div class="deal-skeleton"></div>
-        </div>
-
-        {/* SSR content for search engines (visually hidden, semantically present) */}
-        {deals.length > 0 && (
-          <div class="seo-deals" aria-hidden="true" tabindex="-1">
-            {deals.map(deal => (
-              <HomeDealCard
-                title={deal.data.title}
-                price={deal.data.price}
-                originalPrice={deal.data.originalPrice}
-                link={deal.data.link}
-                category={deal.data.category}
-                isLoot={deal.data.isLoot}
-                merchant={deal.data.platform}
-                image={deal.data.image}
-              />
-            ))}
+    <!-- Section 1 (TOP): Curated Shopping Guides & Sale Playbooks (/blog) -->
+    {featuredGuides.length > 0 && (
+      <section id="shopping-guides" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 border-t border-slate-800/80">
+        
+        <!-- Clean Wirecutter Editorial Header -->
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 pb-4 border-b border-slate-800">
+          <div>
+            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-bold uppercase tracking-wider mb-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>EDITOR'S FIELD GUIDES &amp; SHOPPING HACKS</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">
+                📚 Curated Shopping Guides &amp; Sale Playbooks
+              </h2>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1.5 font-normal max-w-2xl">
+              Wire-tested shopping strategies, card cashback stacking, and price-error playbooks from DealsHub editors. Tested before you buy.
+            </p>
           </div>
-        )}
-      </section>
 
-      {/* ===== COMMUNITY ===== */}
-      <CommunityJoinSection />
-    </div>
+          <div class="shrink-0">
+            <a
+              href="/blog"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/50 text-slate-200 hover:text-emerald-300 text-xs sm:text-sm font-bold transition-all shadow-sm group"
+            >
+              <span>Explore All Guides &amp; Insights (/blog)</span>
+              <span class="text-emerald-400 group-hover:translate-x-1 transition-transform">→</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 3 Featured Field Guide Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {featuredGuides.map((post) => (
+            <BlogCard
+              title={post.data.title}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              author={post.data.author || "DealsHub Editorial"}
+              image={post.data.image}
+              url={post.cleanUrl}
+              category={post.data.category}
+              readingTime={post.readingTime}
+              editorialBadge={post.editorialBadge}
+            />
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Section 2 (DIRECTLY NEXT/BELOW): Today's Live Deals (2 rows = 8 deals) -->
+    <section id="deals" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 border-t border-slate-800/80">
+      
+      <!-- Clean Editorial Section Header -->
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 pb-4 border-b border-slate-800">
+        <div>
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-bold uppercase tracking-wider mb-2">
+            <span>EDITORIAL SHORTLIST</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">Today's Live Deals</h2>
+            <span class="pulse-indicator"></span>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1.5 font-normal">
+            Slashed MRP vs verified deal price. Hand-filtered from 200+ raw daily drops.
+          </p>
+        </div>
+
+        <div class="shrink-0">
+          <a
+            href="/livedeals"
+            class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/50 text-slate-200 hover:text-emerald-300 text-xs sm:text-sm font-bold transition-all shadow-sm group"
+          >
+            <span>Browse All 200+ Live Deals →</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Curated Drops 2-Row Grid (Clean Horizontal Cards on Desktop) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {editorialDeals.map((deal, idx) => (
+          <EditorialDealCard
+            id={deal.id}
+            title={deal.title}
+            price={deal.price}
+            originalPrice={deal.originalPrice}
+            discount={deal.discount}
+            link={deal.link}
+            image={deal.image}
+            merchant={deal.merchant}
+            category={deal.category}
+            isLoot={deal.isLoot}
+            date={deal.date}
+            index={idx}
+            couponText={deal.couponText}
+            bankOffer={deal.bankOffer}
+            variants={deal.variants}
+            budgetTier={deal.budgetTier}
+          />
+        ))}
+      </div>
+
+      <!-- 5. Mature Editorial Live Stream Banner -->
+      <div class="mt-12 sm:mt-16 p-7 sm:p-10 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl shadow-black/60 relative overflow-hidden group">
+        <div class="max-w-3xl mx-auto flex flex-col items-center text-center gap-4 relative z-10">
+          
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-mono font-bold uppercase tracking-wider">
+            <span class="pulse-indicator"></span>
+            <span>LIVE TELEGRAM INGESTION ENGINE ACTIVE</span>
+          </div>
+
+          <div class="space-y-2">
+            <h3 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-snug">
+              Want the unfiltered feed? Explore all 200+ live Telegram drops as they happen.
+            </h3>
+            <p class="text-sm sm:text-base text-slate-300 max-w-xl mx-auto leading-relaxed">
+              Fast merchant filtering for Amazon & Flipkart, instant budget toggles (&lt;₹500, &lt;₹1,000, &lt;₹5,000), and auto-refreshing live Telegram stream.
+            </p>
+          </div>
+
+          <div class="pt-2 w-full sm:w-auto">
+            <a
+              href="/livedeals"
+              class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm sm:text-base shadow-xl shadow-emerald-500/20 hover:shadow-emerald-500/35 transition-all hover:scale-[1.01] active:scale-[0.98]"
+            >
+              <span>⚡ Explore All 200+ Live Deals Stream →</span>
+            </a>
+          </div>
+
+          <p class="text-xs text-slate-400 font-mono">
+            ⚡ 200+ drops scanned daily • Hand-verified price drops • 100% Free
+          </p>
+
+        </div>
+      </div>
+
+    </section>
+
+
+
   </main>
 
-  <SiteFooter />
-  <FloatingWhatsApp />
-  <StructuredData deals={deals} />
-</BaseLayout>
-
-{/* Client-side live data fetching, rendering, search & category filter logic */}
-<script is:inline>
-  (function () {
-    const grid = document.getElementById("deals-grid");
-    const countEl = document.getElementById("deals-count");
-    const noResults = document.getElementById("no-search-results");
-    let allWrappers = [];
-
-    // Title and Text Cleanup Helper
-    function cleanTitle(str) {
-      if (!str) return "";
-      let val = str;
-      // Remove raw hashtag tails
-      val = val.replace(/#\w+/gi, "");
-      // Remove "sale -" common raw prefixes/delimiters
-      val = val.replace(/sale\s*-/gi, "");
-      // Remove whitespace
-      val = val.replace(/\s+/g, " ").trim();
-      return val;
-    }
-
-    // Price Sanitizer to avoid double ₹₹ symbols and verify raw inputs
-    function cleanUrl(url) { if (!url) return ""; let val = String(url).trim(); return val.replace(/t\.me\/DealsHubIndiaa/gi, "t.me/DealsHubIndia"); } function cleanPriceString(pStr) {
-      if (!pStr) return "";
-      let cleaned = String(pStr).replace(/[₹\s]/g, "").trim();
-      return cleaned;
-    }
-
-    function renderCard(deal) {
-      const cleanPrice = cleanPriceString(deal.price);
-      const cleanOriginal = deal.originalPrice ? cleanPriceString(deal.originalPrice) : "";
-
-      const priceStr = cleanPrice ? "₹" + cleanPrice : "Check Price";
-      const origStr = cleanOriginal
-        ? `<span class="hd-card__price-orig">₹${cleanOriginal}</span>`
-        : "";
-
-      const link = cleanUrl(deal.link || deal.url || "#");
-      const cat = deal.category || "deal";
-      const catLabel = cat.toUpperCase();
-      const isLoot = String(deal.isLoot) === "true";
-      
-      const pricePlain = cleanPrice.replace(/[^0-9]/g, "");
-      const originalPlain = cleanOriginal.replace(/[^0-9]/g, "");
-      
-      const sellingNum = parseFloat(pricePlain) || 0;
-      const originalNum = parseFloat(originalPlain) || 0;
-      let discountPill = "";
-      if (originalNum > 0 && sellingNum > 0 && originalNum > sellingNum) {
-        const pct = Math.round(((originalNum - sellingNum) / originalNum) * 100);
-        if (pct > 10) {
-          discountPill = `<span class="hd-card__discount-pill">${pct}% OFF</span>`;
-        }
-      }
-
-      const imgHtml = deal.image 
-        ? `<div class="hd-card__image-container"><img src="${deal.image}" alt="" loading="lazy" class="hd-card__image" /></div>` 
-        : "";
-
-      const cleanedTitleText = cleanTitle(deal.title || "");
-
-      return `<div class="deal-card-wrapper"
-          data-title="${cleanedTitleText.toLowerCase().replace(/"/g, "&quot;")}"
-          data-category="${cat}"
-          data-price="${pricePlain}"
-          data-is-loot="${isLoot}">
-        <div class="home-deal-card${isLoot ? " home-deal-card--loot" : ""}">
-          <div class="hd-card__header">
-            <div class="hd-card__merchant-tag">
-              <span class="hd-card__merchant-badge">${(deal.platform || "STORE").toUpperCase()}</span>
-              <span class="hd-card__cat-badge">${catLabel}</span>
-            </div>
-            <span class="hd-card__time">LIVE</span>
-          </div>
-          <div class="hd-card__content">
-            ${imgHtml}
-            <div class="hd-card__details">
-              <h3 class="hd-card__title">
-                <a href="${link}" target="_blank" rel="noopener noreferrer">${cleanedTitleText}</a>
-              </h3>
-              <div class="hd-card__price-row">
-                <span class="hd-card__price">${priceStr}</span>
-                ${origStr}
-                ${discountPill}
-              </div>
-            </div>
-          </div>
-          <div class="hd-card__actions">
-            <a href="${link}" target="_blank" rel="noopener noreferrer" class="hd-card__cta-btn">
-              <span>View Deal</span>
-            </a>
-            <button class="hd-card__share-btn deal-share-btn" data-title="${cleanedTitleText}" data-url="${link}" type="button">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>`;
-    }
-
-    // Deduplication logic to avoid rendering duplicate items
-    function deduplicateDeals(dealsList) {
-      const seen = new Set();
-      return dealsList.filter(item => {
-        // Unique key based on link/url and cleaned title
-        const titleKey = cleanTitle(item.title || "").toLowerCase().replace(/\s+/g, "");
-        const linkKey = (item.link || item.url || "").trim();
-        const dedupeKey = titleKey + "|" + linkKey;
-        if (seen.has(dedupeKey)) {
-          return false;
-        }
-        seen.add(dedupeKey);
-        return true;
-      });
-    }
-
-    async function loadDeals() {
-      try {
-        const res = await fetch("/api/deals");
-        const data = await res.json();
-        const list = Array.isArray(data) ? data : (data.deals || []);
-
-        const uniqueList = deduplicateDeals(list);
-
-        if (!uniqueList.length) {
-          grid.innerHTML = "<p class=\"feed-empty\">No live drops right now. Check back soon!</p>";
-          return;
-        }
-
-        grid.innerHTML = uniqueList.map(renderCard).join("");
-        allWrappers = Array.from(grid.querySelectorAll(".deal-card-wrapper"));
-
-        if (countEl) {
-          countEl.textContent = uniqueList.length + " deals";
-        }
-      } catch (err) {
-        console.error("[DealsFeed]", err);
-        grid.innerHTML = "<p class=\"feed-empty\">Could not refresh feed. Try reloading.</p>";
-      }
-    }
-
-    loadDeals();
-
-    // Event listener for search events
-    window.addEventListener("deals-search", (e) => {
-      const query = (e.detail.query || "").toLowerCase().trim();
-      let visible = 0;
-      allWrappers.forEach(w => {
-        const title = w.getAttribute("data-title") || "";
-        const show = !query || title.includes(query);
-        w.classList.toggle("is-hidden", !show);
-        if (show) visible++;
-      });
-      if (noResults) noResults.style.display = (query && visible === 0) ? "block" : "none";
-    });
-
-    // Event listener for categories
-    window.addEventListener("deals-category", (e) => {
-      const cat = e.detail.category;
-      let visible = 0;
-      allWrappers.forEach(w => {
-        const itemCat = w.getAttribute("data-category") || "";
-        const itemPrice = parseInt(w.getAttribute("data-price") || "0", 10);
-        const itemIsLoot = w.getAttribute("data-is-loot") === "true";
-
-        let show = false;
-        if (cat === "all") show = true;
-        else if (cat === "tech" && itemCat === "tech") show = true;
-        else if (cat === "fashion" && itemCat === "fashion") show = true;
-        else if (cat === "home" && itemCat === "home") show = true;
-        else if (cat === "under-99" && itemPrice > 0 && itemPrice < 99) show = true;
-        else if (cat === "loots" && itemIsLoot) show = true;
-
-        w.classList.toggle("is-hidden", !show);
-        if (show) visible++;
-      });
-      if (noResults) noResults.style.display = (visible === 0) ? "block" : "none";
-    });
-  })();
-</script>
-
-<style>
-  .deals-section {
-    padding-top: var(--spacing-3);
-  }
-
-  .deals-section__header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: var(--spacing-2);
-  }
-
-  .section-label {
-    font-size: 16px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: -0.2px;
-    color: var(--text-primary);
-    margin: 0;
-  }
-
-  .section-count {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text-secondary);
-    background-color: var(--surface-color-hover);
-    border: 1px solid var(--border-color);
-    padding: 2px 8px;
-    border-radius: var(--radius-full);
-  }
-
-  .deals-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  @media (min-width: 600px) {
-    .deals-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (min-width: 900px) {
-    .deals-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-
-  .seo-deals {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  #main-content {
-    padding-bottom: var(--spacing-5);
-  }
-</style>
+  <!-- 7. Master Clean Footer -->
+  <Footer />
+</Layout>

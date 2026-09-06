@@ -61,7 +61,8 @@ function getPlatformColor(p: string): string {
 }
 
 const title = cleanTitle(rawTitle); const price = cleanPriceString(rawPrice); const originalPrice = rawOriginalPrice ? cleanPriceString(rawOriginalPrice) : undefined; const platformColor = getPlatformColor(platform);
-const hasImage = image && !image.includes('dummyimage') && !image.includes('placehold');
+const hasImage = image && !image.includes('dummyimage') && !image.includes('placehold') && !image.includes('example.com');
+const safeImageUrl = image && image.includes('telesco.pe') ? '/api/image-proxy?url=' + encodeURIComponent(image) : image;
 
 const transitionSlug = url
   .replace(/^https?:\/\//, '')
@@ -138,8 +139,7 @@ else if (isAjio) { storeLogo = 'https://www.google.com/s2/favicons?sz=64&domain=
     <div class="m3-skeleton" aria-hidden="true"><div class="m3-skeleton__shimmer"></div></div>
 
     {hasImage ? (
-      <img
-        src={image}
+      <img src={safeImageUrl || image}
         alt={title}
         loading="lazy"
         decoding="async"

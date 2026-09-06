@@ -1,0 +1,264 @@
+---
+// src/components/StoreRail.astro
+// Horizontal swipeable circular store rail with active counts + Budget Fast-Pills
+
+interface Props {
+  className?: string;
+}
+
+const { className = "" } = Astro.props;
+
+const stores = [
+  {
+    id: "amazon",
+    name: "Amazon",
+    count: "45+",
+    color: "#FF9900",
+    bgClass: "hover:border-[#FF9900]/50 hover:shadow-[0_0_15px_rgba(255,153,0,0.2)]",
+    activeClass: "border-[#FF9900] shadow-[0_0_15px_rgba(255,153,0,0.3)] bg-[#FF9900]/10",
+  },
+  {
+    id: "flipkart",
+    name: "Flipkart",
+    count: "32+",
+    color: "#2874F0",
+    bgClass: "hover:border-[#2874F0]/50 hover:shadow-[0_0_15px_rgba(40,116,240,0.2)]",
+    activeClass: "border-[#2874F0] shadow-[0_0_15px_rgba(40,116,240,0.3)] bg-[#2874F0]/10",
+  },
+  {
+    id: "myntra",
+    name: "Myntra",
+    count: "18+",
+    color: "#FF3F6C",
+    bgClass: "hover:border-[#FF3F6C]/50 hover:shadow-[0_0_15px_rgba(255,63,108,0.2)]",
+    activeClass: "border-[#FF3F6C] shadow-[0_0_15px_rgba(255,63,108,0.3)] bg-[#FF3F6C]/10",
+  },
+  {
+    id: "ajio",
+    name: "Ajio",
+    count: "14+",
+    color: "#60A5FA",
+    bgClass: "hover:border-[#60A5FA]/50 hover:shadow-[0_0_15px_rgba(96,165,250,0.2)]",
+    activeClass: "border-[#60A5FA] shadow-[0_0_15px_rgba(96,165,250,0.3)] bg-[#60A5FA]/10",
+  },
+  {
+    id: "croma",
+    name: "Croma",
+    count: "10+",
+    color: "#00E9BF",
+    bgClass: "hover:border-[#00E9BF]/50 hover:shadow-[0_0_15px_rgba(0,233,191,0.2)]",
+    activeClass: "border-[#00E9BF] shadow-[0_0_15px_rgba(0,233,191,0.3)] bg-[#00E9BF]/10",
+  },
+  {
+    id: "meesho",
+    name: "Meesho",
+    count: "8+",
+    color: "#D946EF",
+    bgClass: "hover:border-[#D946EF]/50 hover:shadow-[0_0_15px_rgba(217,70,239,0.2)]",
+    activeClass: "border-[#D946EF] shadow-[0_0_15px_rgba(217,70,239,0.3)] bg-[#D946EF]/10",
+  },
+];
+
+const budgetPills = [
+  { id: "all", label: "All Drops", icon: "✨" },
+  { id: "under99", label: "Under ₹99", icon: "⚡" },
+  { id: "under499", label: "Under ₹499", icon: "🎯" },
+  { id: "under999", label: "Under ₹999", icon: "💎" },
+  { id: "error80", label: "80%+ Price Errors", icon: "🔥" },
+];
+---
+
+<section class:list={["w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-2", className]}>
+  
+  <!-- 1. Store Rail Header & Circular Store Badges -->
+  <div class="mb-4">
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Featured Stores</span>
+        <span class="w-1 h-1 rounded-full bg-slate-600"></span>
+        <span class="text-[11px] text-emerald-400 font-semibold">Live Feed Synced</span>
+      </div>
+      <span class="text-[11px] text-slate-400 hidden sm:inline">Tap store to filter deals</span>
+    </div>
+
+    <!-- Horizontal Swipeable Circular Store Rail -->
+    <div class="flex items-center gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 pt-1 -mx-4 px-4 sm:mx-0 sm:px-0">
+      {stores.map((store) => (
+        <button
+          type="button"
+          data-store-target={store.id}
+          class="store-rail-btn group flex flex-col items-center gap-1.5 shrink-0 focus:outline-none cursor-pointer"
+          title={"Filter " + store.name + " deals"}
+        >
+          <!-- Circular Store Icon Container -->
+          <div class:list={[
+            "relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-slate-900/90 border border-white/10 flex items-center justify-center transition-all duration-300 group-hover:scale-105 active:scale-95",
+            store.bgClass
+          ]}>
+            <!-- Deal Count Badge -->
+            <span class="absolute -top-1.5 -right-1.5 px-1.5 py-0.2 rounded-full bg-emerald-500 text-slate-950 font-black text-[9px] tracking-tight shadow-md shadow-emerald-500/30">
+              {store.count}
+            </span>
+
+            <!-- Store Brand SVG Icon -->
+            {store.id === "amazon" && (
+              <svg class="w-7 h-7 text-[#FF9900] fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M1.6 14.8c2.9 2.6 7 4.2 11.5 4.2 3.8 0 7.3-1.2 10.2-3.3.3-.2.2-.6-.1-.5-3.3 1.3-7.2 2-11.2 2-3.7 0-7.2-.8-10.2-2.4-.3-.2-.5.2-.2.5zm19.8-1.4c-.3-.4-1.9-.6-3.8.8-.2.1-.3 0-.2-.2.6-1 1.9-2.9 2.3-3.4.2-.2.4 0 .3.3-.3.9-.9 2-1 2.3-.1.3.2.3.4.2.7-.3 1.7-.8 2.2-1.1.2-.1.3.1.2.3-.2.3-.3.6-.4.9zM14.5 9.2v4c0 .8-.5 1.4-1.3 1.4-.7 0-1.1-.4-1.1-1.1 0-1.3 1.1-1.5 2.4-1.5v-.4c0-.7-.4-1.1-1.3-1.1-.6 0-1.2.2-1.6.5l-.4-1.1c.6-.4 1.4-.7 2.4-.7 1.8 0 3 .8 3 2.6v3.8c0 .5.1.9.2 1.1h-1.4c-.1-.2-.2-.5-.2-.9-.4.5-1.1 1-2.1 1-1.4 0-2.4-.9-2.4-2.2 0-1.7 1.3-2.5 3.3-2.5.4 0 .8.1 1.1.2v-.8c0-1-.6-1.5-1.6-1.5-.7 0-1.3.2-1.7.5l-.4-1.1c.6-.4 1.5-.6 2.5-.6 2 0 3.3 1 3.3 2.9z"/>
+              </svg>
+            )}
+            {store.id === "flipkart" && (
+              <svg class="w-7 h-7" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#2874F0" d="M3 6h18l-2 15H5L3 6z"/>
+                <path fill="#FFE11B" d="M10 2h4v5h-4z"/>
+                <path fill="#FFE11B" d="M9 8h6v2.5h-3.5v2h3V15h-3v5H9V8z"/>
+              </svg>
+            )}
+            {store.id === "myntra" && (
+              <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="#FF3F6C" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 19l4.5-12 3.5 8 3.5-8L20 19"/>
+              </svg>
+            )}
+            {store.id === "ajio" && (
+              <svg class="w-7 h-7 text-[#60A5FA] fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 5l5 14h-3l-1.2-3.5H11.2L10 19H7l5-14zm0 4.5l-1.5 4h3l-1.5-4z"/>
+              </svg>
+            )}
+            {store.id === "croma" && (
+              <svg class="w-7 h-7 text-[#00E9BF] fill-none stroke-current stroke-[2.5]" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" d="M16 8.5A6.5 6.5 0 1 0 16 15.5"/>
+                <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+              </svg>
+            )}
+            {store.id === "meesho" && (
+              <svg class="w-7 h-7 text-[#D946EF] fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 19V7l5 6 4-6v12h-2.5V11.5L8.8 15h-.6L5.5 11.5V19H5zm14-12v12h-2.5V7H19z"/>
+              </svg>
+            )}
+          </div>
+
+          <!-- Store Name Label -->
+          <span class="text-xs font-bold text-slate-300 group-hover:text-white transition-colors">
+            {store.name}
+          </span>
+        </button>
+      ))}
+    </div>
+  </div>
+
+  <!-- 2. Quick-Tap Budget Fast-Pills Row -->
+  <div class="pt-2 border-t border-white/5">
+    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
+      <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider shrink-0 mr-1 hidden sm:inline">
+        Budget Filters:
+      </span>
+      {budgetPills.map((pill) => (
+        <button
+          type="button"
+          data-budget-target={pill.id}
+          class:list={[
+            "budget-fast-pill inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold shrink-0 transition-all cursor-pointer border",
+            pill.id === "all"
+              ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30 shadow-sm"
+              : "bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border-white/10 hover:border-emerald-500/30"
+          ]}
+        >
+          <span>{pill.icon}</span>
+          <span>{pill.label}</span>
+        </button>
+      ))}
+    </div>
+  </div>
+
+</section>
+
+<script is:inline>
+  (function() {
+    function setupStoreRail() {
+      const storeBtns = document.querySelectorAll("[data-store-target]");
+      const budgetBtns = document.querySelectorAll("[data-budget-target]");
+
+      let activeStore = "all";
+      let activeCategory = "all";
+
+      window.addEventListener("deals-filter", (e) => {
+        if (!e.detail) return;
+        if (e.detail.store !== undefined) {
+          activeStore = e.detail.store;
+          updateStoreUI();
+        }
+        if (e.detail.category !== undefined) {
+          activeCategory = e.detail.category;
+          updateBudgetUI();
+        }
+      });
+
+      function updateStoreUI() {
+        storeBtns.forEach((btn) => {
+          const storeId = btn.getAttribute("data-store-target");
+          const container = btn.querySelector("div");
+          if (storeId === activeStore) {
+            btn.classList.add("scale-105");
+            if (container) {
+              container.classList.add("ring-2", "ring-emerald-400", "bg-slate-800");
+            }
+          } else {
+            btn.classList.remove("scale-105");
+            if (container) {
+              container.classList.remove("ring-2", "ring-emerald-400", "bg-slate-800");
+            }
+          }
+        });
+      }
+
+      function updateBudgetUI() {
+        budgetBtns.forEach((btn) => {
+          const budgetId = btn.getAttribute("data-budget-target");
+          if (budgetId === activeCategory) {
+            btn.className = "budget-fast-pill inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold shrink-0 transition-all cursor-pointer border bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20";
+          } else {
+            btn.className = "budget-fast-pill inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold shrink-0 transition-all cursor-pointer border bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border-white/10 hover:border-emerald-500/30";
+          }
+        });
+      }
+
+      storeBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const storeId = btn.getAttribute("data-store-target") || "all";
+          activeStore = activeStore === storeId ? "all" : storeId;
+          updateStoreUI();
+
+          window.dispatchEvent(new CustomEvent("deals-filter", {
+            detail: { store: activeStore, category: activeCategory }
+          }));
+
+          const dealsSection = document.getElementById("deals");
+          if (dealsSection && window.scrollY < dealsSection.offsetTop - 150) {
+            dealsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        });
+      });
+
+      budgetBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const budgetId = btn.getAttribute("data-budget-target") || "all";
+          activeCategory = budgetId;
+          updateBudgetUI();
+
+          window.dispatchEvent(new CustomEvent("deals-filter", {
+            detail: { store: activeStore, category: activeCategory }
+          }));
+
+          const dealsSection = document.getElementById("deals");
+          if (dealsSection && window.scrollY < dealsSection.offsetTop - 150) {
+            dealsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        });
+      });
+    }
+
+    setupStoreRail();
+    document.addEventListener("astro:after-swap", setupStoreRail);
+    document.addEventListener("astro:page-load", setupStoreRail);
+  })();
+</script>

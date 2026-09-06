@@ -1,37 +1,252 @@
 ---
-import BrandLogo from './BrandLogo.astro';
+interface Props {
+  activePath?: string;
+}
+
+const { activePath = Astro.url.pathname } = Astro.props;
+
+const navItems = [
+  { label: "Live Deals", href: "/livedeals", isCurrent: activePath === "/livedeals" || activePath.startsWith("/livedeals"), badge: null },
+  { label: "Stores", href: "/livedeals#stores", isCurrent: false, badge: null },
+  { label: "Blog", href: "/blog", isCurrent: activePath.startsWith("/blog"), badge: "Insights" },
+  { label: "About", href: "/about", isCurrent: activePath === "/about", badge: null },
+];
 ---
 
-<header class="sticky top-0 z-50 w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-    
-    {/* Left Identity */}
-    <a href="/" class="flex items-center gap-2.5 group decoration-transparent" aria-label="DealsHub India Home">
-      <BrandLogo size={28} gradientId="logo-grad" />
-      <span class="text-lg font-black tracking-tight text-slate-800 dark:text-slate-100 uppercase">
-        DealsHub<span class="text-emerald-600">India</span>
-      </span>
-    </a>
+<header class="sticky top-0 z-50 w-full glass-nav transition-all duration-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16 gap-3 sm:gap-4">
+      
+      <!-- Brand Logo -->
+      <a href="/" class="flex items-center gap-2 group shrink-0 focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-lg p-1">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-slate-950 font-black shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+        </div>
+        <div class="flex flex-col leading-none">
+          <div class="flex items-center gap-1">
+            <span class="font-extrabold text-xl tracking-tight text-white group-hover:text-emerald-300 transition-colors">DealsHub</span>
+            <span class="text-emerald-400 font-extrabold text-xl">.in</span>
+          </div>
+          <span class="text-[10px] text-slate-400 uppercase font-semibold tracking-wider">India’s Loot Hunter</span>
+        </div>
+      </a>
 
-    {/* Center Nav */}
-    <nav class="hidden md:flex items-center gap-8 text-xs font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase">
-      <a href="/" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Deals</a>
-      <a href="/livedeals" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Live Alerts</a>
-      <a href="/blog" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Insights</a>
-      <a href="/about" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Our Story</a>
-    </nav>
-
-    {/* Right CTA */}
-    <div class="flex items-center gap-4">
-      <a 
-        href="https://whatsapp.com/channel/0029Va8sOrp4SpkEQKVElV1i" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] tracking-widest rounded-lg shadow-sm hover:shadow uppercase transition-all"
+      <!-- Real-Time Live Activity Pill -->
+      <a
+        href="/livedeals"
+        class="hidden xl:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 shadow-[0_0_12px_rgba(34,197,94,0.12)] shrink-0 transition-all group"
       >
-        Join WhatsApp Channel
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        <span class="text-xs font-bold text-emerald-300 group-hover:text-emerald-200 tracking-tight">⚡ 200+ Live Deals Stream</span>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav class="hidden md:flex items-center gap-1 lg:gap-2">
+        {navItems.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              "relative inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all group/nav",
+              item.isCurrent
+                ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 shadow-sm font-semibold"
+                : "text-slate-300 hover:text-white hover:bg-slate-800/60"
+            ]}
+          >
+            <span>{item.label}</span>
+            {item.badge && (
+              <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-extrabold uppercase tracking-wide bg-emerald-500/20 text-emerald-300 border border-emerald-500/35 shadow-[0_0_8px_rgba(16,185,129,0.2)] group-hover/nav:bg-emerald-500/30 group-hover/nav:text-emerald-200 transition-colors">
+                {item.badge}
+              </span>
+            )}
+          </a>
+        ))}
+      </nav>
+
+      <!-- Search Trigger & Actions -->
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        
+        <!-- Instant Search Trigger (Ctrl+K) -->
+        <button
+          type="button"
+          id="global-search-trigger"
+          aria-label="Search deals"
+          class="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-white/10 hover:border-emerald-500/40 text-slate-400 hover:text-slate-200 text-xs sm:text-sm font-normal transition-all shadow-inner group"
+        >
+          <svg class="w-4 h-4 text-slate-400 group-hover:text-emerald-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <span class="hidden sm:inline text-slate-400">Search...</span>
+          <kbd class="hidden md:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-slate-900 border border-slate-700 rounded shadow-sm">
+            ⌘K
+          </kbd>
+        </button>
+
+        <!-- Balanced Dual Community Action Buttons (WhatsApp & Telegram) -->
+        <div class="flex items-center gap-1.5 sm:gap-2">
+          <!-- WhatsApp Channel -->
+          <a
+            href="https://whatsapp.com/channel/0029Vb81sJqGk1FxL7t9lW0h"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="relative inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 text-xs sm:text-sm font-bold shadow-md shadow-[#25D366]/20 transition-all hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#25D366]"
+            title="Join WhatsApp Channel (100k+ Followers)"
+            aria-label="Join WhatsApp Channel"
+          >
+            <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+            </svg>
+            <span class="hidden sm:inline whitespace-nowrap">WhatsApp</span>
+            <span class="hidden lg:inline-flex items-center text-[10px] bg-black/15 px-1.5 py-0.2 rounded-full font-bold">100k+</span>
+          </a>
+
+          <!-- Telegram Channel -->
+          <a
+            href="https://t.me/DealsHubIndia"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="relative inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#0088cc] hover:bg-[#0077b5] text-white text-xs sm:text-sm font-semibold shadow-md shadow-[#0088cc]/20 transition-all hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#0088cc]"
+            title="Join Telegram Channel (15k+ Hunters)"
+            aria-label="Join Telegram Channel"
+          >
+            <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .4z"/>
+            </svg>
+            <span class="hidden sm:inline whitespace-nowrap">Telegram</span>
+            <span class="hidden lg:inline-flex items-center text-[10px] bg-white/20 px-1.5 py-0.2 rounded-full font-bold">15k+</span>
+          </a>
+        </div>
+
+        <!-- Mobile Menu Toggle Button -->
+        <button
+          type="button"
+          id="mobile-menu-btn"
+          aria-expanded="false"
+          aria-controls="mobile-nav-menu"
+          aria-label="Toggle navigation menu"
+          class="md:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 border border-white/5 focus:outline-none"
+        >
+          <svg id="menu-open-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <svg id="menu-close-icon" class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Mobile Drawer Menu -->
+  <div id="mobile-nav-menu" class="hidden md:hidden border-t border-white/10 bg-slate-950/95 backdrop-blur-2xl px-4 pt-3 pb-6 space-y-3">
+    <nav class="flex flex-col space-y-1">
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          class:list={[
+            "flex items-center justify-between px-3 py-2 rounded-lg text-base font-medium transition-colors",
+            item.isCurrent
+              ? "text-emerald-400 bg-emerald-500/10 font-semibold"
+              : "text-slate-300 hover:text-white hover:bg-slate-800/60"
+          ]}
+        >
+          <span>{item.label}</span>
+          {item.badge && (
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-bold uppercase tracking-wide bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              {item.badge}
+            </span>
+          )}
+        </a>
+      ))}
+    </nav>
+    <div class="pt-2 border-t border-white/10 grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <a
+        href="https://whatsapp.com/channel/0029Vb81sJqGk1FxL7t9lW0h"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 font-bold text-sm shadow-md transition-colors"
+      >
+        <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+        <span>Join WhatsApp (100k+)</span>
+      </a>
+      <a
+        href="https://t.me/DealsHubIndia"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[#0088cc] hover:bg-[#0077b5] text-white font-medium text-sm shadow-md transition-colors"
+      >
+        <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .4z"/>
+        </svg>
+        <span>Join Telegram (15k+)</span>
       </a>
     </div>
-
   </div>
 </header>
+
+<script is:inline>
+  (function() {
+    function setupHeader() {
+      const menuBtn = document.getElementById("mobile-menu-btn");
+      const mobileMenu = document.getElementById("mobile-nav-menu");
+      const openIcon = document.getElementById("menu-open-icon");
+      const closeIcon = document.getElementById("menu-close-icon");
+      const searchTrigger = document.getElementById("global-search-trigger");
+
+      if (menuBtn && mobileMenu) {
+        menuBtn.addEventListener("click", () => {
+          const isExpanded = menuBtn.getAttribute("aria-expanded") === "true";
+          menuBtn.setAttribute("aria-expanded", String(!isExpanded));
+          mobileMenu.classList.toggle("hidden");
+          if (openIcon && closeIcon) {
+            openIcon.classList.toggle("hidden");
+            closeIcon.classList.toggle("hidden");
+          }
+        });
+      }
+
+      // Handle search trigger — focus the right input depending on current page
+      function focusSearchInput() {
+        // On /livedeals, focus the live stream search bar
+        const liveInput = document.getElementById("live-search-input");
+        if (liveInput) {
+          liveInput.focus();
+          liveInput.scrollIntoView({ behavior: "smooth", block: "center" });
+          return;
+        }
+        // On homepage, focus the hero editorial search bar
+        const heroInput = document.getElementById("hero-editorial-search-input");
+        if (heroInput) {
+          heroInput.focus();
+          heroInput.scrollIntoView({ behavior: "smooth", block: "center" });
+          return;
+        }
+        // Fallback: navigate to livedeals
+        window.location.href = "/livedeals";
+      }
+
+      if (searchTrigger) {
+        searchTrigger.addEventListener("click", focusSearchInput);
+      }
+
+      // Keyboard shortcut Ctrl+K / Cmd+K
+      document.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+          e.preventDefault();
+          focusSearchInput();
+        }
+      });
+    }
+
+    setupHeader();
+    document.addEventListener("astro:after-swap", setupHeader);
+  })();
+</script>
+

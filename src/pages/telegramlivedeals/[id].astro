@@ -32,7 +32,7 @@ const pageDescription = post.text ? post.text.slice(0, 160) : post.title;
     <!-- Blog-style Sub-Menu Bar -->
     <div class="blog-sub-menu glass-panel">
       <div class="sub-menu-left">
-        <a href="/telegramlivedeals" class="back-to-blog-btn">
+        <a href="/livedeals" class="back-to-blog-btn">
           <span class="arrow">←</span>
           <span>Back to Live Stream</span>
         </a>
@@ -62,7 +62,7 @@ const pageDescription = post.text ? post.text.slice(0, 160) : post.title;
           <div class="detail-content">
              {post.image && (
                <div class="detail-hero-img">
-                  <img src={post.image} alt={post.title} />
+                  <img src={post.image} alt={post.title} referrerpolicy="no-referrer" />
                </div>
              )}
 

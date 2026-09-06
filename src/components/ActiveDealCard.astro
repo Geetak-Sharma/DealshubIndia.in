@@ -1,5 +1,5 @@
 ---
-// ActiveDealCard.astro - Unified, clean deal card component
+// ActiveDealCard.astro - Upgraded, conversion-focused deal card component
 import { cleanTitle, cleanPriceString, cleanUrl } from "../lib/dealNormalizer.js";
 
 interface Props {
@@ -26,30 +26,78 @@ const {
   image
 } = Astro.props;
 
-const title = cleanTitle(rawTitle); const cleanLink = cleanUrl(link);
+const title = cleanTitle(rawTitle); 
+const cleanLink = cleanUrl(link);
 const cleanPrice = cleanPriceString(rawPrice);
 const cleanOriginal = rawOriginalPrice ? cleanPriceString(rawOriginalPrice) : undefined;
 
 const displayCategory = (category || "deal").toUpperCase();
-const displayMerchant = (merchant || "Store").toUpperCase();
+const rawMerchantUpper = (merchant || "Store").toUpperCase().trim();
+
+let storeColor = "var(--primary-color)";
+let storeBg = "rgba(34, 197, 94, 0.12)";
+let storeBorder = "rgba(34, 197, 94, 0.25)";
+let storeIcon = "🛍️";
+let storeName = rawMerchantUpper;
+
+if (rawMerchantUpper.includes("AMAZON")) {
+  storeColor = "var(--store-amazon, #f59e0b)";
+  storeBg = "rgba(245, 158, 11, 0.12)";
+  storeBorder = "rgba(245, 158, 11, 0.3)";
+  storeIcon = "📦";
+  storeName = "AMAZON";
+} else if (rawMerchantUpper.includes("FLIPKART")) {
+  storeColor = "var(--store-flipkart, #3b82f6)";
+  storeBg = "rgba(59, 130, 246, 0.12)";
+  storeBorder = "rgba(59, 130, 246, 0.3)";
+  storeIcon = "🛒";
+  storeName = "FLIPKART";
+} else if (rawMerchantUpper.includes("MYNTRA")) {
+  storeColor = "var(--store-myntra, #f43f5e)";
+  storeBg = "rgba(244, 63, 94, 0.12)";
+  storeBorder = "rgba(244, 63, 94, 0.3)";
+  storeIcon = "💖";
+  storeName = "MYNTRA";
+} else if (rawMerchantUpper.includes("TELEGRAM")) {
+  storeColor = "var(--store-telegram, #0088cc)";
+  storeBg = "rgba(0, 136, 204, 0.12)";
+  storeBorder = "rgba(0, 136, 204, 0.3)";
+  storeIcon = "⚡";
+  storeName = "TELEGRAM";
+}
 
 const sellingNum = parseFloat(cleanPrice.replace(/[^\d.]/g, "")) || 0;
 const originalNum = parseFloat(cleanOriginal?.replace(/[^\d.]/g, "") || "") || 0;
 
-let discountPercent = 0;
+let discountText = "";
 if (originalNum > 0 && sellingNum > 0 && originalNum > sellingNum) {
-  discountPercent = Math.round(((originalNum - sellingNum) / originalNum) * 100);
+  const discountPercent = Math.round(((originalNum - sellingNum) / originalNum) * 100);
+  const savings = Math.round(originalNum - sellingNum);
+  if (discountPercent >= 10) {
+    discountText = `-${discountPercent}% OFF`;
+  } else if (savings > 50) {
+    discountText = `Save ₹${savings.toLocaleString("en-IN")}`;
+  }
 }
 ---
 
-<div class={`home-deal-card ${isLoot ? "home-deal-card--loot" : ""}`}>
+<div class={`home-deal-card c-card-container ${isLoot ? "home-deal-card--loot" : ""}`}>
   {/* Card Header metadata */}
   <div class="hd-card__header">
     <div class="hd-card__merchant-tag">
-      <span class="hd-card__merchant-badge">{displayMerchant}</span>
+      <span 
+        class="hd-card__merchant-badge" 
+        style={`color: ${storeColor}; background-color: ${storeBg}; border-color: ${storeBorder};`}>
+        <span class="hd-card__store-icon">{storeIcon}</span>
+        {storeName}
+      </span>
       <span class="hd-card__cat-badge">{displayCategory}</span>
     </div>
-    <span class="hd-card__time">{timeLabel}</span>
+    
+    <div class="hd-card__live-indicator">
+      <span class="pulse-dot-sm"></span>
+      <span>⚡ Live Drop</span>
+    </div>
   </div>
 
   {/* Card Content Row */}
@@ -74,8 +122,8 @@ if (originalNum > 0 && sellingNum > 0 && originalNum > sellingNum) {
         {cleanOriginal && cleanOriginal !== cleanPrice && (
           <span class="hd-card__price-orig">₹{cleanOriginal}</span>
         )}
-        {discountPercent > 10 && (
-          <span class="hd-card__discount-pill">{discountPercent}% OFF</span>
+        {discountText && (
+          <span class="hd-card__discount-pill">{discountText}</span>
         )}
       </div>
     </div>
@@ -96,10 +144,12 @@ if (originalNum > 0 && sellingNum > 0 && originalNum > sellingNum) {
       data-url={cleanLink}
       aria-label="Share deal"
       type="button"
+      title="Copy Link"
     >
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/>
       </svg>
+      <span class="share-toast-pop">Copied! 📋</span>
     </button>
   </div>
 </div>
@@ -107,19 +157,20 @@ if (originalNum > 0 && sellingNum > 0 && originalNum > sellingNum) {
 <style>
   .home-deal-card {
     background-color: var(--surface-color);
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-md);
     padding: 12px;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
   }
 
   .home-deal-card:hover {
     transform: translateY(-2px);
-    border-color: var(--text-muted);
-    box-shadow: var(--shadow-md);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
   }
 
   .home-deal-card--loot {
@@ -141,18 +192,51 @@ if (originalNum > 0 && sellingNum > 0 && originalNum > sellingNum) {
   }
 
   .hd-card__merchant-badge {
-    color: var(--primary-color);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    border: 1px solid;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+  }
+
+  .hd-card__store-icon {
+    font-size: 11px;
   }
 
   .hd-card__cat-badge {
     color: var(--text-secondary);
     background-color: var(--surface-color-hover);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     padding: 2px 6px;
     border-radius: 4px;
+    font-size: 9.5px;
   }
 
-  .hd-card__time {
-    color: var(--text-muted);
+  .hd-card__live-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--primary-color);
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .pulse-dot-sm {
+    width: 5px;
+    height: 5px;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--primary-color);
+    animation: livePulse 1.5s infinite ease-in-out;
+  }
+
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.3); }
   }
 
   .hd-card__content {
@@ -162,8 +246,8 @@ if (originalNum > 0 && sellingNum > 0 && originalNum > sellingNum) {
   }
 
   .hd-card__image-container {
-    width: 60px;
-    height: 60px;
+    width: 64px;
+    height: 64px;
     border-radius: var(--radius-sm);
     overflow: hidden;
     background-color: #ffffff;
@@ -171,7 +255,8 @@ if (originalNum > 0 && sellingNum > 0 && originalNum > sellingNum) {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2px;
   }
 
   .hd-card__image {
@@ -214,32 +299,36 @@ if (originalNum > 0 && sellingNum > 0 && originalNum > sellingNum) {
     align-items: center;
     gap: 6px;
     flex-wrap: wrap;
+    margin-top: 2px;
   }
 
   .hd-card__price {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 900;
-    color: var(--text-primary);
+    color: var(--primary-color);
   }
 
   .hd-card__price--empty {
     color: var(--text-muted);
     font-weight: 700;
+    font-size: 12px;
   }
 
   .hd-card__price-orig {
-    font-size: 11px;
+    font-size: 11.5px;
     color: var(--text-muted);
     text-decoration: line-through;
   }
 
   .hd-card__discount-pill {
-    font-size: 9px;
+    font-size: 9.5px;
     font-weight: 900;
-    color: var(--primary-color);
-    background-color: rgba(34, 197, 94, 0.1);
-    padding: 2px 6px;
+    color: #ffffff;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    padding: 2px 7px;
     border-radius: var(--radius-full);
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 6px rgba(34, 197, 94, 0.25);
   }
 
   .hd-card__actions {
@@ -252,7 +341,7 @@ if (originalNum > 0 && sellingNum > 0 && originalNum > sellingNum) {
   .hd-card__cta-btn {
     flex: 1;
     height: 36px;
-    background-color: var(--primary-color);
+    background: linear-gradient(135deg, #22c55e, #16a34a);
     color: #ffffff;
     font-size: 12px;
     font-weight: 800;
@@ -263,11 +352,14 @@ if (originalNum > 0 && sellingNum > 0 && originalNum > sellingNum) {
     gap: 6px;
     border-radius: var(--radius-sm);
     text-decoration: none;
-    transition: filter 0.15s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
   }
 
   .hd-card__cta-btn:hover {
-    filter: brightness(1.08);
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(34, 197, 94, 0.35);
   }
 
   .cta-btn-icon {
@@ -275,21 +367,47 @@ if (originalNum > 0 && sellingNum > 0 && originalNum > sellingNum) {
   }
 
   .hd-card__share-btn {
+    position: relative;
     width: 36px;
     height: 36px;
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    background-color: transparent;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    background-color: rgba(255, 255, 255, 0.03);
+    transition: all 0.2s ease;
   }
 
   .hd-card__share-btn:hover {
-    background-color: var(--surface-color-hover);
+    background-color: rgba(255, 255, 255, 0.08);
     color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .share-toast-pop {
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: #10141d;
+    border: 1px solid var(--primary-color);
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+
+  .hd-card__share-btn.is-copied .share-toast-pop {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
 </style>

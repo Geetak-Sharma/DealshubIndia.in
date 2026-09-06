@@ -7,7 +7,7 @@ import '../styles/layout.css';
 import '../styles/components.css';
 import '../styles/utilities.css';
 import '../styles/glass3d.css';
-import StickyHeader from '../components/StickyHeader.astro';
+import GlobalHeader from '../components/GlobalHeader.astro';
 import StructuredData from '../components/StructuredData.astro';
 
 import MobileBottomDock from '../components/MobileBottomDock.astro';
@@ -99,8 +99,12 @@ const {
     </style>
     
     <script is:inline>
-      // Force Dark Mode globally
-      document.documentElement.setAttribute('data-theme', 'dark');
+      // Blocking script to prevent theme flash
+      (function() {
+        const savedTheme = localStorage.getItem('theme');
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme || systemTheme);
+      })();
     </script>
 	</head>
 	<body class="theme-aware">
@@ -111,12 +115,12 @@ const {
       <div class="liquid-blob blob-3"></div>
     </div>
     <div style="view-transition-name: site-header; position: relative; z-index: 200;">
-      <StickyHeader />
+      <GlobalHeader activePath={Astro.url.pathname} />
     </div>
 		<div style="view-transition-name: main-content; isolation: isolate;">
 			<slot />
 		</div>
-    <Footer />
+     <Footer />
     <StructuredData deals={deals} />
 
         <!-- Dynamic Command Palette -->
@@ -302,9 +306,3 @@ const {
     .cp-trigger { display: none !important; }
   </style>
 </html>
-
-
-
-
-
-

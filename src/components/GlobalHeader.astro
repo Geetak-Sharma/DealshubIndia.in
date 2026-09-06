@@ -1,0 +1,949 @@
+---
+// src/components/GlobalHeader.astro
+import BrandLogo from "./BrandLogo.astro";
+import FlashTicker from "./home/FlashTicker.astro";
+import { navItems, whatsAppConfig } from "../config/navigation";
+
+interface Props {
+  activePath?: string;
+}
+
+const { activePath = "" } = Astro.props;
+
+const isPathActive = (itemPath: string) => {
+  if (itemPath === "/") {
+    return activePath === "/" || activePath === "";
+  }
+  return activePath.startsWith(itemPath);
+};
+---
+
+<header id="global-site-header" class="global-header">
+  <FlashTicker />
+  <div class="global-header__inner">
+
+    <!-- ① Brand -->
+    <a href="/" class="global-header__brand" aria-label="DealsHub India – Best Deals">
+      <div class="brand-logo-wrapper">
+        <BrandLogo size={26} gradientId="hdr-logo-grad" />
+      </div>
+      <span class="global-header__logo-text">
+        DealsHub<span class="global-header__logo-accent">.in</span>
+      </span>
+    </a>
+
+    <!-- ② Desktop nav -->
+    <nav class="global-header__nav-desktop" aria-label="Main navigation">
+      {navItems.map(item => (
+        <a
+          href={item.path}
+          class={`desktop-nav-link ${isPathActive(item.path) ? 'desktop-nav-link--active' : ''}`}
+          aria-current={isPathActive(item.path) ? "page" : undefined}
+        >
+          {item.name}
+        </a>
+      ))}
+    </nav>
+
+    <!-- ③ Actions -->
+    <div class="global-header__actions">
+
+      <!-- Search -->
+      <button
+        id="search-trigger"
+        class="search-trigger-btn"
+        aria-label="Search deals, stores and coupons"
+        type="button"
+      >
+        <span class="search-trigger-content">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+          <span class="search-placeholder">Deals, stores, coupons…</span>
+        </span>
+        <kbd class="search-kbd-badge" aria-label="Keyboard shortcut">Ctrl + K</kbd>
+      </button>
+
+      <!-- Theme toggle -->
+      <button
+        id="theme-toggle-btn"
+        class="header-action-icon-btn theme-toggle-btn"
+        aria-label="Switch theme"
+        type="button"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="theme-sun-icon" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="theme-moon-icon" aria-hidden="true">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+        </svg>
+      </button>
+
+      <!-- WhatsApp CTA – desktop only -->
+      <a
+        href={whatsAppConfig.channelUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="whatsapp-cta-btn"
+        aria-label="Get deals on WhatsApp"
+      >
+        <svg class="whatsapp-btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+        <span>Get Deals on WhatsApp</span>
+      </a>
+
+      <!-- Hamburger – mobile only -->
+      <button
+        id="global-mobile-menu-trigger"
+        class="header-action-icon-btn menu-hamburger-btn"
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="global-mobile-drawer"
+        type="button"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="3" x2="21" y1="6" y2="6"/>
+          <line x1="3" x2="21" y1="12" y2="12"/>
+          <line x1="3" x2="15" y1="18" y2="18"/>
+        </svg>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- Mobile Drawer -->
+  <div
+    id="global-mobile-drawer"
+    class="mobile-drawer"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Navigation"
+  >
+    <div class="mobile-drawer__overlay" id="global-mobile-drawer-overlay" tabindex="-1"></div>
+
+    <div class="mobile-drawer__content">
+
+      <!-- Drawer head -->
+      <div class="mobile-drawer__head">
+        <a href="/" class="global-header__brand drawer-brand">
+          <BrandLogo size={22} gradientId="drawer-logo-grad" />
+          <span class="global-header__logo-text">DealsHub<span class="global-header__logo-accent">.in</span></span>
+        </a>
+        <button
+          id="global-mobile-menu-close"
+          class="header-action-icon-btn"
+          aria-label="Close menu"
+          type="button"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Nav section label -->
+      <p class="drawer-section-label">Browse</p>
+
+      <!-- Nav links -->
+      <nav class="mobile-drawer__links" aria-label="Mobile navigation">
+        {navItems.map(item => (
+          <a
+            href={item.path}
+            class={`drawer-link ${isPathActive(item.path) ? 'drawer-link--active' : ''}`}
+            aria-current={isPathActive(item.path) ? "page" : undefined}
+          >
+            <span class="drawer-link-text">{item.name}</span>
+            <svg
+              class="drawer-chevron"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
+          </a>
+        ))}
+      </nav>
+
+      <!-- Drawer footer -->
+      <div class="mobile-drawer__footer">
+        <a
+          href={whatsAppConfig.channelUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="drawer-whatsapp-btn"
+          aria-label="Get instant deal alerts on WhatsApp"
+        >
+          <svg class="whatsapp-btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+          </svg>
+          <span>Get Instant Deal Alerts</span>
+        </a>
+        <p class="drawer-footer-note">100k+ shoppers. Zero spam. Free forever.</p>
+      </div>
+
+    </div>
+  </div>
+</header>
+
+<script>
+  function initGlobalHeader() {
+    const header    = document.getElementById("global-site-header");
+    const themeBtn  = document.getElementById("theme-toggle-btn");
+    const trigger   = document.getElementById("global-mobile-menu-trigger");
+    const closeBtn  = document.getElementById("global-mobile-menu-close");
+    const drawer    = document.getElementById("global-mobile-drawer");
+    const overlay   = document.getElementById("global-mobile-drawer-overlay");
+
+    // ── Compact on scroll (rAF-debounced) ──────────────────────────────
+    let ticking = false;
+
+    const applyCompact = () => {
+      header?.classList.toggle("global-header--compact", window.scrollY > 24);
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(applyCompact);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    applyCompact();
+
+    // ── Mobile drawer ───────────────────────────────────────────────────
+    let returnFocus: HTMLElement | null = null;
+
+    const setDrawer = (open: boolean) => {
+      if (!drawer || !trigger) return;
+      drawer.classList.toggle("mobile-drawer--open", open);
+      trigger.setAttribute("aria-expanded", String(open));
+      document.body.style.overflow = open ? "hidden" : "";
+
+      if (open) {
+        returnFocus = document.activeElement as HTMLElement;
+        setTimeout(() => closeBtn?.focus(), 60);
+        document.addEventListener("keydown", onKey);
+        drawer.addEventListener("keydown", trapFocus);
+      } else {
+        document.removeEventListener("keydown", onKey);
+        drawer.removeEventListener("keydown", trapFocus);
+        returnFocus?.focus();
+      }
+    };
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setDrawer(false);
+    };
+
+    const trapFocus = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" || !drawer) return;
+      const els = drawer.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex="0"]'
+      );
+      const first = els[0];
+      const last  = els[els.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        last.focus(); e.preventDefault();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        first.focus(); e.preventDefault();
+      }
+    };
+
+    // Keyboard shortcut Ctrl + K
+    const onGlobalKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        const searchBtn = document.getElementById("search-trigger");
+        searchBtn?.click();
+      }
+    };
+    document.addEventListener("keydown", onGlobalKey);
+
+    trigger?.addEventListener("click",  () => setDrawer(true));
+    closeBtn?.addEventListener("click", () => setDrawer(false));
+    overlay?.addEventListener("click",  () => setDrawer(false));
+
+    // ── Theme ───────────────────────────────────────────────────────────
+    const getTheme = () =>
+      localStorage.getItem("theme") ??
+      (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+
+    const applyTheme = (t: string) => {
+      document.documentElement.setAttribute("data-theme", t);
+      document.body.classList.toggle("dark", t === "dark");
+    };
+
+    applyTheme(getTheme());
+
+    themeBtn?.addEventListener("click", () => {
+      const next = getTheme() === "dark" ? "light" : "dark";
+      localStorage.setItem("theme", next);
+      applyTheme(next);
+    });
+
+    // ── Cleanup before Astro swap ───────────────────────────────────────
+    document.addEventListener("astro:before-swap", () => {
+      window.removeEventListener("scroll", onScroll);
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", onKey);
+      drawer?.removeEventListener("keydown", trapFocus);
+    }, { once: true });
+  }
+
+  initGlobalHeader();
+  document.addEventListener("astro:after-swap", initGlobalHeader);
+</script>
+
+<style>
+  /* ─────────────────────────────────────────
+     HEADER SHELL
+  ───────────────────────────────────────── */
+  .global-header {
+    position: sticky;
+    top: 0;
+    z-index: 150;
+    width: 100%;
+    /* Dark: deep near-black glass */
+    background-color: rgba(10, 13, 18, 0.9);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    /* Hairline bottom separator */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    /* Clip inner height animation cleanly */
+    overflow: hidden;
+    transition:
+      background-color 0.4s ease,
+      box-shadow       0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  :global([data-theme="light"]) .global-header {
+    background-color: rgba(250, 251, 253, 0.93);
+    border-bottom-color: rgba(0, 0, 0, 0.05);
+  }
+
+  /* Compact: subtle elevation, more opaque */
+  .global-header--compact {
+    background-color: rgba(10, 13, 18, 0.96);
+    box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.28);
+  }
+
+  :global([data-theme="light"]) .global-header--compact {
+    background-color: rgba(250, 251, 253, 0.98);
+    box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.07);
+  }
+
+  /* ─────────────────────────────────────────
+     INNER ROW
+  ───────────────────────────────────────── */
+  .global-header__inner {
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 0 16px;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    /* Height shrink is the only moving dimension */
+    transition: height 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .global-header--compact .global-header__inner {
+    height: 50px;
+  }
+
+  /* ─────────────────────────────────────────
+     BRAND
+  ───────────────────────────────────────── */
+  .global-header__brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    flex-shrink: 0;
+    user-select: none;
+    border-radius: 6px;
+    padding: 3px 2px;
+    /* Opacity-only hover — no scale jitter */
+    transition: opacity 0.18s ease;
+  }
+
+  .global-header__brand:hover {
+    opacity: 0.75;
+  }
+
+  .global-header__brand:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 3px;
+  }
+
+  .brand-logo-wrapper {
+    line-height: 0;
+    /* Spring pop on logo mark only */
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .global-header__brand:hover .brand-logo-wrapper {
+    transform: scale(1.08) rotate(-5deg);
+  }
+
+  .global-header__logo-text {
+    font-size: 15.5px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.6px;
+    line-height: 1;
+  }
+
+  .global-header__logo-accent {
+    /* Small tonal shift, not screaming */
+    color: var(--primary-color);
+    opacity: 0.9;
+  }
+
+  /* ─────────────────────────────────────────
+     ACTIONS CLUSTER
+  ───────────────────────────────────────── */
+  .global-header__actions {
+    display: flex;
+    align-items: center;
+    /* Tighter on mobile so icons don't crowd */
+    gap: 6px;
+  }
+
+  /* Base icon button — transparent at rest */
+  .header-action-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .header-action-icon-btn:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: var(--text-primary);
+  }
+
+  :global([data-theme="light"]) .header-action-icon-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .header-action-icon-btn:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+
+  /* Theme toggle sits at lower visual weight */
+  .theme-toggle-btn {
+    opacity: 0.7;
+  }
+
+  .theme-toggle-btn:hover {
+    opacity: 1;
+  }
+
+  /* ─────────────────────────────────────────
+     SEARCH TRIGGER
+  ───────────────────────────────────────── */
+  .search-trigger-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    /* Icon-only on mobile: square pill */
+    width: 36px;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 18px;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition:
+      width            0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 0.18s ease,
+      border-color     0.18s ease,
+      box-shadow       0.18s ease,
+      color            0.18s ease;
+  }
+
+  :global([data-theme="light"]) .search-trigger-btn {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.06);
+  }
+
+  .search-trigger-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(34, 197, 94, 0.4);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.07);
+    color: var(--text-secondary);
+  }
+
+  :global([data-theme="light"]) .search-trigger-btn:hover {
+    background: rgba(0, 0, 0, 0.06);
+    border-color: rgba(34, 197, 94, 0.35);
+  }
+
+  .search-trigger-btn:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  .search-trigger-content {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  /* Text + badge hidden on mobile */
+  .search-placeholder,
+  .search-kbd-badge {
+    display: none;
+  }
+
+  /* ─────────────────────────────────────────
+     THEME ICON SWAP
+  ───────────────────────────────────────── */
+  .theme-sun-icon  { display: none;  }
+  .theme-moon-icon { display: block; }
+
+  :global([data-theme="dark"]) .theme-sun-icon  { display: block; }
+  :global([data-theme="dark"]) .theme-moon-icon { display: none;  }
+
+  /* ─────────────────────────────────────────
+     WHATSAPP CTA — desktop only
+  ───────────────────────────────────────── */
+  .whatsapp-cta-btn {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 13px;
+    background: #22C55E;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.15px;
+    border-radius: 17px;
+    text-decoration: none;
+    white-space: nowrap;
+    /* Restrained shadow — not neon */
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
+    transition:
+      background-color 0.18s ease,
+      box-shadow       0.18s ease,
+      transform        0.18s ease;
+  }
+
+  .whatsapp-cta-btn:hover {
+    background: #1db851;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
+  }
+
+  .whatsapp-cta-btn:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  .whatsapp-btn-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+
+  /* ─────────────────────────────────────────
+     DESKTOP NAV — hidden mobile
+  ───────────────────────────────────────── */
+  .global-header__nav-desktop {
+    display: none;
+  }
+
+  /* ═══════════════════════════════════════════
+     DESKTOP  ≥ 768px
+  ═══════════════════════════════════════════ */
+  @media (min-width: 768px) {
+    .global-header__inner {
+      padding: 0 28px;
+      height: 60px;
+      gap: 0;
+    }
+
+    .global-header--compact .global-header__inner {
+      height: 52px;
+    }
+
+    /* Nav sits between logo and actions, centred */
+    .global-header__nav-desktop {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .desktop-nav-link {
+      position: relative;
+      padding: 5px 10px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: 7px;
+      white-space: nowrap;
+      transition:
+        color            0.15s ease,
+        background-color 0.15s ease;
+    }
+
+    .desktop-nav-link:hover {
+      color: var(--text-primary);
+      background-color: rgba(255, 255, 255, 0.04);
+    }
+
+    :global([data-theme="light"]) .desktop-nav-link:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    .desktop-nav-link:focus-visible {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
+    }
+
+    /* Active underline — slides in from left */
+    .desktop-nav-link::after {
+      content: '';
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 2px;
+      height: 1.5px;
+      background: var(--primary-color);
+      border-radius: 1px;
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .desktop-nav-link:hover::after {
+      transform: scaleX(0.5);
+      opacity: 0.5;
+    }
+
+    /* Active page — full-width underline, heavier color */
+    .desktop-nav-link--active {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .desktop-nav-link--active::after {
+      transform: scaleX(1) !important;
+      opacity: 1 !important;
+    }
+
+    /* Search expands to pill input */
+    .search-trigger-btn {
+      width: 210px;
+      justify-content: space-between;
+      padding: 0 11px 0 12px;
+    }
+
+    .search-placeholder {
+      display: inline;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .search-kbd-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-family);
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 1;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      padding: 2px 5px 3px;
+      border-radius: 5px;
+      letter-spacing: 0.2px;
+      flex-shrink: 0;
+    }
+
+    :global([data-theme="light"]) .search-kbd-badge {
+      background: rgba(0, 0, 0, 0.04);
+      border-color: rgba(0, 0, 0, 0.07);
+    }
+
+    .whatsapp-cta-btn {
+      display: inline-flex;
+    }
+
+    .menu-hamburger-btn {
+      display: none;
+    }
+
+    .global-header__actions {
+      gap: 8px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .search-trigger-btn {
+      width: 248px;
+    }
+
+    .global-header__inner {
+      padding: 0 32px;
+    }
+  }
+
+  /* ═══════════════════════════════════════════
+     MOBILE DRAWER
+  ═══════════════════════════════════════════ */
+  .mobile-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    pointer-events: none;
+  }
+
+  .mobile-drawer--open {
+    pointer-events: auto;
+  }
+
+  /* Backdrop */
+  .mobile-drawer__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(4, 6, 10, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .mobile-drawer--open .mobile-drawer__overlay {
+    opacity: 1;
+  }
+
+  /* Sheet */
+  .mobile-drawer__content {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(300px, 85vw);
+    background: #111520;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 16px calc(20px + env(safe-area-inset-bottom));
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    border-left: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: -20px 0 60px rgba(0, 0, 0, 0.5);
+  }
+
+  :global([data-theme="light"]) .mobile-drawer__content {
+    background: #f8f9fb;
+    border-left-color: rgba(0, 0, 0, 0.05);
+    box-shadow: -20px 0 60px rgba(0, 0, 0, 0.08);
+  }
+
+  .mobile-drawer--open .mobile-drawer__content {
+    transform: translateX(0);
+  }
+
+  /* Drawer head row */
+  .mobile-drawer__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 20px;
+  }
+
+  :global([data-theme="light"]) .mobile-drawer__head {
+    border-bottom-color: rgba(0, 0, 0, 0.06);
+  }
+
+  /* Section label above links */
+  .drawer-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 4px;
+    margin-bottom: 6px;
+  }
+
+  /* Nav links */
+  .mobile-drawer__links {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+  }
+
+  .drawer-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 10px 11px 12px;
+    border-radius: 9px;
+    font-size: 14.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    background: transparent;
+    border: 1px solid transparent;
+    transition:
+      background-color 0.14s ease,
+      color            0.14s ease,
+      border-color     0.14s ease;
+  }
+
+  .drawer-link:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+    color: var(--text-primary);
+  }
+
+  :global([data-theme="light"]) .drawer-link:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  .drawer-link:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  /* Active page link */
+  .drawer-link--active {
+    background-color: rgba(34, 197, 94, 0.07);
+    border-color: rgba(34, 197, 94, 0.15);
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  .drawer-link--active .drawer-link-text {
+    color: #3dd67a;
+  }
+
+  :global([data-theme="light"]) .drawer-link--active .drawer-link-text {
+    color: #15803d;
+  }
+
+  /* Chevron — always visible but dimmer at rest */
+  .drawer-chevron {
+    opacity: 0.25;
+    flex-shrink: 0;
+    transition: opacity 0.14s ease, transform 0.14s ease;
+  }
+
+  .drawer-link:hover .drawer-chevron {
+    opacity: 0.6;
+    transform: translateX(2px);
+  }
+
+  .drawer-link--active .drawer-chevron {
+    opacity: 0.5;
+    color: var(--primary-color);
+    transform: translateX(2px);
+  }
+
+  /* Drawer footer */
+  .mobile-drawer__footer {
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  :global([data-theme="light"]) .mobile-drawer__footer {
+    border-top-color: rgba(0, 0, 0, 0.06);
+  }
+
+  .drawer-whatsapp-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 46px;
+    background: #22C55E;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1px;
+    border-radius: 10px;
+    text-decoration: none;
+    box-shadow: 0 2px 10px rgba(34, 197, 94, 0.2);
+    transition:
+      background-color 0.18s ease,
+      box-shadow       0.18s ease;
+  }
+
+  .drawer-whatsapp-btn:hover {
+    background: #1db851;
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+  }
+
+  .drawer-whatsapp-btn:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  /* Footer note */
+  .drawer-footer-note {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    text-align: center;
+    letter-spacing: 0.1px;
+    line-height: 1.4;
+  }
+
+  /* ─────────────────────────────────────────
+     REDUCED MOTION
+  ───────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .global-header,
+    .global-header__inner,
+    .brand-logo-wrapper,
+    .desktop-nav-link,
+    .desktop-nav-link::after,
+    .search-trigger-btn,
+    .drawer-link,
+    .drawer-chevron,
+    .mobile-drawer__overlay,
+    .mobile-drawer__content {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+</style>

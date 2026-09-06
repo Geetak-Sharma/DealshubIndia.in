@@ -24,7 +24,7 @@ export const GET = async ({ url }) => {
   if (allDeals.length === 0) {
     allDeals.push({
       id: "manual-deal-1", title: "🔥 MEGA DEAL: Local Setup Works!",
-      url: "https://t.me/DealsHubIndiaa", platform: "Telegram",
+      url: "https://t.me/DealsHubIndia", platform: "Telegram",
       price: "₹0", priceNum: 0, category: "other", originalPrice: "₹999",
       discount: "100%", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/512px-Telegram_logo.svg.png",
       badge: "🔥 Super Loot", timestamp: Date.now(), isLoot: true

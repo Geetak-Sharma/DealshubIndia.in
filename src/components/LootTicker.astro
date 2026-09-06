@@ -1,51 +1,235 @@
 ---
+export interface Props {
+  eventName?: string;
+  badgeText?: string;
+  targetTimestamp?: number;
+  ctaText?: string;
+  ctaHref?: string;
+  announcements?: any[];
+}
+
+const {
+  eventName = "PRIME DAY & FESTIVAL DROP RADAR",
+  badgeText = "GLITCH ALERTS ACTIVE",
+  targetTimestamp,
+  ctaText = "View Flash Deals",
+  ctaHref = "/livedeals?filter=loot",
+} = Astro.props;
+
+// Calculate server-side initial hours, mins, secs so it renders immediately without hydration flash
+const now = new Date();
+const cycleHours = 6;
+const currentHour = now.getHours();
+const nextHour = (Math.floor(currentHour / cycleHours) + 1) * cycleHours;
+const target = new Date(now);
+if (nextHour >= 24) {
+  target.setDate(target.getDate() + 1);
+  target.setHours(0, 0, 0, 0);
+} else {
+  target.setHours(nextHour, 0, 0, 0);
+}
+const serverTarget = targetTimestamp || target.getTime();
+const diffMs = Math.max(0, serverTarget - now.getTime());
+const initialHours = String(Math.floor(diffMs / (1000 * 60 * 60))).padStart(2, '0');
+const initialMins = String(Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+const initialSecs = String(Math.floor((diffMs % (1000 * 60)) / 1000)).padStart(2, '0');
 ---
-<div class="loot-ticker-container">
-  <div class="ticker-wrapper">
-    <div class="ticker-content" id="ticker">
-      <span>🔥 Amazon: iPhone 15 at ₹64,999! •</span>
-      <span>⚡ Flipkart: 70% Off on Nike Shoes •</span>
-      <span>💥 Myntra: End of Reason Sale LIVE •</span>
-      <span>🚀 Telegram: Exclusive Loot at 90% Off! •</span>
-      <span>🔥 Amazon: iPhone 15 at ₹64,999! •</span>
-      <span>⚡ Flipkart: 70% Off on Nike Shoes •</span>
+
+<aside
+  id="event-drop-ticker"
+  aria-label="Flash Sale Drop Radar and Countdown"
+  class="w-full bg-slate-950 border-b border-slate-800/90 text-white text-xs py-2 px-3 sm:px-4 lg:px-6 relative z-40 select-none shadow-sm backdrop-blur-md"
+  data-target-timestamp={targetTimestamp || ""}
+>
+  <!-- Subtle ambient glow background -->
+  <div class="absolute inset-0 bg-gradient-to-r from-sky-500/[0.04] via-transparent to-cyan-500/[0.04] pointer-events-none" aria-hidden="true"></div>
+
+  <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4 relative">
+    
+    <!-- Left Section: Event Branding & Live Radar Indicator -->
+    <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">
+      <a
+        href={ctaHref}
+        class="group inline-flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-lg"
+        title="Live Festival Drop Radar Active — Click to view deals"
+      >
+        <!-- Live Pulsating Beacon -->
+        <span class="relative flex h-2 sm:h-2.5 w-2 sm:w-2.5 shrink-0" aria-hidden="true">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 sm:h-2.5 w-2 sm:w-2.5 bg-cyan-400 shadow-[0_0_8px_#38bdf8]"></span>
+        </span>
+
+        <!-- Event Headline -->
+        <div class="flex items-center gap-2">
+          <span class="font-extrabold tracking-wide uppercase text-white group-hover:text-cyan-300 transition-colors text-xs sm:text-sm whitespace-nowrap">
+            <span class="hidden sm:inline">⚡ {eventName}</span>
+            <span class="sm:hidden">⚡ DROP RADAR</span>
+          </span>
+
+          <!-- Subtle Sub-Badge -->
+          <span class="hidden xl:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
+            {badgeText}
+          </span>
+        </div>
+      </a>
     </div>
+
+    <!-- Center Section: Digital Glow Countdown Timer -->
+    <div class="flex items-center justify-center shrink-0">
+      <div
+        class="countdown-container inline-flex items-center gap-1 sm:gap-1.5"
+        role="timer"
+        aria-live="polite"
+        aria-label="Time remaining until next flash deal drop"
+      >
+        <!-- Hours Box -->
+        <div class="flex items-center justify-center min-w-[2.5rem] sm:min-w-[2.85rem] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg bg-slate-900/90 border border-slate-700/80 shadow-[0_0_15px_rgba(56,189,248,0.15)] text-sky-300 font-mono font-bold text-xs sm:text-sm">
+          <span data-countdown-unit="hours">{initialHours}</span>
+          <span class="text-[10px] sm:text-xs text-sky-400/80 font-sans font-semibold ml-0.5">h</span>
+        </div>
+
+        <span class="text-sky-400/70 font-bold font-mono text-xs sm:text-sm animate-pulse" aria-hidden="true">:</span>
+
+        <!-- Minutes Box -->
+        <div class="flex items-center justify-center min-w-[2.5rem] sm:min-w-[2.85rem] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg bg-slate-900/90 border border-slate-700/80 shadow-[0_0_15px_rgba(56,189,248,0.15)] text-sky-300 font-mono font-bold text-xs sm:text-sm">
+          <span data-countdown-unit="mins">{initialMins}</span>
+          <span class="text-[10px] sm:text-xs text-sky-400/80 font-sans font-semibold ml-0.5">m</span>
+        </div>
+
+        <span class="text-sky-400/70 font-bold font-mono text-xs sm:text-sm animate-pulse" aria-hidden="true">:</span>
+
+        <!-- Seconds Box -->
+        <div class="flex items-center justify-center min-w-[2.5rem] sm:min-w-[2.85rem] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg bg-slate-900/90 border border-slate-700/80 shadow-[0_0_15px_rgba(56,189,248,0.15)] text-sky-300 font-mono font-bold text-xs sm:text-sm">
+          <span data-countdown-unit="secs">{initialSecs}</span>
+          <span class="text-[10px] sm:text-xs text-sky-400/80 font-sans font-semibold ml-0.5">s</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Section: Direct Action CTA & Community Links -->
+    <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+      <!-- Primary Action CTA Button -->
+      <a
+        href={ctaHref}
+        class="inline-flex items-center gap-1 sm:gap-1.5 bg-white hover:bg-slate-200 text-slate-950 font-bold text-[11px] sm:text-xs px-3 sm:px-4 py-1 sm:py-1.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] shrink-0 group/cta whitespace-nowrap"
+      >
+        <span class="hidden sm:inline">{ctaText}</span>
+        <span class="sm:hidden">Flash Deals</span>
+        <span class="inline-block transition-transform duration-200 group-hover/cta:translate-x-0.5" aria-hidden="true">→</span>
+      </a>
+
+      <!-- WhatsApp Quick Icon -->
+      <a
+        href="https://whatsapp.com/channel/0029Vb81sJqGk1FxL7t9lW0h"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="hidden sm:inline-flex items-center justify-center p-1.5 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366] text-[#25D366] hover:text-slate-950 border border-[#25D366]/30 transition-all shadow-sm group shrink-0"
+        title="Join DealsHub WhatsApp Alerts"
+        aria-label="Join DealsHub WhatsApp Channel"
+      >
+        <svg class="w-3.5 h-3.5 fill-current transition-transform group-hover:scale-110" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+      </a>
+
+      <!-- Telegram Quick Icon -->
+      <a
+        href="https://t.me/DealsHubIndia"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="hidden sm:inline-flex items-center justify-center p-1.5 rounded-xl bg-[#0088cc]/15 hover:bg-[#0088cc] text-sky-400 hover:text-white border border-[#0088cc]/30 transition-all shadow-sm group shrink-0"
+        title="Join DealsHub Telegram Channel"
+        aria-label="Join DealsHub Telegram Channel"
+      >
+        <svg class="w-3.5 h-3.5 fill-current transition-transform group-hover:scale-110" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .4z"/>
+        </svg>
+      </a>
+    </div>
+
   </div>
-</div>
+</aside>
 
-<style>
-  .loot-ticker-container {
-    width: 100%;
-    background: var(--text-primary);
-    color: var(--bg-color);
-    padding: 0.75rem 0;
-    overflow: hidden;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    font-weight: 800;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+<script>
+  let countdownInterval: ReturnType<typeof setInterval> | null = null;
+
+  function calculateDropTarget(customTarget?: number): number {
+    if (customTarget && customTarget > Date.now()) {
+      return customTarget;
+    }
+    const now = new Date();
+    const cycleHours = 6;
+    const currentHour = now.getHours();
+    const nextHour = (Math.floor(currentHour / cycleHours) + 1) * cycleHours;
+    const target = new Date(now);
+    if (nextHour >= 24) {
+      target.setDate(target.getDate() + 1);
+      target.setHours(0, 0, 0, 0);
+    } else {
+      target.setHours(nextHour, 0, 0, 0);
+    }
+    return target.getTime();
   }
 
-  .ticker-wrapper {
-    display: flex;
-    white-space: nowrap;
+  function setupEventCountdown() {
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
+
+    const ticker = document.getElementById('event-drop-ticker');
+    if (!ticker) return;
+
+    const customTargetStr = ticker.getAttribute('data-target-timestamp');
+    const customTarget = customTargetStr ? parseInt(customTargetStr, 10) : undefined;
+
+    const hoursEl = ticker.querySelector('[data-countdown-unit="hours"]');
+    const minsEl = ticker.querySelector('[data-countdown-unit="mins"]');
+    const secsEl = ticker.querySelector('[data-countdown-unit="secs"]');
+
+    if (!hoursEl || !minsEl || !secsEl) return;
+
+    let targetTime = calculateDropTarget(customTarget);
+
+    function tick() {
+      const now = Date.now();
+      let diff = targetTime - now;
+
+      if (diff <= 0) {
+        // Cycle completed! Immediately jump to next 6-hour cycle
+        targetTime = calculateDropTarget();
+        diff = Math.max(0, targetTime - now);
+      }
+
+      const totalSeconds = Math.floor(diff / 1000);
+      const hours = Math.floor(totalSeconds / 3600);
+      const mins = Math.floor((totalSeconds % 3600) / 60);
+      const secs = totalSeconds % 60;
+
+      const hStr = String(hours).padStart(2, '0');
+      const mStr = String(mins).padStart(2, '0');
+      const sStr = String(secs).padStart(2, '0');
+
+      if (hoursEl.textContent !== hStr) hoursEl.textContent = hStr;
+      if (minsEl.textContent !== mStr) minsEl.textContent = mStr;
+      if (secsEl.textContent !== sStr) secsEl.textContent = sStr;
+    }
+
+    tick();
+    countdownInterval = setInterval(tick, 1000);
   }
 
-  .ticker-content {
-    display: inline-block;
-    padding-left: 100%;
-    animation: ticker 25s linear infinite;
+  // Support both classic DOM loading and Astro View Transitions
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupEventCountdown);
+  } else {
+    setupEventCountdown();
   }
-
-  .ticker-content span {
-    margin-right: 2rem;
-  }
-
-  @keyframes ticker {
-    0% { transform: translate3d(0, 0, 0); }
-    100% { transform: translate3d(-100%, 0, 0); }
-  }
-</style>
+  document.addEventListener('astro:page-load', setupEventCountdown);
+  document.addEventListener('astro:before-swap', () => {
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
+  });
+</script>

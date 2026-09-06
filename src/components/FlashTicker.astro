@@ -1,52 +1,185 @@
 ---
+// src/components/home/FlashTicker.astro - Live Top Loot Ticker Bar
 ---
-<div class="ticker-wrap" aria-live="polite">
-  <div class="ticker">
-    <div class="ticker__item">🚀 ALPHA LOOT: SONY WH-1000XM5 AT LOWEST EVER! </div>
-    <div class="ticker__item">🔥 NEW DROP: ADIDAS ULTRABOOST 70% OFF! </div>
-    <div class="ticker__item">⚡️ SYSTEM ALERT: JOIN WHATSAPP FOR INSTANT ALERTS! </div>
-    <div class="ticker__item">💎 EXCLUSIVE: 10K+ HUNTERS ALREADY IN! </div>
-    <!-- Loop -->
-    <div class="ticker__item">🚀 ALPHA LOOT: SONY WH-1000XM5 AT LOWEST EVER! </div>
-    <div class="ticker__item">🔥 NEW DROP: ADIDAS ULTRABOOST 70% OFF! </div>
-    <div class="ticker__item">⚡️ SYSTEM ALERT: JOIN WHATSAPP FOR INSTANT ALERTS! </div>
-    <div class="ticker__item">💎 EXCLUSIVE: 10K+ HUNTERS ALREADY IN! </div>
+
+<div class="top-loot-ticker-bar" aria-label="Live Loot Notifications">
+  <div class="ticker-inner">
+    <div class="ticker-badge">
+      <span class="pulse-dot"></span>
+      <span class="badge-text">LIVE LOOT</span>
+    </div>
+    
+    <div class="ticker-scroll-viewport">
+      <div class="ticker-track animate-marquee">
+        <span class="ticker-item">
+          <strong class="text-amber-400">🔥 HOT:</strong> Smartwatch at 80% OFF
+        </span>
+        <span class="ticker-separator">•</span>
+        <span class="ticker-item">
+          <strong class="text-cyan-400">⚡ TELEGRAM:</strong> Join 15k+ Loot Hunters on Telegram ↗
+        </span>
+        <span class="ticker-separator">•</span>
+        <span class="ticker-item">
+          <strong class="text-emerald-400">💥 FLASH:</strong> Wireless Earbuds under ₹499
+        </span>
+        <span class="ticker-separator">•</span>
+        <span class="ticker-item">
+          <strong class="text-blue-400">🛍️ FLIPKART:</strong> Electronics Sale Up to 75% OFF
+        </span>
+        <span class="ticker-separator">•</span>
+        <span class="ticker-item">
+          <strong class="text-rose-400">💖 MYNTRA:</strong> Sneaker Drops starting ₹699
+        </span>
+        <span class="ticker-separator">•</span>
+        
+        <!-- Duplicated for seamless loop -->
+        <span class="ticker-item">
+          <strong class="text-amber-400">🔥 HOT:</strong> Smartwatch at 80% OFF
+        </span>
+        <span class="ticker-separator">•</span>
+        <span class="ticker-item">
+          <strong class="text-cyan-400">⚡ TELEGRAM:</strong> Join 15k+ Loot Hunters on Telegram ↗
+        </span>
+        <span class="ticker-separator">•</span>
+        <span class="ticker-item">
+          <strong class="text-emerald-400">💥 FLASH:</strong> Wireless Earbuds under ₹499
+        </span>
+        <span class="ticker-separator">•</span>
+        <span class="ticker-item">
+          <strong class="text-blue-400">🛍️ FLIPKART:</strong> Electronics Sale Up to 75% OFF
+        </span>
+        <span class="ticker-separator">•</span>
+        <span class="ticker-item">
+          <strong class="text-rose-400">💖 MYNTRA:</strong> Sneaker Drops starting ₹699
+        </span>
+        <span class="ticker-separator">•</span>
+      </div>
+    </div>
+
+    <a href="https://t.me/DealsHubIndia" target="_blank" rel="noopener noreferrer" class="ticker-telegram-cta">
+      <span>Join Telegram</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="7" y1="17" x2="17" y2="7"></line>
+        <polyline points="7 7 17 7 17 17"></polyline>
+      </svg>
+    </a>
   </div>
 </div>
 
 <style>
-  .ticker-wrap {
-    position: fixed;
-    top: 0;
-    left: 0;
+  .top-loot-ticker-bar {
     width: 100%;
+    background: rgba(13, 17, 23, 0.95);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    height: 34px;
+    font-size: 11.5px;
+    color: var(--text-primary);
     overflow: hidden;
-    height: 40px;
-    background-color: var(--bg-secondary);
-    border-bottom: 1px solid var(--card-border);
-    z-index: 10000;
+    position: relative;
+    z-index: 160;
+  }
+
+  .ticker-inner {
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 0 16px;
+    height: 100%;
     display: flex;
     align-items: center;
+    gap: 12px;
   }
 
-  .ticker {
-    display: inline-block;
+  .ticker-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #22c55e;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    background-color: #22c55e;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #22c55e;
+    animation: livePulse 1.5s infinite ease-in-out;
+  }
+
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.3); }
+  }
+
+  .ticker-scroll-viewport {
+    flex: 1;
+    overflow: hidden;
     white-space: nowrap;
-    animation: ticker 25s linear infinite;
+    mask-image: linear-gradient(to right, transparent, black 15px, black calc(100% - 15px), transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 15px, black calc(100% - 15px), transparent);
   }
 
-  .ticker__item {
-    display: inline-block;
-    padding: 0 4rem;
-    font-size: 0.7rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--text-primary);
+  .ticker-track {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
   }
 
-  @keyframes ticker {
-    0% { transform: translate3d(0, 0, 0); }
-    100% { transform: translate3d(-50%, 0, 0); }
+  .ticker-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .ticker-item strong {
+    font-weight: 700;
+  }
+
+  .text-amber-400 { color: #f59e0b; }
+  .text-cyan-400 { color: #0088cc; }
+  .text-emerald-400 { color: #22c55e; }
+  .text-blue-400 { color: #3b82f6; }
+  .text-rose-400 { color: #f43f5e; }
+
+  .ticker-separator {
+    color: var(--text-muted);
+    opacity: 0.5;
+  }
+
+  .ticker-telegram-cta {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    background: rgba(0, 136, 204, 0.15);
+    border: 1px solid rgba(0, 136, 204, 0.3);
+    color: #0088cc;
+    padding: 2px 10px;
+    border-radius: 9999px;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+
+  .ticker-telegram-cta:hover {
+    background: rgba(0, 136, 204, 0.25);
+    color: #38bdf8;
+    transform: translateY(-1px);
+  }
+
+  @media (min-width: 640px) {
+    .ticker-telegram-cta {
+      display: inline-flex;
+    }
   }
 </style>

@@ -1,27 +1,37 @@
-﻿---
-// CategoryStrip.astro - Horizontal scrollable filter strip for mobile, sticky on scroll
+---
+// CategoryStrip.astro - Interactive Category & Store Filter Bar
 ---
 
 <div class="category-strip-container">
   <div class="l-container">
-    <div class="category-strip" role="group" aria-label="Filter deals by category">
+    <div class="category-strip" role="group" aria-label="Filter deals by category and store">
       <button class="category-chip category-chip--active" data-category="all" type="button">
         All Drops
       </button>
       <button class="category-chip" data-category="tech" type="button">
-        Tech
+        Tech 💻
       </button>
       <button class="category-chip" data-category="fashion" type="button">
-        Fashion
+        Fashion 👗
       </button>
       <button class="category-chip" data-category="home" type="button">
-        Home &amp; Kitchen
+        Home &amp; Kitchen 🏠
       </button>
       <button class="category-chip" data-category="under-99" type="button">
-        Under ₹99
+        Under ₹99 ⚡
       </button>
       <button class="category-chip" data-category="loots" type="button">
         Loot Deals 🔥
+      </button>
+
+      <span class="strip-divider" aria-hidden="true"></span>
+
+      <!-- Store Filters -->
+      <button class="category-chip category-chip--amazon" data-category="amazon" type="button">
+        Amazon 📦
+      </button>
+      <button class="category-chip category-chip--flipkart" data-category="flipkart" type="button">
+        Flipkart 🛒
       </button>
     </div>
   </div>
@@ -54,17 +64,19 @@
 <style>
   .category-strip-container {
     position: sticky;
-    top: 56px; /* Sits exactly below sticky header */
+    top: 34px; /* Account for top ticker height */
     z-index: 90;
-    background-color: var(--bg-color);
-    border-bottom: 1px solid var(--border-color);
+    background-color: rgba(11, 14, 20, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     padding: 10px 0;
     transition: background-color 0.2s ease, border-color 0.2s ease;
   }
 
   @media (min-width: 768px) {
     .category-strip-container {
-      top: 64px;
+      top: 34px;
       padding: 12px 0;
     }
   }
@@ -76,11 +88,19 @@
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    padding-bottom: 2px; /* Avoid clipping drop shadows if any */
+    padding-bottom: 2px;
   }
 
   .category-strip::-webkit-scrollbar {
     display: none;
+  }
+
+  .strip-divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.12);
+    margin: 0 4px;
+    flex-shrink: 0;
   }
 
   .category-chip {
@@ -88,25 +108,41 @@
     height: 36px;
     padding: 0 16px;
     background-color: var(--surface-color-hover);
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     color: var(--text-secondary);
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 700;
     border-radius: var(--radius-full);
     cursor: pointer;
     white-space: nowrap;
-    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
 
   .category-chip:hover {
     color: var(--text-primary);
-    border-color: var(--text-muted);
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px);
   }
 
   .category-chip--active {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
     color: #ffffff !important;
-    box-shadow: 0 4px 10px rgba(34, 197, 94, 0.2);
+    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+  }
+
+  .category-chip--amazon.category-chip--active {
+    background-color: #f59e0b !important;
+    border-color: #f59e0b !important;
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+  }
+
+  .category-chip--flipkart.category-chip--active {
+    background-color: #3b82f6 !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
   }
 </style>

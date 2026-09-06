@@ -4,6 +4,13 @@
   --primary-color-rgb: 34, 197, 94;
   --accent-color: #0088cc; /* Telegram Blue */
 
+  /* Store Branding Colors */
+  --store-amazon: #f59e0b;   /* Amber */
+  --store-flipkart: #3b82f6; /* Blue */
+  --store-myntra: #f43f5e;   /* Rose */
+  --store-telegram: #0088cc; /* Cyan */
+  --store-loot: #22c55e;     /* Loot Green */
+
   /* Permanent Dark Mode Variables */
   --bg-color: #0B0E14;
   --surface-color: #131720;
@@ -186,3 +193,20 @@ button {
 }
 
 
+
+
+/* Top Ticker Marquee Animation */
+@keyframes marquee {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}

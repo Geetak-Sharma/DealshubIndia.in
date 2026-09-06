@@ -1,4 +1,893 @@
 ---
-const search = Astro.url.search;
-return Astro.redirect(`/telegramlivedeals${search}`, 301);
+export const prerender = false;
+import fs from 'node:fs/promises';
+import { getCollection } from 'astro:content';
+import { TelegramDataStore } from '../lib/telegramStore.js';
+import { extractCoupon, extractBankOffer, extractVariants, getBudgetTier } from '../lib/dealNormalizer.js';
+import Layout from '../layouts/Layout.astro';
+import LootTicker from '../components/LootTicker.astro';
+import Header from '../components/Header.astro';
+import StoreRail from '../components/StoreRail.astro';
+import FilterBar from '../components/FilterBar.astro';
+import DealCard from '../components/DealCard.astro';
+import TelegramBanner from '../components/TelegramBanner.astro';
+import Footer from '../components/Footer.astro';
+
+// 1. Fetch content collection deals
+let contentDeals: any[] = [];
+try {
+  contentDeals = await getCollection('deals');
+} catch (e) {
+  console.warn('[LiveDeals] Content deals error:', e);
+}
+
+// 2. Fetch fresh deals from telegram_posts.json (via TelegramDataStore)
+let rawDeals: any[] = [];
+try {
+  const storeData = TelegramDataStore.load();
+  if (storeData && Array.isArray(storeData.posts) && storeData.posts.length > 0) {
+    rawDeals = storeData.posts;
+  } else {
+    const tgURL = new URL('../data/telegram_posts.json', import.meta.url);
+    const tgData = await fs.readFile(tgURL, 'utf-8');
+    const parsed = JSON.parse(tgData);
+    rawDeals = parsed.posts || [];
+  }
+} catch (e) {
+  console.warn('[LiveDeals] Could not load telegram_posts.json fallback:', e);
+  try {
+    const cacheURL = new URL('../data/deals_cache.json', import.meta.url);
+    const cacheData = await fs.readFile(cacheURL, 'utf-8');
+    const parsed = JSON.parse(cacheData);
+    rawDeals = parsed.deals || [];
+  } catch (err) {
+    console.warn('[LiveDeals] Could not load deals_cache.json fallback:', err);
+  }
+}
+
+// Ensure deals are sorted by timestamp descending (newest first)
+rawDeals.sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0));
+
+// 3. Normalize deals with proper merchant, price, and clean product title extraction
+const normalizedDeals = rawDeals.map((item: any) => {
+  let rawTitle = (item.title || "").replace(/[\u200e\u200f\u200b\uFEFF]/g, "").trim();
+  let merchant = item.platform || "Amazon";
+
+  // Clean title: remove emojis, hashtags, spam suffixes, store prefixes
+  let title = rawTitle
+    .replace(/^[\p{Emoji}\s]+/gu, "")
+    .replace(/#\w+/gi, "")
+    .replace(/^(?:amazon|flipkart|myntra|ajio|croma|meesho)\s*[:|\-–]\s*/i, "")
+    .replace(/sale\s*-/gi, "")
+    .replace(/cashback card on all online transactions-?/gi, "")
+    .replace(/for under 99 deals join-?.*/gi, "")
+    .replace(/under 99 deals join-?.*/gi, "")
+    .replace(/_______________________________.*/gi, "")
+    .replace(/Master Link\s*:?.*/gi, "")
+    .replace(/\s*\.?\s*Apply\s*(?:₹\s*\d+|\d+%)\s*Off\s*Coupon.*$/i, "")
+    .replace(/\s*(?:@|at\s*|Rs\.?\s*|₹)\s*[0-9,]+\s*$/i, "")
+    .replace(/[:\.\-\s|–]+$/, "")
+    .trim();
+
+  if (title.includes("\n")) {
+    title = title.split("\n")[0].trim();
+  }
+
+  // Smart merchant detection
+  const fullText = `${item.checkoutUrl || ''} ${item.url || ''} ${rawTitle} ${item.text || ''}`.toLowerCase();
+  if (fullText.includes("amazon") || fullText.includes("amazn") || fullText.includes("amzn")) merchant = "Amazon";
+  else if (fullText.includes("flipkart") || fullText.includes("fkrt")) merchant = "Flipkart";
+  else if (fullText.includes("myntra") || fullText.includes("myntr")) merchant = "Myntra";
+  else if (fullText.includes("ajio") || fullText.includes("ajiio")) merchant = "Ajio";
+  else if (fullText.includes("croma")) merchant = "Croma";
+  else if (fullText.includes("meesho")) merchant = "Meesho";
+  else if (fullText.includes("tatacliq")) merchant = "Tata CLiQ";
+  else if (merchant === "Deal") merchant = "Amazon";
+
+  // Price extraction: match @123, at 123, ₹123, Rs. 123
+  let price = item.price;
+  const priceMatch = rawTitle.match(/(?:@|at\s*|₹|Rs\.?\s*)([0-9,]+)/i);
+  if ((!price || price === "Check Price") && priceMatch) {
+    price = priceMatch[1].replace(/,/g, "");
+  } else if (!price || price === "Check Price") {
+    price = item.priceNum && item.priceNum > 0 ? String(item.priceNum) : "Check Price";
+  }
+
+  const numPrice = parseFloat(String(price).replace(/[^0-9.]/g, "")) || 0;
+
+  // Discount extraction: match 34% Off, etc.
+  let discount = item.discount || "";
+  if (!discount) {
+    const discountMatch = rawTitle.match(/(\d+)%\s*(?:off|discount|coupon)/i) || (item.text || "").match(/(\d+)%\s*(?:off|discount|coupon)/i);
+    if (discountMatch) {
+      discount = `${discountMatch[1]}%`;
+    }
+  }
+
+  // Category detection
+  let category = item.category || "General";
+  const lowerCheck = `${rawTitle} ${item.text || ''} ${category}`.toLowerCase();
+  if (lowerCheck.match(/laptop|phone|smartphone|smartwatch|earbuds|headphones|mouse|keyboard|cpu|gpu|storage|ram|gadget|charger|geyser|fan|electronics|heater|cooler/)) {
+    category = "Tech";
+  } else if (lowerCheck.match(/shirt|jeans|clothing|shoes|t-shirt|kurta|dress|jacket|pants|sneakers|apparel|footwear/)) {
+    category = "Fashion";
+  } else if (lowerCheck.match(/bedsheet|cooker|bottle|kitchen|home|curtain|mop|light|decor|pillow|pan|induction/)) {
+    category = "Home";
+  } else if (item.isLoot) {
+    category = "Loot";
+  }
+
+  // 4 Visual Format Upgrades: Coupon, Bank Offer, Variants & Budget Tagging
+  const couponText = extractCoupon(rawTitle, item.text);
+  const bankOffer = extractBankOffer(rawTitle, item.text);
+  const variants = extractVariants(item, item.checkoutUrl || item.url);
+  const budgetTier = getBudgetTier(numPrice);
+
+  return {
+    id: item.id || `deal-${Math.random().toString(36).substring(7)}`,
+    title,
+    price,
+    numPrice,
+    originalPrice: item.originalPrice || (item.originalPriceNum ? String(item.originalPriceNum) : ""),
+    discount,
+    link: item.checkoutUrl || item.url || "#",
+    image: item.image || "",
+    merchant,
+    category,
+    isLoot: Boolean(item.isLoot || lowerCheck.includes("loot") || (discount && parseInt(discount) >= 70) || budgetTier === 'under99'),
+    date: item.timestamp ? new Date(item.timestamp) : new Date(),
+    couponText,
+    bankOffer,
+    variants,
+    budgetTier,
+  };
+});
+
+// Map content collection deals
+const mappedContentDeals = contentDeals.map((d: any) => {
+  const numP = parseFloat(String(d.data.price).replace(/[^0-9.]/g, "")) || 0;
+  return {
+    id: d.id,
+    title: d.data.title,
+    price: d.data.price,
+    numPrice: numP,
+    originalPrice: d.data.originalPrice || "",
+    discount: "",
+    link: d.data.link,
+    image: d.data.image,
+    merchant: "Amazon",
+    category: d.data.category || "Tech",
+    isLoot: d.data.isLoot,
+    date: d.data.date,
+    timestamp: new Date(d.data.date).getTime(),
+    budgetTier: getBudgetTier(numP),
+  };
+});
+
+const sortedContentDeals = mappedContentDeals.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+const allDeals = [...normalizedDeals, ...sortedContentDeals];
+
+const INITIAL_CHUNK = 24;
+const initialDeals = allDeals.slice(0, INITIAL_CHUNK);
+const totalDeals = allDeals.length;
+
+const pageTitle = "Live Deals Stream & Price Glitches (200+ Active Drops) | DealsHub India";
+const pageDescription = "Live 24/7 stream of verified Telegram loot deals, secret price glitches, ₹1 sales, and up to 90% discount alerts across Amazon, Flipkart, Myntra & Blinkit.";
 ---
+
+<Layout
+  title={pageTitle}
+  description={pageDescription}
+  includeHeader={false}
+  includeFooter={false}
+  deals={initialDeals}
+  activePath="/livedeals"
+>
+  <LootTicker />
+  <Header activePath="/livedeals" />
+
+  <main id="main-content" class="w-full">
+    <!-- Dedicated Live Deals Hero & Real-Time Monitor Bar -->
+    <section class="relative pt-6 pb-8 sm:pt-10 sm:pb-12 overflow-hidden border-b border-white/10 bg-slate-950/60">
+      <div class="absolute top-0 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+      <div class="absolute bottom-0 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 text-xs text-slate-400 mb-4" aria-label="Breadcrumb">
+          <a href="/" class="hover:text-emerald-400 transition-colors">Home</a>
+          <span>/</span>
+          <span class="text-white font-medium">Live Deals Stream</span>
+        </nav>
+
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+          <div class="max-w-2xl">
+            <!-- Real-time Live Badge -->
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-3 shadow-sm">
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span id="live-stream-badge">Live Telegram Feed Active</span>
+              <span class="text-emerald-500/40">•</span>
+              <span class="text-slate-300 font-semibold">Real-Time Sync</span>
+            </div>
+
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+              Live Deals Stream & Loot Drops
+            </h1>
+
+            <p class="text-sm sm:text-base text-slate-300 mt-2 leading-relaxed">
+              Unfiltered, real-time price glitch alerts, ₹1 flash loots, and up to 90% discounts streamed directly from Telegram. Verified 24/7.
+            </p>
+          </div>
+
+          <!-- Quick Stats Counter Row -->
+          <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
+            <div class="px-4 py-2.5 rounded-2xl bg-slate-900/90 border border-white/10 shadow-lg">
+              <div class="text-xs text-slate-400 font-medium">Active Drops</div>
+              <div id="stat-active-count" class="text-lg sm:text-xl font-black text-emerald-400">
+                {totalDeals}+
+              </div>
+            </div>
+
+            <div class="px-4 py-2.5 rounded-2xl bg-slate-900/90 border border-white/10 shadow-lg">
+              <div class="text-xs text-slate-400 font-medium">Sync Frequency</div>
+              <div class="text-lg sm:text-xl font-black text-cyan-400">⚡ Live</div>
+            </div>
+
+            <div class="px-4 py-2.5 rounded-2xl bg-slate-900/90 border border-white/10 shadow-lg">
+              <div class="text-xs text-slate-400 font-medium">Merchants</div>
+              <div class="text-lg sm:text-xl font-black text-white">100% Safe</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Instant Search Bar -->
+        <div class="mt-6 max-w-2xl">
+          <div class="relative flex items-center bg-slate-900/90 border border-white/15 focus-within:border-emerald-500/80 rounded-2xl shadow-xl backdrop-blur-xl transition-all p-1.5 sm:p-2">
+            <div class="pl-3 pr-2 text-slate-400 flex items-center">
+              <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+
+            <input
+              type="search"
+              id="live-search-input"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Search by product name, brand (Sony, boat), store (Amazon, Flipkart), or price..."
+              class="w-full bg-transparent text-white placeholder-slate-400 text-sm sm:text-base px-2 py-2 focus:outline-none"
+            />
+
+            <button
+              type="button"
+              id="live-search-clear"
+              aria-label="Clear search"
+              class="hidden px-2 text-slate-400 hover:text-white"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Store Rail & Fast-Pills -->
+    <StoreRail />
+
+    <!-- Filter Bar -->
+    <FilterBar />
+
+    <!-- Dedicated Live Deals Feed Section -->
+    <section id="deals" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
+      <!-- Feed Meta Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-white/10">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Streamed Deals Feed</h2>
+            <span class="pulse-indicator"></span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5">Chronological feed sorted newest first • Auto-synced with Telegram</p>
+        </div>
+
+        <div class="flex items-center gap-2.5 sm:gap-3 flex-wrap">
+          <span id="deals-counter-badge" class="text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-emerald-400">
+            Showing <span id="visible-count-num">{initialDeals.length}</span> of <span id="total-count-num">{totalDeals}</span> deals
+          </span>
+
+          <button
+            type="button"
+            id="refresh-feed-btn"
+            title="Refresh feed"
+            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 text-xs font-semibold transition-all cursor-pointer"
+          >
+            <span id="refresh-icon">🔄</span>
+            <span class="hidden sm:inline">Refresh</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Real-Time SSE New Drops Toast -->
+      <div
+        id="new-deals-toast"
+        class="hidden mb-6 p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/20 via-teal-500/25 to-emerald-500/20 border border-emerald-500/40 text-center cursor-pointer hover:bg-emerald-500/30 transition-all shadow-lg shadow-emerald-950/40 animate-pulse"
+        role="alert"
+      >
+        <div class="flex items-center justify-center gap-2">
+          <span class="text-sm">⚡</span>
+          <span class="text-xs sm:text-sm font-bold text-emerald-300">
+            <span id="new-deals-badge-count">1</span> new deal just dropped! Click here to view latest drops ↑
+          </span>
+        </div>
+      </div>
+
+      <!-- Empty / No Deals State -->
+      <div id="no-deals-found" class="hidden py-16 px-4 text-center glass-card rounded-2xl max-w-lg mx-auto my-8">
+        <div class="text-4xl mb-3">🔍</div>
+        <h3 class="text-lg font-bold text-white mb-1">No deals matching your filter</h3>
+        <p class="text-sm text-slate-400 mb-5">We couldn’t find any offers matching your current search or category filter.</p>
+        <button
+          type="button"
+          id="reset-filter-btn"
+          class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs sm:text-sm transition-all shadow-md shadow-emerald-500/20 cursor-pointer"
+        >
+          Reset All Filters
+        </button>
+      </div>
+
+      <!-- High-Performance Chunked Deals Grid -->
+      <div id="deals-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        {initialDeals.map((deal) => (
+          <DealCard
+            id={deal.id}
+            title={deal.title}
+            price={deal.price}
+            originalPrice={deal.originalPrice}
+            discount={deal.discount}
+            link={deal.link}
+            image={deal.image}
+            merchant={deal.merchant}
+            category={deal.category}
+            isLoot={deal.isLoot}
+            date={deal.date}
+            couponText={deal.couponText}
+            bankOffer={deal.bankOffer}
+            variants={deal.variants}
+            budgetTier={deal.budgetTier}
+          />
+        ))}
+      </div>
+
+      <!-- Load More Button -->
+      <div id="load-more-wrap" class="mt-10 mb-6 text-center">
+        <button
+          type="button"
+          id="load-more-btn"
+          class="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm border border-white/15 hover:border-emerald-500/50 shadow-xl shadow-slate-950/50 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+        >
+          <span>⚡ Load More Deals</span>
+          <span id="load-more-indicator" class="text-xs text-slate-400 font-normal">
+            ({initialDeals.length} of {totalDeals})
+          </span>
+        </button>
+      </div>
+
+      <!-- End of Stream Notice -->
+      <div id="end-of-feed" class="hidden mt-8 mb-4 text-center text-xs text-slate-400 font-semibold">
+        🎉 You're all caught up with today’s live stream! New deals drop every few minutes.
+      </div>
+    </section>
+
+    <!-- VIP Telegram Banner -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+      <TelegramBanner memberCount="15,000+" />
+    </div>
+  </main>
+
+  <Footer />
+
+  <script id="all-deals-data" type="application/json" set:html={JSON.stringify(allDeals)}></script>
+</Layout>
+
+<script is:inline>
+  (function() {
+    function initLiveDealsEngine() {
+      const dataScript = document.getElementById("all-deals-data");
+      if (!dataScript) return;
+
+      let allDeals = [];
+      try {
+        allDeals = JSON.parse(dataScript.textContent || "[]");
+      } catch(e) {
+        console.error("Failed to parse deals data:", e);
+        return;
+      }
+
+      const grid = document.getElementById("deals-grid");
+      const visibleNumEl = document.getElementById("visible-count-num");
+      const totalNumEl = document.getElementById("total-count-num");
+      const statActiveCount = document.getElementById("stat-active-count");
+      const noDealsEl = document.getElementById("no-deals-found");
+      const resetBtn = document.getElementById("reset-filter-btn");
+      const loadMoreWrap = document.getElementById("load-more-wrap");
+      const loadMoreBtn = document.getElementById("load-more-btn");
+      const loadMoreIndicator = document.getElementById("load-more-indicator");
+      const endOfFeed = document.getElementById("end-of-feed");
+      const newDealsToast = document.getElementById("new-deals-toast");
+      const newDealsCountEl = document.getElementById("new-deals-badge-count");
+      const refreshBtn = document.getElementById("refresh-feed-btn");
+      const refreshIcon = document.getElementById("refresh-icon");
+      const searchInput = document.getElementById("live-search-input");
+      const clearSearchBtn = document.getElementById("live-search-clear");
+
+      const PAGE_SIZE = 24;
+      let activeCategory = "all";
+      let activeStore = "all";
+      let activeQuery = "";
+      let currentRenderedCount = PAGE_SIZE;
+      let filteredDeals = [...allDeals];
+      let pendingNewDeals = [];
+
+      function getMerchantSvg(merchant) {
+        const m = (merchant || '').toLowerCase();
+        if (m.includes("amazon")) {
+          return '<svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24"><path d="M1.6 14.8c2.9 2.6 7 4.2 11.5 4.2 3.8 0 7.3-1.2 10.2-3.3.3-.2.2-.6-.1-.5-3.3 1.3-7.2 2-11.2 2-3.7 0-7.2-.8-10.2-2.4-.3-.2-.5.2-.2.5zm19.8-1.4c-.3-.4-1.9-.6-3.8.8-.2.1-.3 0-.2-.2.6-1 1.9-2.9 2.3-3.4.2-.2.4 0 .3.3-.3.9-.9 2-1 2.3-.1.3.2.3.4.2.7-.3 1.7-.8 2.2-1.1.2-.1.3.1.2.3-.2.3-.3.6-.4.9zM14.5 9.2v4c0 .8-.5 1.4-1.3 1.4-.7 0-1.1-.4-1.1-1.1 0-1.3 1.1-1.5 2.4-1.5v-.4c0-.7-.4-1.1-1.3-1.1-.6 0-1.2.2-1.6.5l-.4-1.1c.6-.4 1.4-.7 2.4-.7 1.8 0 3 .8 3 2.6v3.8c0 .5.1.9.2 1.1h-1.4c-.1-.2-.2-.5-.2-.9-.4.5-1.1 1-2.1 1-1.4 0-2.4-.9-2.4-2.2 0-1.7 1.3-2.5 3.3-2.5.4 0 .8.1 1.1.2v-.8c0-1-.6-1.5-1.6-1.5-.7 0-1.3.2-1.7.5l-.4-1.1c.6-.4 1.5-.6 2.5-.6 2 0 3.3 1 3.3 2.9z"/></svg>';
+        } else if (m.includes("flipkart")) {
+          return '<svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24"><path fill="#2874F0" d="M3 6h18l-2 15H5L3 6z"/><path fill="#FFE11B" d="M10 2h4v5h-4z"/><path fill="#FFE11B" d="M9 8h6v2.5h-3.5v2h3V15h-3v5H9V8z"/></svg>';
+        } else if (m.includes("myntra")) {
+          return '<svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="#FF3F6C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19l4.5-12 3.5 8 3.5-8L20 19"/></svg>';
+        } else if (m.includes("ajio")) {
+          return '<svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 5l5 14h-3l-1.2-3.5H11.2L10 19H7l5-14zm0 4.5l-1.5 4h3l-1.5-4z"/></svg>';
+        } else if (m.includes("croma")) {
+          return '<svg class="w-3.5 h-3.5 fill-none stroke-current stroke-[2.5] shrink-0" viewBox="0 0 24 24"><path stroke-linecap="round" d="M16 8.5A6.5 6.5 0 1 0 16 15.5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>';
+        } else if (m.includes("meesho")) {
+          return '<svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24"><path d="M5 19V7l5 6 4-6v12h-2.5V11.5L8.8 15h-.6L5.5 11.5V19H5zm14-12v12h-2.5V7H19z"/></svg>';
+        }
+        return '<svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24"><path d="M12 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>';
+      }
+
+      function getBadgeClass(merchant) {
+        const m = (merchant || '').toLowerCase();
+        if (m.includes("flipkart")) return "badge-flipkart";
+        if (m.includes("myntra")) return "badge-myntra";
+        if (m.includes("ajio")) return "badge-ajio";
+        if (m.includes("croma")) return "badge-croma";
+        if (m.includes("meesho")) return "badge-meesho";
+        return "badge-amazon";
+      }
+
+      function createCardHtml(deal) {
+        const targetLink = deal.link || "#";
+        const cleanedTitle = (deal.title || "Special Loot Deal").replace(/"/g, '&quot;');
+        const numPrice = parseFloat(String(deal.price || "0").replace(/[^0-9.]/g, "")) || 0;
+        const numOriginal = parseFloat(String(deal.originalPrice || "0").replace(/[^0-9.]/g, "")) || 0;
+        const discountVal = String(deal.discount || "").replace(/[^0-9]/g, "");
+        const savingsAmount = numOriginal > numPrice ? numOriginal - numPrice : 0;
+        const isLoot = deal.isLoot || (discountVal && parseInt(discountVal) >= 70);
+        const merchant = deal.merchant || "Amazon";
+        const category = deal.category || "General";
+        const merchantBadgeClass = getBadgeClass(merchant);
+        const merchantSvg = getMerchantSvg(merchant);
+
+        const priceDisplay = numPrice > 0 ? "₹" + numPrice.toLocaleString("en-IN") : deal.price;
+        const originalDisplay = numOriginal > numPrice ? "₹" + numOriginal.toLocaleString("en-IN") : "";
+
+        const displayImage = deal.image && !deal.image.includes("Telegram_logo") ? deal.image : null;
+        const fallbackSvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'><rect width='400' height='300' fill='%230f141d'/><circle cx='200' cy='120' r='42' fill='%23161f2f'/><text x='200' y='128' dominant-baseline='middle' text-anchor='middle' font-size='28'>🛍️</text><text x='200' y='195' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' font-weight='bold' fill='%2322c55e'>DealsHub Verified</text><text x='200' y='220' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='12' fill='%2394a3b8'>" + merchant + "</text></svg>";
+
+        let whatsappMsg = "🔥 *" + cleanedTitle + "*\n";
+        whatsappMsg += "💰 *Deal Price:* " + priceDisplay + "\n";
+        if (originalDisplay && discountVal) {
+          whatsappMsg += "🏷️ *Discount:* " + discountVal + "% OFF (MRP: " + originalDisplay + ")\n";
+        }
+        whatsappMsg += "⚡ *Store:* " + merchant + "\n";
+        whatsappMsg += "👉 *Grab Deal before it expires:*\n" + targetLink + "\n\n📢 Verified via DealsHub India 🇮🇳";
+
+        const whatsappUrl = "https://api.whatsapp.com/send?text=" + encodeURIComponent(whatsappMsg);
+
+        return `
+          <article
+            class="deal-card-item glass-card rounded-2xl overflow-hidden flex flex-col justify-between group relative border border-white/5 hover:border-emerald-500/30 transition-all duration-300"
+            data-id="${deal.id}"
+            data-category="${category.toLowerCase()}"
+            data-merchant="${merchant.toLowerCase()}"
+            data-price="${numPrice}"
+            data-original="${numOriginal}"
+            data-discount="${discountVal || "0"}"
+            data-loot="${isLoot ? "true" : "false"}"
+            data-title="${cleanedTitle.toLowerCase()}"
+          >
+            <div class="p-3.5 pb-0 flex items-center justify-between gap-2 z-10">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide shrink-0 ${merchantBadgeClass}">
+                  ${merchantSvg}
+                  <span>${merchant}</span>
+                </span>
+                ${isLoot ? `<span class="badge-loot inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0"><span>🔥</span><span>LOOT</span></span>` : ''}
+                ${deal.budgetTier === 'under99' ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-400/20 text-amber-300 border border-amber-400/40 shadow-sm shadow-amber-400/20 animate-pulse shrink-0"><span>⚡</span><span>UNDER ₹99 LOOT</span></span>` : ''}
+                ${deal.budgetTier === 'under499' ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0"><span>🪙</span><span>UNDER ₹499 VALUE STEAL</span></span>` : ''}
+              </div>
+
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 shadow-sm">
+                  <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  <span class="whitespace-nowrap">⚡ Live Drop</span>
+                </span>
+              </div>
+            </div>
+
+            <a href="${targetLink}" target="_blank" rel="noopener noreferrer sponsored" class="block relative w-full pt-[72%] px-4 overflow-hidden group/img transition-opacity">
+              <div class="absolute inset-x-3.5 inset-y-2 rounded-xl bg-slate-900/80 flex items-center justify-center p-3 border border-white/5 overflow-hidden group-hover/img:border-emerald-500/30 transition-all">
+                <img
+                  src="${displayImage || fallbackSvg}"
+                  alt="${cleanedTitle}"
+                  loading="lazy"
+                  decoding="async"
+                  referrerpolicy="no-referrer"
+                  class="max-h-full max-w-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
+                  onerror="this.onerror=null;this.src='${fallbackSvg}';"
+                />
+              </div>
+            </a>
+
+            <div class="p-4 pt-1 flex flex-col flex-grow justify-between gap-3">
+              <div>
+                <a href="${targetLink}" target="_blank" rel="noopener noreferrer sponsored" class="text-sm font-semibold text-white group-hover:text-emerald-300 transition-colors line-clamp-2 leading-snug" title="${cleanedTitle}">
+                  ${cleanedTitle}
+                </a>
+                <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1">
+                  <span class="capitalize">${category}</span>
+                  <span class="text-[10px] text-slate-400">Active Now</span>
+                </div>
+                ${deal.couponText ? `
+                  <div class="mt-2 p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-1.5 text-xs text-amber-200 shadow-sm">
+                    <span class="text-sm shrink-0 leading-none">✂️</span>
+                    <div class="leading-tight text-[11px]">
+                      <span class="font-bold text-amber-300">Action Required:</span> Tick <span class="underline decoration-amber-400 font-semibold text-white">&quot;${deal.couponText}&quot;</span> on ${merchant} before checkout.
+                    </div>
+                  </div>
+                ` : ''}
+                ${deal.bankOffer ? `
+                  <div class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-500/10 border border-blue-500/25 text-blue-300 text-[11px] font-medium self-start">
+                    <span>💳</span>
+                    <span class="line-clamp-1">${deal.bankOffer}</span>
+                  </div>
+                ` : ''}
+              </div>
+
+              <div class="pt-2.5 border-t border-white/5 flex items-baseline justify-between gap-2">
+                <div class="flex items-baseline gap-2 flex-wrap">
+                  <span class="text-xl font-black text-emerald-400 tracking-tight">${priceDisplay}</span>
+                  ${originalDisplay ? `<span class="text-xs text-slate-400 line-through">${originalDisplay}</span>` : ''}
+                </div>
+
+                <div class="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+                  ${savingsAmount > 0 ? `<span class="px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 text-[11px] font-bold shrink-0">Save ₹${savingsAmount.toLocaleString("en-IN")}</span>` : ''}
+                  ${discountVal && parseInt(discountVal) > 0 ? `<span class="px-2 py-0.5 rounded-md bg-rose-500/20 border border-rose-500/30 text-rose-400 text-xs font-black shrink-0 tracking-wide">🔥 ${discountVal}% OFF</span>` : ''}
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 pt-1">
+                <a href="${targetLink}" target="_blank" rel="noopener noreferrer sponsored" class="deal-grab-btn flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-slate-950 font-black text-xs sm:text-sm tracking-wide transition-all shadow-md shadow-emerald-500/20 active:scale-[0.98] group/btn">
+                  <span class="btn-text">Grab Deal</span>
+                  <span class="btn-icon font-extrabold text-sm leading-none transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5">↗</span>
+                </a>
+
+                <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="deal-whatsapp-btn inline-flex items-center justify-center w-10 h-10 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366] text-[#25D366] hover:text-white border border-[#25D366]/30 hover:border-transparent transition-all hover:scale-105 active:scale-95 shrink-0 shadow-sm" title="Share on WhatsApp" aria-label="Share deal on WhatsApp">
+                  <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                </a>
+
+                <button type="button" class="deal-share-btn inline-flex items-center justify-center w-10 h-10 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 transition-all hover:scale-105 active:scale-95 shrink-0" title="Copy deal link" aria-label="Copy deal link" data-url="${targetLink}" data-title="${cleanedTitle}">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                </button>
+              </div>
+
+              ${deal.variants && deal.variants.length > 0 ? `
+                <div class="pt-2 border-t border-white/5 mt-1">
+                  <div class="text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1">
+                    <span>🔗</span>
+                    <span>Variants (${deal.variants.length})</span>
+                  </div>
+                  <div class="flex flex-wrap gap-1">
+                    ${deal.variants.slice(0, 3).map(v => `
+                      <a href="${v.url}" target="_blank" rel="noopener noreferrer sponsored" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 hover:bg-white/10 text-slate-200 hover:text-emerald-300 border border-white/10 hover:border-emerald-500/30 text-[11px] font-medium transition-colors" title="${(v.title || '').replace(/"/g, '&quot;')}">
+                        <span class="max-w-[120px] truncate">${v.title}</span>
+                        ${v.price ? `<span class="text-emerald-400 font-bold font-mono">₹${v.price}</span>` : ''}
+                        <span class="text-[9px] text-slate-400">↗</span>
+                      </a>
+                    `).join('')}
+                    ${deal.variants.length > 3 ? `<span class="text-[10px] text-slate-400 self-center">+${deal.variants.length - 3} more</span>` : ''}
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          </article>
+        `;
+      }
+
+      function filterAndRender() {
+        const q = activeQuery.toLowerCase().trim();
+
+        filteredDeals = allDeals.filter((deal) => {
+          const cardCat = (deal.category || "").toLowerCase();
+          const cardMerchant = (deal.merchant || "").toLowerCase();
+          const cardPrice = parseFloat(String(deal.price || "0").replace(/[^0-9.]/g, "")) || 0;
+          const cardOriginal = parseFloat(String(deal.originalPrice || "0").replace(/[^0-9.]/g, "")) || 0;
+          const cardDiscount = parseFloat(String(deal.discount || "").replace(/[^0-9]/g, "")) || 0;
+          const cardIsLoot = Boolean(deal.isLoot);
+          const cardTitle = (deal.title || "").toLowerCase();
+
+          let matchCat = true;
+          if (activeCategory === "loot") {
+            matchCat = cardIsLoot || cardDiscount >= 70;
+          } else if (activeCategory === "under99") {
+            matchCat = cardPrice > 0 && cardPrice <= 99;
+          } else if (activeCategory === "under499") {
+            matchCat = cardPrice > 0 && cardPrice <= 499;
+          } else if (activeCategory === "under999") {
+            matchCat = cardPrice > 0 && cardPrice <= 999;
+          } else if (activeCategory === "error80") {
+            matchCat = cardDiscount >= 80 || cardIsLoot || (cardOriginal > 0 && (cardOriginal - cardPrice) / cardOriginal >= 0.8);
+          } else if (activeCategory === "tech") {
+            matchCat = cardCat.includes("tech") || cardCat.includes("cpu") || cardCat.includes("gpu") || cardCat.includes("laptop") || cardCat.includes("gadget");
+          } else if (activeCategory === "fashion") {
+            matchCat = cardCat.includes("fashion") || cardCat.includes("clothing") || cardCat.includes("apparel");
+          } else if (activeCategory === "home") {
+            matchCat = cardCat.includes("home") || cardCat.includes("kitchen");
+          } else if (activeCategory !== "all") {
+            matchCat = cardCat.includes(activeCategory);
+          }
+
+          let matchStore = true;
+          if (activeStore !== "all") {
+            matchStore = cardMerchant.includes(activeStore);
+          }
+
+          let matchQuery = true;
+          if (q.length > 0) {
+            matchQuery = cardTitle.includes(q) || cardMerchant.includes(q) || cardCat.includes(q);
+          }
+
+          return matchCat && matchStore && matchQuery;
+        });
+
+        currentRenderedCount = Math.min(PAGE_SIZE, filteredDeals.length);
+        renderGridContent();
+      }
+
+      function renderGridContent() {
+        const total = filteredDeals.length;
+        const visibleSlice = filteredDeals.slice(0, currentRenderedCount);
+
+        if (visibleNumEl) visibleNumEl.textContent = String(visibleSlice.length);
+        if (totalNumEl) totalNumEl.textContent = String(total);
+        if (statActiveCount) statActiveCount.textContent = total + "+";
+
+        if (total === 0) {
+          if (grid) grid.innerHTML = "";
+          if (noDealsEl) noDealsEl.classList.remove("hidden");
+          if (loadMoreWrap) loadMoreWrap.classList.add("hidden");
+          if (endOfFeed) endOfFeed.classList.add("hidden");
+          return;
+        }
+
+        if (noDealsEl) noDealsEl.classList.add("hidden");
+
+        if (grid) {
+          grid.innerHTML = visibleSlice.map(createCardHtml).join("");
+        }
+
+        if (currentRenderedCount < total) {
+          if (loadMoreWrap) loadMoreWrap.classList.remove("hidden");
+          if (loadMoreIndicator) loadMoreIndicator.textContent = `(${visibleSlice.length} of ${total})`;
+          if (endOfFeed) endOfFeed.classList.add("hidden");
+        } else {
+          if (loadMoreWrap) loadMoreWrap.classList.add("hidden");
+          if (endOfFeed && total > 0) endOfFeed.classList.remove("hidden");
+        }
+      }
+
+      if (loadMoreBtn) {
+        loadMoreBtn.addEventListener("click", () => {
+          if (navigator.vibrate) navigator.vibrate(20);
+          const nextCount = currentRenderedCount + PAGE_SIZE;
+          const nextSlice = filteredDeals.slice(currentRenderedCount, nextCount);
+
+          if (grid && nextSlice.length > 0) {
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = nextSlice.map(createCardHtml).join("");
+            while (tempDiv.firstChild) {
+              grid.appendChild(tempDiv.firstChild);
+            }
+          }
+
+          currentRenderedCount = Math.min(nextCount, filteredDeals.length);
+          if (visibleNumEl) visibleNumEl.textContent = String(currentRenderedCount);
+
+          if (currentRenderedCount >= filteredDeals.length) {
+            if (loadMoreWrap) loadMoreWrap.classList.add("hidden");
+            if (endOfFeed) endOfFeed.classList.remove("hidden");
+          } else {
+            if (loadMoreIndicator) loadMoreIndicator.textContent = `(${currentRenderedCount} of ${filteredDeals.length})`;
+          }
+        });
+      }
+
+      if (searchInput) {
+        let debounceTimer = null;
+        searchInput.addEventListener("input", () => {
+          activeQuery = searchInput.value;
+          if (clearSearchBtn) {
+            if (activeQuery.length > 0) clearSearchBtn.classList.remove("hidden");
+            else clearSearchBtn.classList.add("hidden");
+          }
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => {
+            filterAndRender();
+          }, 150);
+        });
+      }
+
+      if (clearSearchBtn && searchInput) {
+        clearSearchBtn.addEventListener("click", () => {
+          searchInput.value = "";
+          activeQuery = "";
+          clearSearchBtn.classList.add("hidden");
+          searchInput.focus();
+          filterAndRender();
+        });
+      }
+
+      window.addEventListener("deals-filter", (e) => {
+        if (!e.detail) return;
+        if (e.detail.category !== undefined) activeCategory = e.detail.category;
+        if (e.detail.store !== undefined) activeStore = e.detail.store;
+        filterAndRender();
+      });
+
+      if (resetBtn) {
+        resetBtn.addEventListener("click", () => {
+          activeCategory = "all";
+          activeStore = "all";
+          activeQuery = "";
+          if (searchInput) searchInput.value = "";
+          if (clearSearchBtn) clearSearchBtn.classList.add("hidden");
+
+          window.dispatchEvent(new CustomEvent("deals-filter", {
+            detail: { category: "all", store: "all" }
+          }));
+
+          filterAndRender();
+        });
+      }
+
+      if (refreshBtn) {
+        refreshBtn.addEventListener("click", async () => {
+          if (refreshIcon) refreshIcon.classList.add("animate-spin");
+          try {
+            const res = await fetch("/api/deals.json");
+            if (res.ok) {
+              const fresh = await res.json();
+              if (Array.isArray(fresh) && fresh.length > 0) {
+                const existingIds = new Set(allDeals.map(d => d.id));
+                const newlyAdded = fresh.filter(d => !existingIds.has(d.id));
+                if (newlyAdded.length > 0) {
+                  allDeals = [...newlyAdded, ...allDeals];
+                  filterAndRender();
+                }
+              }
+            }
+          } catch(err) {
+            console.warn("Manual refresh failed:", err);
+          } finally {
+            setTimeout(() => {
+              if (refreshIcon) refreshIcon.classList.remove("animate-spin");
+            }, 500);
+          }
+        });
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const urlCat = params.get("filter") || params.get("category");
+      const urlStore = params.get("store");
+      const urlQ = params.get("q");
+
+      if (urlCat) activeCategory = urlCat;
+      if (urlStore) activeStore = urlStore;
+      if (urlQ) {
+        activeQuery = urlQ;
+        if (searchInput) {
+          searchInput.value = urlQ;
+          if (clearSearchBtn) clearSearchBtn.classList.remove("hidden");
+        }
+      }
+
+      if (urlCat || urlStore || urlQ) {
+        filterAndRender();
+      }
+
+      // Auto-focus search if redirected from header search trigger
+      const focusParam = params.get("focusSearch");
+      if (focusParam === "1" && searchInput) {
+        setTimeout(() => {
+          searchInput.focus();
+          searchInput.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 200);
+      }
+
+      // Live SSE auto-update
+      let eventSource = null;
+      try {
+        eventSource = new EventSource("/api/tg-stream");
+        eventSource.onmessage = (e) => {
+          try {
+            const incoming = JSON.parse(e.data);
+            if (Array.isArray(incoming) && incoming.length > 0) {
+              const currentIds = new Set(allDeals.map(d => d.id));
+              const brandNew = incoming.filter(d => d && d.id && !currentIds.has(d.id));
+
+              if (brandNew.length > 0) {
+                pendingNewDeals.push(...brandNew);
+                allDeals = [...brandNew, ...allDeals];
+
+                if (newDealsToast && newDealsCountEl) {
+                  newDealsCountEl.textContent = String(pendingNewDeals.length);
+                  newDealsToast.classList.remove("hidden");
+                }
+              }
+            }
+          } catch(err) {}
+        };
+      } catch(err) {
+        console.warn("SSE error:", err);
+      }
+
+      if (newDealsToast) {
+        newDealsToast.addEventListener("click", () => {
+          newDealsToast.classList.add("hidden");
+          pendingNewDeals = [];
+          filterAndRender();
+          const dealsSec = document.getElementById("deals");
+          if (dealsSec) {
+            dealsSec.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        });
+      }
+
+      const pollTimer = setInterval(async () => {
+        try {
+          const res = await fetch("/api/deals.json");
+          if (res.ok) {
+            const latest = await res.json();
+            if (Array.isArray(latest)) {
+              const currentIds = new Set(allDeals.map(d => d.id));
+              const newItems = latest.filter(d => d && d.id && !currentIds.has(d.id));
+              if (newItems.length > 0) {
+                pendingNewDeals.push(...newItems);
+                allDeals = [...newItems, ...allDeals];
+                if (newDealsToast && newDealsCountEl) {
+                  newDealsCountEl.textContent = String(pendingNewDeals.length);
+                  newDealsToast.classList.remove("hidden");
+                }
+              }
+            }
+          }
+        } catch(e) {}
+      }, 45000);
+
+      window.addEventListener("beforeunload", () => {
+        clearInterval(pollTimer);
+        if (eventSource) eventSource.close();
+      });
+    }
+
+    initLiveDealsEngine();
+    document.addEventListener("astro:after-swap", initLiveDealsEngine);
+  })();
+</script>

@@ -1,544 +1,448 @@
 ---
-export interface Props {
+interface Props {
+  id?: string;
   title: string;
-  image: string;
-  price: string;
-  originalPrice?: string;
-  discount?: string;
-  url: string;
+  price: string | number;
+  originalPrice?: string | number;
+  discount?: string | number;
+  link?: string;
+  url?: string;
+  image?: string;
+  merchant?: string;
   platform?: string;
-  badge?: string;
-  timestamp?: number;
-  featured?: boolean;
+  category?: string;
   isLoot?: boolean;
+  date?: string | Date;
+  timestamp?: number | string | Date;
   insightBadge?: string;
-  explanation?: string;
+  couponText?: string;
+  bankOffer?: string;
+  variants?: Array<{ title: string; url: string; price?: string }>;
+  budgetTier?: string;
+  [key: string]: any;
 }
 
-const { title, image, price, originalPrice, discount, url, platform = '', badge, timestamp, featured = false, isLoot = false, insightBadge, explanation } = Astro.props;
+const {
+  id,
+  title,
+  price,
+  originalPrice,
+  discount,
+  link,
+  url,
+  image,
+  merchant,
+  platform,
+  category = "General",
+  isLoot = false,
+  date,
+  timestamp,
+  insightBadge,
+  couponText,
+  bankOffer,
+  variants = [],
+  budgetTier,
+} = Astro.props;
 
-// ---- Compute "Posted X mins ago" ----
-let timeAgo = '';
-if (timestamp) {
-  const diffMs = Date.now() - timestamp;
-  const mins = Math.floor(diffMs / 60000);
-  if (mins < 1) timeAgo = 'Just now';
-  else if (mins < 60) timeAgo = `${mins}m ago`;
-  else if (mins < 1440) timeAgo = `${Math.floor(mins / 60)}h ago`;
-  else timeAgo = `${Math.floor(mins / 1440)}d ago`;
+const targetLink = link || url || "#";
+const targetMerchant = merchant || platform || "Amazon";
+const targetDate = date || timestamp;
+
+// Clean up title
+const cleanedTitle = title
+  ? title.replace(/#\w+/gi, "").replace(/sale\s*-/gi, "").replace(/cashback card on all online transactions-?/gi, "").trim()
+  : "Special Loot Deal";
+
+// Format prices
+function parsePrice(val: string | number | undefined): number {
+  if (val === undefined || val === null) return 0;
+  if (typeof val === "number") return val;
+  const cleaned = val.toString().replace(/[^0-9.]/g, "");
+  return parseFloat(cleaned) || 0;
 }
 
-// ---- Smart Discount Calculation ----
-function parsePrice(s?: string): number {
-  if (!s) return 0;
-  const n = parseFloat(s.replace(/[^\d.]/g, ''));
-  return isNaN(n) ? 0 : n;
+const numPrice = parsePrice(price);
+const numOriginal = parsePrice(originalPrice);
+
+let discountPercent = discount ? discount.toString().replace(/[^0-9]/g, "") : "";
+if (!discountPercent && numOriginal > numPrice && numPrice > 0) {
+  discountPercent = Math.round(((numOriginal - numPrice) / numOriginal) * 100).toString();
 }
 
-const sellingNum = parsePrice(price);
-const originalNum = parsePrice(originalPrice);
+const savingsAmount = numOriginal > numPrice ? numOriginal - numPrice : 0;
 
-let smartDiscount = 0;
-if (originalNum > 0 && sellingNum > 0 && originalNum > sellingNum) {
-  smartDiscount = Math.round(((originalNum - sellingNum) / originalNum) * 100);
+// Format Merchant & Authentic Brand Accent Styling
+const merchantLower = targetMerchant.toLowerCase();
+let merchantLabel = "Amazon";
+let merchantBadgeClass = "badge-amazon";
+let storeKey = "amazon";
+
+if (merchantLower.includes("flipkart")) {
+  merchantLabel = "Flipkart";
+  merchantBadgeClass = "badge-flipkart";
+  storeKey = "flipkart";
+} else if (merchantLower.includes("myntra")) {
+  merchantLabel = "Myntra";
+  merchantBadgeClass = "badge-myntra";
+  storeKey = "myntra";
+} else if (merchantLower.includes("ajio")) {
+  merchantLabel = "Ajio";
+  merchantBadgeClass = "badge-ajio";
+  storeKey = "ajio";
+} else if (merchantLower.includes("croma")) {
+  merchantLabel = "Croma";
+  merchantBadgeClass = "badge-croma";
+  storeKey = "croma";
+} else if (merchantLower.includes("meesho")) {
+  merchantLabel = "Meesho";
+  merchantBadgeClass = "badge-meesho";
+  storeKey = "meesho";
+} else if (merchantLower.includes("blinkit") || merchantLower.includes("zepto") || merchantLower.includes("swiggy") || merchantLower.includes("instamart") || merchantLower.includes("quick")) {
+  merchantLabel = "Quick Commerce";
+  merchantBadgeClass = "badge-quick";
+  storeKey = "quick";
+} else if (merchantLower.includes("telegram")) {
+  merchantLabel = "Telegram";
+  merchantBadgeClass = "badge-telegram";
+  storeKey = "telegram";
 }
 
-if (smartDiscount === 0 && discount) {
-  const m = discount.match(/(\d+)/);
-  if (m) smartDiscount = parseInt(m[1], 10);
-}
-
-const showDiscount = smartDiscount > 10;
-const isDealLoot = isLoot || smartDiscount > 90;
-
-// ---- Cyberpunk / Neon Color Map ----
-function getPlatformColor(p: string): string {
-  switch (p) {
-    case 'Amazon':   return '#FF9900'; // Amazon Orange Glow
-    case 'Flipkart': return '#047BD5'; // Flipkart Blue Glow
-    case 'Myntra':   return '#FF3E6C'; // Myntra Pink Glow
-    case 'Ajio':     return '#2C3E50'; // Dark Slate
-    case 'Croma':    return '#00E5FF'; // Cyber Teal
-    case 'Meesho':   return '#F43397'; // Meesho Pink
-    case 'Nykaa':    return '#FC2779'; // Nykaa Pink
-    case 'JioMart':  return '#0078D4'; // Jio Blue
-    case 'Tata CLiQ':return '#E02020'; // Tata Red
-    default:         return '#00FF9D'; // Cyber Green
+// Time calculation
+let timeAgo = "Active Now";
+if (targetDate) {
+  const d = new Date(targetDate);
+  if (!isNaN(d.getTime())) {
+    const diffHours = Math.floor((Date.now() - d.getTime()) / (1000 * 60 * 60));
+    if (diffHours < 1) timeAgo = "Just dropped";
+    else if (diffHours < 24) timeAgo = `${diffHours}h ago`;
+    else timeAgo = `${Math.floor(diffHours / 24)}d ago`;
   }
 }
 
-const platformColor = getPlatformColor(platform);
-const hasImage = image && !image.includes('dummyimage') && !image.includes('placehold');
+// 1-Click WhatsApp Share text format
+const priceDisplay = numPrice > 0 ? `₹${numPrice.toLocaleString("en-IN")}` : (price ? `₹${price}` : "Special Price");
+const mrpDisplay = numOriginal > numPrice ? `₹${numOriginal.toLocaleString("en-IN")}` : "";
+const savingsDisplay = savingsAmount > 0 ? `₹${savingsAmount.toLocaleString("en-IN")}` : "";
 
-const transitionSlug = url
-  .replace(/^https?:\/\//, '')
-  .replace(/[^a-z0-9]/gi, '-')
-  .replace(/-+/g, '-')
-  .slice(0, 60);
+let whatsappMsg = `🔥 *${cleanedTitle}*\n`;
+whatsappMsg += `💰 *Deal Price:* ${priceDisplay}\n`;
+if (mrpDisplay && discountPercent) {
+  whatsappMsg += `🏷️ *Discount:* ${discountPercent}% OFF (MRP: ${mrpDisplay})\n`;
+  whatsappMsg += `💵 *You Save:* ${savingsDisplay}\n`;
+}
+whatsappMsg += `⚡ *Store:* ${merchantLabel}\n`;
+whatsappMsg += `👉 *Grab Deal before it expires:*\n${targetLink}\n\n`;
+whatsappMsg += `📢 Verified via DealsHub India 🇮🇳`;
 
-// ---- Store Badge Mapping ----
-const p = (platform || '').toLowerCase();
-const u = (url || '').toLowerCase();
-const isAmazon   = p.includes('ama') || u.includes('amazon') || u.includes('amzn.to');
-const isFlipkart = p.includes('fl') || p.includes('fk') || u.includes('flipkart');
-const isMyntra   = p.includes('myntra') || u.includes('myntra');
-const isAjio     = p.includes('ajio') || u.includes('ajio');
-let storeLogo = '';
-let storeName = platform === 'Deal' ? 'DEAL' : platform;
-if (isAmazon)   { storeLogo = 'https://www.google.com/s2/favicons?sz=64&domain=amazon.in'; storeName = 'Amazon'; }
-else if (isFlipkart) { storeLogo = 'https://www.google.com/s2/favicons?sz=64&domain=flipkart.com'; storeName = 'Flipkart'; }
-else if (isMyntra)   { storeLogo = 'https://www.google.com/s2/favicons?sz=64&domain=myntra.com'; storeName = 'Myntra'; }
-else if (isAjio)     { storeLogo = 'https://www.google.com/s2/favicons?sz=64&domain=ajio.com'; storeName = 'Ajio'; }
+const whatsappShareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(whatsappMsg)}`;
+
+// High fidelity fallback SVG image
+// Filter placeholder logo
+const displayImage = image && typeof image === 'string' && image.startsWith('http') && !image.includes("Telegram_logo") && !image.includes("example.com") ? image : null;
+const safeImageUrl = displayImage
+  ? (displayImage.includes('telesco.pe') ? '/api/image-proxy?url=' + encodeURIComponent(displayImage) : displayImage)
+  : null;
+
+// High fidelity fallback SVG image
+const fallbackImage = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect width="400" height="300" fill="%230f141d"/><circle cx="200" cy="120" r="42" fill="%23161f2f"/><text x="200" y="128" dominant-baseline="middle" text-anchor="middle" font-size="28">🛍️</text><text x="200" y="195" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="%2322c55e">DealsHub Verified</text><text x="200" y="220" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="12" fill="%2394a3b8">${merchantLabel}</text></svg>`;
+
+const isHighDiscount = Boolean(discountPercent && parseInt(discountPercent) >= 70);
 ---
 
-<!-- ═══════════════════════════════════════════════════
-     2026 CYBER-GLASSMORPHIC DEAL CARD OVERHAUL
-════════════════════════════════════════════════════ -->
-<div class={`cyber-card ${featured ? 'cyber-card--featured' : ''} ${isDealLoot ? 'cyber-card--loot' : ''}`} style={`--brand-color: ${platformColor}; view-transition-name: deal-card-${transitionSlug};`}>
-  
-  <!-- ── 1. DEDICATED STORE HEADER SECTION ── -->
-  <div class="cyber-card__store-header">
-    <div class="store-info">
-      {storeLogo ? (
-        <img src={storeLogo} alt={storeName} class="store-logo" loading="lazy" decoding="async" />
-      ) : (
-        <span class="material-symbols-outlined store-icon">storefront</span>
+<article
+  class="deal-card-item glass-card rounded-2xl overflow-hidden flex flex-col justify-between group relative border border-white/5 hover:border-emerald-500/30 transition-all duration-300"
+  data-id={id}
+  data-category={category.toLowerCase()}
+  data-merchant={merchantLower}
+  data-price={numPrice}
+  data-original={numOriginal}
+  data-discount={discountPercent || "0"}
+  data-loot={isLoot ? "true" : "false"}
+  data-title={cleanedTitle.toLowerCase()}
+>
+  <!-- Card Header: Store Badge, Loot & Live Status -->
+  <div class="p-3.5 pb-0 flex items-center justify-between gap-2 z-10">
+    <div class="flex items-center gap-1.5 flex-wrap">
+      <!-- Authentic Store Badge with SVG Logo -->
+      <span class:list={["inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide shrink-0", merchantBadgeClass]}>
+        {storeKey === "amazon" && (
+          <svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M1.6 14.8c2.9 2.6 7 4.2 11.5 4.2 3.8 0 7.3-1.2 10.2-3.3.3-.2.2-.6-.1-.5-3.3 1.3-7.2 2-11.2 2-3.7 0-7.2-.8-10.2-2.4-.3-.2-.5.2-.2.5zm19.8-1.4c-.3-.4-1.9-.6-3.8.8-.2.1-.3 0-.2-.2.6-1 1.9-2.9 2.3-3.4.2-.2.4 0 .3.3-.3.9-.9 2-1 2.3-.1.3.2.3.4.2.7-.3 1.7-.8 2.2-1.1.2-.1.3.1.2.3-.2.3-.3.6-.4.9zM14.5 9.2v4c0 .8-.5 1.4-1.3 1.4-.7 0-1.1-.4-1.1-1.1 0-1.3 1.1-1.5 2.4-1.5v-.4c0-.7-.4-1.1-1.3-1.1-.6 0-1.2.2-1.6.5l-.4-1.1c.6-.4 1.4-.7 2.4-.7 1.8 0 3 .8 3 2.6v3.8c0 .5.1.9.2 1.1h-1.4c-.1-.2-.2-.5-.2-.9-.4.5-1.1 1-2.1 1-1.4 0-2.4-.9-2.4-2.2 0-1.7 1.3-2.5 3.3-2.5.4 0 .8.1 1.1.2v-.8c0-1-.6-1.5-1.6-1.5-.7 0-1.3.2-1.7.5l-.4-1.1c.6-.4 1.5-.6 2.5-.6 2 0 3.3 1 3.3 2.9z"/>
+          </svg>
+        )}
+        {storeKey === "flipkart" && (
+          <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#2874F0" d="M3 6h18l-2 15H5L3 6z"/>
+            <path fill="#FFE11B" d="M10 2h4v5h-4z"/>
+            <path fill="#FFE11B" d="M9 8h6v2.5h-3.5v2h3V15h-3v5H9V8z"/>
+          </svg>
+        )}
+        {storeKey === "myntra" && (
+          <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="#FF3F6C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 19l4.5-12 3.5 8 3.5-8L20 19"/>
+          </svg>
+        )}
+        {storeKey === "ajio" && (
+          <svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 5l5 14h-3l-1.2-3.5H11.2L10 19H7l5-14zm0 4.5l-1.5 4h3l-1.5-4z"/>
+          </svg>
+        )}
+        {storeKey === "croma" && (
+          <svg class="w-3.5 h-3.5 fill-none stroke-current stroke-[2.5] shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" d="M16 8.5A6.5 6.5 0 1 0 16 15.5"/>
+            <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+          </svg>
+        )}
+        {storeKey === "meesho" && (
+          <svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 19V7l5 6 4-6v12h-2.5V11.5L8.8 15h-.6L5.5 11.5V19H5zm14-12v12h-2.5V7H19z"/>
+          </svg>
+        )}
+        {storeKey === "quick" && (
+          <svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M13 2L3 14h8l-1 8 11-13h-8l1-7z"/>
+          </svg>
+        )}
+        {storeKey === "telegram" && (
+          <svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .4z"/>
+          </svg>
+        )}
+        <span>{merchantLabel}</span>
+      </span>
+
+      <!-- Loot Pill -->
+      {(isLoot || isHighDiscount) && (
+        <span class="badge-loot inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0">
+          <span>🔥</span>
+          <span>LOOT</span>
+        </span>
       )}
-      <span class="store-name">{storeName}</span>
+
+      {budgetTier === 'under99' && (
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-400/20 text-amber-300 border border-amber-400/40 shadow-sm shadow-amber-400/20 animate-pulse shrink-0">
+          <span>⚡</span>
+          <span>UNDER ₹99 LOOT</span>
+        </span>
+      )}
+
+      {budgetTier === 'under499' && (
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
+          <span>🪙</span>
+          <span>UNDER ₹499 VALUE STEAL</span>
+        </span>
+      )}
+      {insightBadge && (
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 shrink-0">
+          {insightBadge}
+        </span>
+      )}
     </div>
-    <div class="deal-time">
-      <span class="material-symbols-outlined">schedule</span>
-      {timeAgo || 'Live'}
+
+    <!-- Pulsing Live Drop Status Indicator -->
+    <div class="flex items-center gap-1.5 shrink-0">
+      <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 shadow-sm" title={timeAgo}>
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        <span class="whitespace-nowrap">⚡ Live Drop</span>
+      </span>
     </div>
   </div>
 
-  <div class="cyber-card__body">
-    <!-- ── Left: Holographic Image Container ── -->
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      class="cyber-img-link"
-      data-deal-id={transitionSlug}
-      data-deal-url={url}
-      onclick="if(navigator.vibrate) navigator.vibrate(40);"
-    >
-      <div class="cyber-img-wrapper">
-        {hasImage ? (
-          <img
-            src={image}
-            alt={title}
-            loading="lazy"
-            decoding="async"
-            class="cyber-img"
-            style={`view-transition-name: deal-img-${transitionSlug}`}
-          />
-        ) : (
-          <div class="cyber-img-fallback">
-            <span class="material-symbols-outlined">local_mall</span>
+  <!-- Product Image Container -->
+  <a
+    href={targetLink}
+    target="_blank"
+    rel="noopener noreferrer sponsored"
+    class="block relative w-full pt-[72%] px-4 overflow-hidden group/img transition-opacity"
+  >
+    <div class="absolute inset-x-3.5 inset-y-2 rounded-xl bg-slate-900/80 flex items-center justify-center p-3 border border-white/5 overflow-hidden group-hover/img:border-emerald-500/30 transition-all">
+      <img
+        src={safeImageUrl || fallbackImage}
+        alt={cleanedTitle}
+        loading="lazy"
+        decoding="async"
+        referrerpolicy="no-referrer"
+        class="max-h-full max-w-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
+        onerror={`this.onerror=null;this.src='${fallbackImage}';`}
+      />
+    </div>
+  </a>
+
+  <!-- Content Section -->
+  <div class="p-4 pt-1 flex flex-col flex-grow justify-between gap-3">
+    
+    <!-- Title & Category -->
+    <div>
+      <a
+        href={targetLink}
+        target="_blank"
+        rel="noopener noreferrer sponsored"
+        class="text-sm font-semibold text-white group-hover:text-emerald-300 transition-colors line-clamp-2 leading-snug"
+        title={cleanedTitle}
+      >
+        {cleanedTitle}
+      </a>
+      <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1">
+        <span class="capitalize">{category}</span>
+        <span class="text-[10px] text-slate-400">{timeAgo}</span>
+      <!-- Coupon Action Callout Box -->
+      {couponText && (
+        <div class="mt-2 p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-1.5 text-xs text-amber-200 shadow-sm">
+          <span class="text-sm shrink-0 leading-none">✂️</span>
+          <div class="leading-tight text-[11px]">
+            <span class="font-bold text-amber-300">Action Required:</span> Tick <span class="underline decoration-amber-400 font-semibold text-white">"{couponText}"</span> on {merchantLabel} before checkout.
           </div>
+        </div>
+      )}
+
+      <!-- Bank / Card Offer Pill -->
+      {bankOffer && (
+        <div class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-500/10 border border-blue-500/25 text-blue-300 text-[11px] font-medium self-start">
+          <span>💳</span>
+          <span class="line-clamp-1">{bankOffer}</span>
+        </div>
+      )}
+      </div>
+    </div>
+
+    <!-- High-Contrast Price & Bold Savings Tags Row -->
+    <div class="pt-2.5 border-t border-white/5 flex items-baseline justify-between gap-2">
+      <div class="flex items-baseline gap-2 flex-wrap">
+        <span class="text-xl font-black text-emerald-400 tracking-tight">
+          {numPrice > 0 ? "₹" + numPrice.toLocaleString("en-IN") : price}
+        </span>
+        {numOriginal > numPrice && (
+          <span class="text-xs text-slate-400 line-through">
+            ₹{numOriginal.toLocaleString("en-IN")}
+          </span>
         )}
       </div>
 
-      <!-- Neon Discount Badge -->
-      {showDiscount && (
-        <div class="neon-badge neon-badge--discount">
-          <span class="discount-val">{smartDiscount}%</span>
-          <span class="discount-lbl">OFF</span>
-        </div>
-      )}
-
-      <!-- Loot Hologram -->
-      {isDealLoot && (
-        <div class="neon-badge neon-badge--loot">
-          <span class="material-symbols-outlined">local_fire_department</span>
-          LOOT
-        </div>
-      )}
-    </a>
-
-    <!-- ── Right: Content & Pricing ── -->
-    <div class="cyber-card__content">
-      <h3 class="cyber-title">{title}</h3>
-
-      {explanation && (
-        <div class="cyber-ai-chip">
-          <span class="material-symbols-outlined">auto_awesome</span>
-          <span>{explanation}</span>
-        </div>
-      )}
-
-      <div class="cyber-footer">
-        <div class="cyber-pricing">
-          {price && price !== 'Check Price' && (
-            <span class="price-current">
-              {price.includes('₹') ? price : `₹${price}`}
-            </span>
-          )}
-          {originalPrice && (
-            <span class="price-original">
-              {originalPrice.includes('₹') ? originalPrice : `₹${originalPrice}`}
-            </span>
-          )}
-        </div>
-
-        <a href={url} target="_blank" rel="noopener noreferrer" class="cyber-btn">
-          <span>GET DEAL</span>
-          <span class="material-symbols-outlined">arrow_forward_ios</span>
-        </a>
+      <!-- Bold Savings Callouts -->
+      <div class="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+        {savingsAmount > 0 && (
+          <span class="px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 text-[11px] font-bold shrink-0">
+            Save ₹{savingsAmount.toLocaleString("en-IN")}
+          </span>
+        )}
+        {discountPercent && parseInt(discountPercent) > 0 && (
+          <span class="px-2 py-0.5 rounded-md bg-rose-500/20 border border-rose-500/30 text-rose-400 text-xs font-black shrink-0 tracking-wide">
+            🔥 {discountPercent}% OFF
+          </span>
+        )}
       </div>
     </div>
+
+    <!-- Action Row: Grab Deal CTA + Dedicated 1-Click WhatsApp + Copy -->
+    <div class="flex items-center gap-2 pt-1">
+      <!-- Primary Grab Deal Button with Animated State -->
+      <a
+        href={targetLink}
+        target="_blank"
+        rel="noopener noreferrer sponsored"
+        class="deal-grab-btn flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-slate-950 font-black text-xs sm:text-sm tracking-wide transition-all shadow-md shadow-emerald-500/20 active:scale-[0.98] group/btn"
+      >
+        <span class="btn-text">Grab Deal</span>
+        <span class="btn-icon font-extrabold text-sm leading-none transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5">↗</span>
+      </a>
+
+      <!-- Dedicated 1-Click WhatsApp Share Button -->
+      <a
+        href={whatsappShareUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="deal-whatsapp-btn inline-flex items-center justify-center w-10 h-10 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366] text-[#25D366] hover:text-white border border-[#25D366]/30 hover:border-transparent transition-all hover:scale-105 active:scale-95 shrink-0 shadow-sm"
+        title="Share on WhatsApp"
+        aria-label="Share deal on WhatsApp"
+      >
+        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+        </svg>
+      </a>
+
+      <!-- Copy Deal Link Button -->
+      <button
+        type="button"
+        class="deal-share-btn inline-flex items-center justify-center w-10 h-10 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 transition-all hover:scale-105 active:scale-95 shrink-0"
+        title="Copy deal link"
+        aria-label="Copy deal link"
+        data-url={targetLink}
+        data-title={cleanedTitle}
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+      </button>
+    </div>
+    <!-- Multi-Link Variant Drawer -->
+    {variants && variants.length > 0 && (
+      <div class="pt-2 border-t border-white/5 mt-1">
+        <div class="text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1">
+          <span>🔗</span>
+          <span>Variants ({variants.length})</span>
+        </div>
+        <div class="flex flex-wrap gap-1">
+          {variants.slice(0, 3).map((v) => (
+            <a
+              href={v.url}
+              target="_blank"
+              rel="noopener noreferrer sponsored"
+              class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 hover:bg-white/10 text-slate-200 hover:text-emerald-300 border border-white/10 hover:border-emerald-500/30 text-[11px] font-medium transition-colors"
+              title={v.title}
+            >
+              <span class="max-w-[120px] truncate">{v.title}</span>
+              {v.price && <span class="text-emerald-400 font-bold font-mono">₹{v.price}</span>}
+              <span class="text-[9px] text-slate-400">↗</span>
+            </a>
+          ))}
+          {variants.length > 3 && (
+            <span class="text-[10px] text-slate-400 self-center">+{variants.length - 3} more</span>
+          )}
+        </div>
+      </div>
+    )}
+
   </div>
-</div>
+</article>
 
 <script is:inline>
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.deal-card__share');
-    if (!btn) return;
-    const shareTitle = btn.getAttribute('data-share-title') || 'Check out this deal!';
-    const shareUrl = btn.getAttribute('data-share-url') || window.location.href;
-    if (navigator.share) {
-      navigator.share({ title: shareTitle, url: shareUrl }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(shareUrl).catch(() => {});
+  (function() {
+    function setupGrabTransitions() {
+      if (window.__dhGrabListenerAdded) return;
+      window.__dhGrabListenerAdded = true;
+
+      document.addEventListener('click', function(e) {
+        const grabBtn = e.target.closest('.deal-grab-btn');
+        if (!grabBtn || grabBtn.dataset.opening === 'true') return;
+
+        grabBtn.dataset.opening = 'true';
+        const textSpan = grabBtn.querySelector('.btn-text');
+        const iconSpan = grabBtn.querySelector('.btn-icon');
+
+        if (textSpan && iconSpan) {
+          const origText = textSpan.textContent;
+          const origIcon = iconSpan.textContent;
+
+          textSpan.textContent = 'Opening Store...';
+          iconSpan.textContent = '🚀';
+          grabBtn.classList.add('ring-2', 'ring-emerald-300');
+
+          setTimeout(function() {
+            textSpan.textContent = origText;
+            iconSpan.textContent = origIcon;
+            grabBtn.classList.remove('ring-2', 'ring-emerald-300');
+            delete grabBtn.dataset.opening;
+          }, 2500);
+        }
+      });
     }
-  });
+
+    setupGrabTransitions();
+    document.addEventListener('astro:after-swap', setupGrabTransitions);
+    document.addEventListener('astro:page-load', setupGrabTransitions);
+  })();
 </script>
-
-<style>
-/* ═══════════════════════════════════════════════════
-   2026 CYBER-GLASSMORPHISM DESIGN SYSTEM
-════════════════════════════════════════════════════ */
-.cyber-card {
-  --glass-bg: rgba(22, 22, 28, 0.65);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glow-opacity: 0;
-  
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  background: var(--glass-bg);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  overflow: hidden;
-  position: relative;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
-}
-
-.cyber-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 20px;
-  padding: 2px;
-  background: linear-gradient(135deg, var(--brand-color), transparent 60%);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: var(--glow-opacity);
-  transition: opacity 0.4s ease;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.cyber-card:hover {
-  transform: translateY(-4px) scale(1.01);
-  --glow-opacity: 1;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 20px rgba(var(--brand-color), 0.2);
-}
-
-/* 1. DEDICATED STORE HEADER */
-.cyber-card__store-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 16px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.03), transparent);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  position: relative;
-}
-
-.cyber-card__store-header::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  width: 30%;
-  height: 1px;
-  background: var(--brand-color);
-  box-shadow: 0 0 8px var(--brand-color);
-}
-
-.store-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.store-logo {
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  object-fit: contain;
-  filter: drop-shadow(0 0 4px rgba(255,255,255,0.2));
-}
-
-.store-icon {
-  font-size: 18px;
-  color: var(--brand-color);
-}
-
-.store-name {
-  font-family: 'Inter', system-ui, sans-serif;
-  font-weight: 800;
-  font-size: 12px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: #fff;
-  text-shadow: 0 0 10px rgba(255,255,255,0.3);
-}
-
-.deal-time {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  font-weight: 600;
-  color: rgba(255,255,255,0.5);
-  letter-spacing: 0.5px;
-}
-
-.deal-time .material-symbols-outlined {
-  font-size: 12px;
-}
-
-/* BODY */
-.cyber-card__body {
-  display: flex;
-  flex-direction: row;
-  padding: 16px;
-  gap: 20px;
-}
-
-@media (max-width: 640px) {
-  .cyber-card__body {
-    flex-direction: column;
-    gap: 16px;
-  }
-}
-
-/* IMAGE CONTAINER */
-.cyber-img-link {
-  flex: 0 0 140px;
-  width: 140px;
-  height: 140px;
-  position: relative;
-  border-radius: 14px;
-  overflow: hidden;
-  background: rgba(0,0,0,0.3);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
-}
-
-@media (max-width: 640px) {
-  .cyber-img-link {
-    width: 100%;
-    height: 180px;
-    flex: none;
-  }
-}
-
-.cyber-img-wrapper {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-}
-
-.cyber-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  transition: transform 0.5s ease;
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
-}
-
-.cyber-card:hover .cyber-img {
-  transform: scale(1.1) rotate(2deg);
-}
-
-.cyber-img-fallback {
-  color: rgba(255,255,255,0.1);
-}
-.cyber-img-fallback .material-symbols-outlined {
-  font-size: 48px;
-}
-
-/* NEON BADGES */
-.neon-badge {
-  position: absolute;
-  backdrop-filter: blur(8px);
-  padding: 4px 8px;
-  border-radius: 8px;
-  font-weight: 900;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-  border: 1px solid rgba(255,255,255,0.2);
-}
-
-.neon-badge--discount {
-  top: 8px;
-  left: 8px;
-  background: rgba(var(--brand-color), 0.2);
-  color: #fff;
-  border-color: var(--brand-color);
-  text-shadow: 0 0 8px var(--brand-color);
-}
-.discount-val { font-size: 14px; }
-.discount-lbl { font-size: 10px; letter-spacing: 1px; }
-
-.neon-badge--loot {
-  bottom: 8px;
-  right: 8px;
-  background: rgba(255, 50, 50, 0.2);
-  color: #ff4d4d;
-  border-color: #ff4d4d;
-  font-size: 11px;
-  letter-spacing: 1px;
-  text-shadow: 0 0 8px #ff4d4d;
-  animation: pulse-glow 2s infinite;
-}
-
-.neon-badge--loot .material-symbols-outlined {
-  font-size: 14px;
-}
-
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 10px rgba(255,50,50,0.4); }
-  50% { box-shadow: 0 0 20px rgba(255,50,50,0.8); }
-}
-
-/* CONTENT */
-.cyber-card__content {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  justify-content: center;
-}
-
-.cyber-title {
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1.4;
-  color: rgba(255,255,255,0.9);
-  margin-bottom: 12px;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  transition: color 0.3s;
-}
-
-.cyber-card:hover .cyber-title {
-  color: #fff;
-}
-
-.cyber-ai-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(0, 229, 255, 0.1);
-  border: 1px solid rgba(0, 229, 255, 0.3);
-  padding: 4px 8px;
-  border-radius: 6px;
-  color: #00E5FF;
-  font-size: 11px;
-  font-weight: 600;
-  margin-bottom: 16px;
-  align-self: flex-start;
-}
-.cyber-ai-chip .material-symbols-outlined {
-  font-size: 12px;
-}
-
-/* FOOTER / PRICING */
-.cyber-footer {
-  margin-top: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.cyber-pricing {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-}
-
-.price-current {
-  font-family: 'Outfit', 'Inter', sans-serif;
-  font-size: 24px;
-  font-weight: 900;
-  color: #00FF9D;
-  text-shadow: 0 0 12px rgba(0, 255, 157, 0.4);
-  letter-spacing: -0.5px;
-}
-
-.price-original {
-  font-family: 'Outfit', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  color: rgba(255,255,255,0.4);
-  text-decoration: line-through;
-  margin-top: 4px;
-}
-
-/* CYBER BUTTON */
-.cyber-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--brand-color);
-  color: #fff;
-  padding: 8px 16px;
-  border-radius: 10px;
-  font-weight: 800;
-  font-size: 12px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  text-decoration: none;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3), 0 0 10px var(--brand-color);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.cyber-btn::after {
-  content: '';
-  position: absolute;
-  top: 0; left: -100%;
-  width: 50%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  transform: skewX(-20deg);
-}
-
-.cyber-card:hover .cyber-btn::after {
-  animation: shine 0.6s ease-out;
-}
-
-@keyframes shine {
-  100% { left: 200%; }
-}
-
-.cyber-btn .material-symbols-outlined {
-  font-size: 14px;
-  font-weight: 900;
-}
-</style>
