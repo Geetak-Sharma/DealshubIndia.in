@@ -12,13 +12,13 @@
   --store-loot: #22c55e;     /* Loot Green */
 
   /* Permanent Dark Mode Variables */
-  --bg-color: #0B0E14;
-  --surface-color: #131720;
-  --surface-color-hover: #1a1f2e;
+  --bg-color: #0F1218;
+  --surface-color: #161A22;
+  --surface-color-hover: #1E232E;
   --text-primary: #f0f2f5;
   --text-secondary: #9ca3b0;
   --text-muted: #5c6370;
-  --border-color: #1e2330;
+  --border-color: #262D3D;
 
   /* Spacing Scale (8px system) */
   --spacing-1: 8px;

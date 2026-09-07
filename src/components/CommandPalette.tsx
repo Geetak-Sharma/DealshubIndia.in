@@ -27,7 +27,7 @@ const QUICK_LINKS: SearchResult[] = [
   { type: 'page', id: 'home',        title: 'Home — All Deals',         url: '/',                category: 'navigate' },
   { type: 'page', id: 'live',        title: 'Live Deal Feed',            url: '/livedeals',        category: 'navigate' },
   { type: 'page', id: 'blog',        title: 'Blog & Money Tips',         url: '/blog',             category: 'navigate' },
-  { type: 'page', id: 'tg',          title: 'Join Telegram Channel',     url: 'https://t.me/DealsHubIndia', category: 'community' },
+  { type: 'page', id: 'tg',          title: 'Join Telegram Channel',     url: 'https://t.me/DealsHubIndiaa', category: 'community' },
   { type: 'page', id: 'wa',          title: 'Join WhatsApp Channel',     url: 'https://whatsapp.com/channel/0029Vb81sJqGk1FxL7t9lW0h', category: 'community' },
 ];
 

@@ -26,12 +26,22 @@ export class TelegramDataStore {
       const dir = path.dirname(DB_PATH);
       if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
       
-      const tempPath = `${DB_PATH}.tmp`;
+      const tempPath = DB_PATH + '.tmp';
       fs.writeFileSync(tempPath, JSON.stringify(data, null, 2));
       fs.renameSync(tempPath, DB_PATH);
     } catch (e) {
       console.error("[DB] Save failed:", e);
     }
+  }
+
+  static isValidImage(img) {
+    return Boolean(
+      img &&
+      typeof img === 'string' &&
+      img.startsWith('http') &&
+      !img.includes('example.com') &&
+      !img.includes('Telegram_logo')
+    );
   }
 
   static upsertPosts(newPosts) {
@@ -42,6 +52,11 @@ export class TelegramDataStore {
     let updatedCount = 0;
 
     for (const post of newPosts) {
+      // STRICT REQUIREMENT: Only accept posts with valid product images
+      if (!this.isValidImage(post.image)) {
+        continue;
+      }
+
       if (!existingMap.has(post.id)) {
         data.posts.push(post);
         existingMap.set(post.id, post);
@@ -69,7 +84,7 @@ export class TelegramDataStore {
           existing.checkoutUrl = post.checkoutUrl;
           changed = true;
         }
-        if ((!existing.image || existing.image.includes('Telegram_logo')) && post.image && !post.image.includes('Telegram_logo')) {
+        if (this.isValidImage(post.image) && (!existing.image || !this.isValidImage(existing.image))) {
           existing.image = post.image;
           changed = true;
         }
@@ -79,17 +94,21 @@ export class TelegramDataStore {
     }
 
     if (addedCount > 0 || updatedCount > 0) {
+      // Ensure all stored posts strictly have valid images
+      data.posts = data.posts.filter(p => this.isValidImage(p.image));
       data.posts.sort((a, b) => b.timestamp - a.timestamp);
       if (data.posts.length > 2000) data.posts = data.posts.slice(0, 2000);
       data.lastUpdated = Date.now();
       this.save(data);
     }
-    return addedCount + updatedCount;
+
+    return addedCount;
   }
 
   static search(query, limit = 20, offset = 0, category = 'all') {
     const data = this.load();
-    let results = data.posts;
+    // Only search/return deals that have valid images
+    let results = data.posts.filter(p => this.isValidImage(p.image));
 
     // First filter by category if specified
     if (category && category !== 'all') {

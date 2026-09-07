@@ -173,13 +173,13 @@ const isHighDiscount = Boolean(discountPercent && parseInt(discountPercent) >= 6
 ---
 
 <article
-  class="editorial-card group flex flex-col sm:flex-row bg-slate-900/70 hover:bg-slate-900 border border-slate-800 hover:border-slate-700/90 rounded-2xl overflow-hidden transition-all duration-200 shadow-sm hover:shadow-xl hover:shadow-black/50"
+  class="editorial-card group flex flex-col sm:flex-row bg-slate-900/80 hover:bg-slate-900 border border-slate-800/90 hover:border-slate-700 rounded-2xl overflow-hidden transition-all duration-300 shadow-sm hover:shadow-2xl hover:shadow-black/60 hover:-translate-y-0.5"
   data-id={id}
   data-merchant={merchantLower}
   data-price={numPrice}
 >
   <!-- Left Side on Desktop: Clean Product Frame -->
-  <div class="sm:w-44 md:w-48 shrink-0 bg-slate-950/80 p-3.5 sm:p-4 flex items-center justify-center relative border-b sm:border-b-0 sm:border-r border-slate-800/80 min-h-[150px] sm:min-h-0 overflow-hidden">
+  <div class="sm:w-48 md:w-52 shrink-0 bg-slate-950/90 p-4 sm:p-5 flex items-center justify-center relative border-b sm:border-b-0 sm:border-r border-slate-800/80 min-h-[160px] sm:min-h-0 overflow-hidden">
     <!-- Store Badge Floating Top-Left -->
     <div class="absolute top-2.5 left-2.5 z-10">
       <span class:list={["inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide", merchantBadgeClass]}>
@@ -261,7 +261,7 @@ const isHighDiscount = Boolean(discountPercent && parseInt(discountPercent) >= 6
   </div>
 
   <!-- Right Side on Desktop: Editorial Details -->
-  <div class="flex-1 p-4 sm:p-5 flex flex-col justify-between gap-3">
+  <div class="flex-1 p-5 sm:p-6 flex flex-col justify-between gap-3.5">
     
     <div>
       <!-- Meta Tag: Category & Drop Age -->
@@ -290,7 +290,7 @@ const isHighDiscount = Boolean(discountPercent && parseInt(discountPercent) >= 6
         href={targetLink}
         target="_blank"
         rel="noopener noreferrer sponsored"
-        class="block font-bold text-white text-sm sm:text-base leading-snug line-clamp-2 group-hover:text-emerald-300 transition-colors"
+        class="block font-bold text-white text-sm sm:text-base leading-snug line-clamp-2 group-hover:text-amber-300 transition-colors"
         title={cleanedTitle}
       >
         {cleanedTitle}
@@ -318,7 +318,7 @@ const isHighDiscount = Boolean(discountPercent && parseInt(discountPercent) >= 6
     <!-- Pricing Row: Indian Pricing with Comma Formatting -->
     <div class="pt-2 border-t border-slate-800/80 flex items-baseline justify-between gap-2 flex-wrap">
       <div class="flex items-baseline gap-2">
-        <span class="text-xl sm:text-2xl font-black text-emerald-400 font-mono tracking-tight">
+        <span class="text-xl sm:text-2xl font-black text-amber-400 font-mono tracking-tight">
           {priceDisplay}
         </span>
         {mrpDisplay && (
@@ -344,7 +344,7 @@ const isHighDiscount = Boolean(discountPercent && parseInt(discountPercent) >= 6
 
     <!-- Micro Editorial Guarantee -->
     <div class="text-[11px] text-slate-400 flex items-center gap-1.5">
-      <span class="text-emerald-400 font-bold">✓</span>
+      <span class="text-amber-400 font-bold">✓</span>
       <span>Hand-verified deal · Lowest price drop detected</span>
     </div>
 

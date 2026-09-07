@@ -41,7 +41,7 @@ export function cleanPriceString(pStr) {
 export function cleanUrl(url) {
   if (!url) return "";
   let val = String(url).trim();
-  val = val.replace(/t\.me\/DealsHubIndiaa/gi, "t.me/DealsHubIndia");
+  val = val.replace(/t\.me\/DealsHubIndia(?![a-z])/gi, "t.me/DealsHubIndiaa");
   return val;
 }
 

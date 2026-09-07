@@ -31,12 +31,12 @@ export const whatsAppConfig: WhatsAppConfig = {
   channelUrl:   "https://whatsapp.com/channel/0029Vb81sJqGk1FxL7t9lW0h",
   desktopLabel: "Join WhatsApp Channel",
   mobileLabel:  "Get Instant WhatsApp Alerts",
-  trustLabel:   "100k+ shoppers. Zero spam. Free forever.",
+  trustLabel:   "Free. Zero spam. Free forever.",
 };
 
 export const telegramConfig: TelegramConfig = {
-  channelUrl:   "https://t.me/DealsHubIndia",
+  channelUrl:   "https://t.me/DealsHubIndiaa",
   desktopLabel: "Join Telegram Channel",
   mobileLabel:  "Join Telegram Alerts",
-  trustLabel:   "15k+ hunters. Instant drops. Zero delay.",
+  trustLabel:   "Free. Instant drops. Zero delay.",
 };

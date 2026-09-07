@@ -9,11 +9,11 @@ export interface Props {
 }
 
 const {
-  eventName = "PRIME DAY & FESTIVAL DROP RADAR",
-  badgeText = "GLITCH ALERTS ACTIVE",
+  eventName = "AMAZON COUPONS & GLITCH RADAR",
+  badgeText = "COUPONS ACTIVE",
   targetTimestamp,
-  ctaText = "View Flash Deals",
-  ctaHref = "/livedeals?filter=loot",
+  ctaText = "Grab Amazon Coupons",
+  ctaHref = "https://bitli.in/iOuaPu5",
 } = Astro.props;
 
 // Calculate server-side initial hours, mins, secs so it renders immediately without hydration flash
@@ -55,19 +55,19 @@ const initialSecs = String(Math.floor((diffMs % (1000 * 60)) / 1000)).padStart(2
       >
         <!-- Live Pulsating Beacon -->
         <span class="relative flex h-2 sm:h-2.5 w-2 sm:w-2.5 shrink-0" aria-hidden="true">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 sm:h-2.5 w-2 sm:w-2.5 bg-cyan-400 shadow-[0_0_8px_#38bdf8]"></span>
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 sm:h-2.5 w-2 sm:w-2.5 bg-amber-400 shadow-[0_0_8px_#f59e0b]"></span>
         </span>
 
         <!-- Event Headline -->
         <div class="flex items-center gap-2">
-          <span class="font-extrabold tracking-wide uppercase text-white group-hover:text-cyan-300 transition-colors text-xs sm:text-sm whitespace-nowrap">
+          <span class="font-extrabold tracking-wide uppercase text-white group-hover:text-amber-300 transition-colors text-xs sm:text-sm whitespace-nowrap">
             <span class="hidden sm:inline">⚡ {eventName}</span>
             <span class="sm:hidden">⚡ DROP RADAR</span>
           </span>
 
           <!-- Subtle Sub-Badge -->
-          <span class="hidden xl:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
+          <span class="hidden xl:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-500/10 text-amber-300 border border-amber-500/30">
             {badgeText}
           </span>
         </div>
@@ -83,25 +83,25 @@ const initialSecs = String(Math.floor((diffMs % (1000 * 60)) / 1000)).padStart(2
         aria-label="Time remaining until next flash deal drop"
       >
         <!-- Hours Box -->
-        <div class="flex items-center justify-center min-w-[2.5rem] sm:min-w-[2.85rem] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg bg-slate-900/90 border border-slate-700/80 shadow-[0_0_15px_rgba(56,189,248,0.15)] text-sky-300 font-mono font-bold text-xs sm:text-sm">
+        <div class="flex items-center justify-center min-w-[2.5rem] sm:min-w-[2.85rem] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg bg-slate-900/90 border border-slate-700/80 shadow-[0_0_15px_rgba(245,158,11,0.2)] text-amber-300 font-mono font-bold text-xs sm:text-sm">
           <span data-countdown-unit="hours">{initialHours}</span>
-          <span class="text-[10px] sm:text-xs text-sky-400/80 font-sans font-semibold ml-0.5">h</span>
+          <span class="text-[10px] sm:text-xs text-amber-400/80 font-sans font-semibold ml-0.5">h</span>
         </div>
 
-        <span class="text-sky-400/70 font-bold font-mono text-xs sm:text-sm animate-pulse" aria-hidden="true">:</span>
+        <span class="text-amber-400/70 font-bold font-mono text-xs sm:text-sm animate-pulse" aria-hidden="true">:</span>
 
         <!-- Minutes Box -->
-        <div class="flex items-center justify-center min-w-[2.5rem] sm:min-w-[2.85rem] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg bg-slate-900/90 border border-slate-700/80 shadow-[0_0_15px_rgba(56,189,248,0.15)] text-sky-300 font-mono font-bold text-xs sm:text-sm">
+        <div class="flex items-center justify-center min-w-[2.5rem] sm:min-w-[2.85rem] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg bg-slate-900/90 border border-slate-700/80 shadow-[0_0_15px_rgba(245,158,11,0.2)] text-amber-300 font-mono font-bold text-xs sm:text-sm">
           <span data-countdown-unit="mins">{initialMins}</span>
-          <span class="text-[10px] sm:text-xs text-sky-400/80 font-sans font-semibold ml-0.5">m</span>
+          <span class="text-[10px] sm:text-xs text-amber-400/80 font-sans font-semibold ml-0.5">m</span>
         </div>
 
-        <span class="text-sky-400/70 font-bold font-mono text-xs sm:text-sm animate-pulse" aria-hidden="true">:</span>
+        <span class="text-amber-400/70 font-bold font-mono text-xs sm:text-sm animate-pulse" aria-hidden="true">:</span>
 
         <!-- Seconds Box -->
-        <div class="flex items-center justify-center min-w-[2.5rem] sm:min-w-[2.85rem] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg bg-slate-900/90 border border-slate-700/80 shadow-[0_0_15px_rgba(56,189,248,0.15)] text-sky-300 font-mono font-bold text-xs sm:text-sm">
+        <div class="flex items-center justify-center min-w-[2.5rem] sm:min-w-[2.85rem] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg bg-slate-900/90 border border-slate-700/80 shadow-[0_0_15px_rgba(245,158,11,0.2)] text-amber-300 font-mono font-bold text-xs sm:text-sm">
           <span data-countdown-unit="secs">{initialSecs}</span>
-          <span class="text-[10px] sm:text-xs text-sky-400/80 font-sans font-semibold ml-0.5">s</span>
+          <span class="text-[10px] sm:text-xs text-amber-400/80 font-sans font-semibold ml-0.5">s</span>
         </div>
       </div>
     </div>
@@ -111,10 +111,10 @@ const initialSecs = String(Math.floor((diffMs % (1000 * 60)) / 1000)).padStart(2
       <!-- Primary Action CTA Button -->
       <a
         href={ctaHref}
-        class="inline-flex items-center gap-1 sm:gap-1.5 bg-white hover:bg-slate-200 text-slate-950 font-bold text-[11px] sm:text-xs px-3 sm:px-4 py-1 sm:py-1.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] shrink-0 group/cta whitespace-nowrap"
+        class="inline-flex items-center gap-1 sm:gap-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[11px] sm:text-xs px-3 sm:px-4 py-1 sm:py-1.5 rounded-xl shadow-md shadow-amber-400/20 hover:shadow-lg transition-all active:scale-[0.98] shrink-0 group/cta whitespace-nowrap"
       >
         <span class="hidden sm:inline">{ctaText}</span>
-        <span class="sm:hidden">Flash Deals</span>
+        <span class="sm:hidden">Coupons</span>
         <span class="inline-block transition-transform duration-200 group-hover/cta:translate-x-0.5" aria-hidden="true">→</span>
       </a>
 
@@ -134,7 +134,7 @@ const initialSecs = String(Math.floor((diffMs % (1000 * 60)) / 1000)).padStart(2
 
       <!-- Telegram Quick Icon -->
       <a
-        href="https://t.me/DealsHubIndia"
+        href="https://t.me/DealsHubIndiaa"
         target="_blank"
         rel="noopener noreferrer"
         class="hidden sm:inline-flex items-center justify-center p-1.5 rounded-xl bg-[#0088cc]/15 hover:bg-[#0088cc] text-sky-400 hover:text-white border border-[#0088cc]/30 transition-all shadow-sm group shrink-0"

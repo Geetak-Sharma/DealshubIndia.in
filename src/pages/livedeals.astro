@@ -141,28 +141,56 @@ const normalizedDeals = rawDeals.map((item: any) => {
     variants,
     budgetTier,
   };
-});
+})
+.filter((d: any) =>
+  d.title &&
+  d.title.length >= 6 &&
+  !d.title.toLowerCase().startsWith("apply ") &&
+  d.image &&
+  typeof d.image === "string" &&
+  d.image.startsWith("http") &&
+  !d.image.includes("example.com") &&
+  !d.image.includes("Telegram_logo") &&
+  d.numPrice > 0
+);
+
+// Helper to ensure deal images are valid, real URLs
+const isValidDealImage = (img: any): boolean => {
+  return Boolean(
+    img &&
+    typeof img === "string" &&
+    img.startsWith("http") &&
+    !img.includes("example.com") &&
+    !img.includes("Telegram_logo")
+  );
+};
 
 // Map content collection deals
-const mappedContentDeals = contentDeals.map((d: any) => {
-  const numP = parseFloat(String(d.data.price).replace(/[^0-9.]/g, "")) || 0;
-  return {
-    id: d.id,
-    title: d.data.title,
-    price: d.data.price,
-    numPrice: numP,
-    originalPrice: d.data.originalPrice || "",
-    discount: "",
-    link: d.data.link,
-    image: d.data.image,
-    merchant: "Amazon",
-    category: d.data.category || "Tech",
-    isLoot: d.data.isLoot,
-    date: d.data.date,
-    timestamp: new Date(d.data.date).getTime(),
-    budgetTier: getBudgetTier(numP),
-  };
-});
+const mappedContentDeals = contentDeals
+  .map((d: any) => {
+    const numP = parseFloat(String(d.data.price).replace(/[^0-9.]/g, "")) || 0;
+    return {
+      id: d.id,
+      title: d.data.title,
+      price: d.data.price,
+      numPrice: numP,
+      originalPrice: d.data.originalPrice || "",
+      discount: "",
+      link: d.data.link,
+      image: d.data.image,
+      merchant: "Amazon",
+      category: d.data.category || "Tech",
+      isLoot: d.data.isLoot,
+      date: d.data.date,
+      timestamp: new Date(d.data.date).getTime(),
+      budgetTier: getBudgetTier(numP),
+    };
+  })
+  .filter((d: any) =>
+    d.title &&
+    isValidDealImage(d.image) &&
+    d.numPrice > 0
+  );
 
 const sortedContentDeals = mappedContentDeals.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
 const allDeals = [...normalizedDeals, ...sortedContentDeals];
