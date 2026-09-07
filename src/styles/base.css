@@ -1,26 +1,26 @@
 :root {
   /* Brand Colors */
-  --primary-color: #22C55E; /* High-conversion Green */
-  --primary-color-rgb: 34, 197, 94;
+  --primary-color: #10B981; /* Notion / Linear Emerald */
+  --primary-color-rgb: 16, 185, 129;
   --accent-color: #0088cc; /* Telegram Blue */
 
   /* Store Branding Colors */
-  --store-amazon: #f59e0b;   /* Amber */
-  --store-flipkart: #3b82f6; /* Blue */
-  --store-myntra: #f43f5e;   /* Rose */
+  --store-amazon: #ea580c;   /* Warm Orange */
+  --store-flipkart: #2563eb; /* Clean Blue */
+  --store-myntra: #e11d48;   /* Rose */
   --store-telegram: #0088cc; /* Cyan */
-  --store-loot: #22c55e;     /* Loot Green */
+  --store-loot: #10b981;     /* Emerald */
 
-  /* Permanent Dark Mode Variables */
-  --bg-color: #0F1218;
-  --surface-color: #161A22;
-  --surface-color-hover: #1E232E;
-  --text-primary: #f0f2f5;
-  --text-secondary: #9ca3b0;
-  --text-muted: #5c6370;
-  --border-color: #262D3D;
+  /* Notion Clean Light Mode Canvas */
+  --bg-color: #F8F9FA;
+  --surface-color: #FFFFFF;
+  --surface-color-hover: #F1F3F5;
+  --text-primary: #111827;
+  --text-secondary: #4B5563;
+  --text-muted: #9CA3AF;
+  --border-color: #E5E7EB;
 
-  /* Spacing Scale (8px system) */
+  /* Spacing Scale */
   --spacing-1: 8px;
   --spacing-2: 16px;
   --spacing-3: 24px;
@@ -32,181 +32,42 @@
   --font-family: 'Inter', system-ui, -apple-system, sans-serif;
   
   /* Radii */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.6), 0 4px 8px -2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
   
   /* Layout Constants */
   --container-max-width: 1200px;
 }
 
-[data-theme='light'] {
-  /* No longer supported, forcing dark defaults */
-}
-
-/* Base Reset */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html, body {
-  font-family: var(--font-family);
+body {
   background-color: var(--bg-color);
   color: var(--text-primary);
-  line-height: 1.6;
+  font-family: var(--font-family);
+  margin: 0;
+  padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  overflow-x: hidden;
 }
 
-img, picture, video, canvas, svg {
-  display: block;
-  max-width: 100%;
+.font-mono-deal {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-input, button, textarea, select {
-  font: inherit;
-  color: inherit;
+.notion-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-button {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-/* Utility Buttons */
-.c-btn {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-}
-
-.c-btn:active {
-  transform: scale(0.96);
-}
-
-.c-btn--primary {
-  background: var(--primary-color);
-  color: white;
-  font-weight: 700;
-  padding: 10px 24px;
-  border-radius: var(--radius-md);
-  border: none;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: 0 4px 14px 0 rgba(var(--primary-color-rgb), 0.3);
-}
-
-.c-btn--primary:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.1);
-  box-shadow: 0 6px 20px rgba(var(--primary-color-rgb), 0.45);
-}
-
-/* Premium Glassmorphism */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-lg);
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-[data-theme='light'] .glass-panel {
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-}
-
-/* Animations */
-.fade-in-up {
-  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes fadeInUp {
-  0% { opacity: 0; transform: translateY(20px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-.spring-hover {
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.spring-hover:hover {
-  transform: translateY(-4px) scale(1.01);
-}
-
-/* Layout Utilities */
-.l-section {
-  padding: var(--spacing-4) 0;
-}
-
-.u-glow-green:hover {
-  box-shadow: 0 0 25px rgba(34, 197, 94, 0.2);
-  border-color: rgba(34, 197, 94, 0.4);
-}
-
-/* ============================================================
-   GLOBAL Z-INDEX LAYER SYSTEM
-   Ensures mobile dock + sidebar always float above ALL content,
-   even when cards create stacking contexts via:
-     - view-transition-name
-     - transform  (spring-hover, card hover)
-     - backdrop-filter / filter
-   ============================================================ */
-
-/* Isolate page content so card stacking contexts stay contained */
-[style*="view-transition-name: main-content"] {
-  isolation: isolate;
-}
-
-/* Hard guarantee — these always win over everything */
-#mobile-bottom-dock {
-  z-index: 1000 !important;
-}
-
-#nav-sidebar {
-  z-index: 9999 !important;
-}
-
-#nav-overlay {
-  z-index: 9998 !important;
-}
-
-
-
-
-/* Top Ticker Marquee Animation */
-@keyframes marquee {
-  0% { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-50%, 0, 0); }
-}
-
-.animate-marquee {
-  display: flex;
-  width: max-content;
-  animation: marquee 25s linear infinite;
-}
-
-.animate-marquee:hover {
-  animation-play-state: paused;
+.notion-card:hover {
+  border-color: #D1D5DB;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
 }

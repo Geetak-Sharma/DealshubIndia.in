@@ -13,7 +13,7 @@ const navItems = [
 ];
 ---
 
-<header class="sticky top-0 z-50 w-full glass-nav transition-all duration-200">
+<header class="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-gray-200/90 shadow-xs transition-all duration-200">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16 gap-3 sm:gap-4">
       
@@ -26,7 +26,7 @@ const navItems = [
         </div>
         <div class="flex flex-col leading-none">
           <div class="flex items-center gap-1">
-            <span class="font-extrabold text-xl tracking-tight text-white group-hover:text-emerald-300 transition-colors">DealsHub</span>
+            <span class="font-extrabold text-xl tracking-tight text-gray-900 group-hover:text-emerald-600 transition-colors">DealsHub</span>
             <span class="text-emerald-400 font-extrabold text-xl">.in</span>
           </div>
 
@@ -54,7 +54,7 @@ const navItems = [
               "relative inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all group/nav",
               item.isCurrent
                 ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 shadow-sm font-semibold"
-                : "text-slate-300 hover:text-white hover:bg-slate-800/60"
+                : "text-gray-600 hover:text-gray-900 hover:bg-slate-800/60"
             ]}
           >
             <span>{item.label}</span>
@@ -75,13 +75,13 @@ const navItems = [
           type="button"
           id="global-search-trigger"
           aria-label="Search deals"
-          class="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-white/10 hover:border-emerald-500/40 text-slate-400 hover:text-slate-200 text-xs sm:text-sm font-normal transition-all shadow-inner group"
+          class="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-white/10 hover:border-emerald-500/40 text-gray-500 hover:text-slate-200 text-xs sm:text-sm font-normal transition-all shadow-inner group"
         >
-          <svg class="w-4 h-4 text-slate-400 group-hover:text-emerald-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <svg class="w-4 h-4 text-gray-500 group-hover:text-emerald-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <span class="hidden sm:inline text-slate-400">Search...</span>
-          <kbd class="hidden md:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-slate-900 border border-slate-700 rounded shadow-sm">
+          <span class="hidden sm:inline text-gray-500">Search...</span>
+          <kbd class="hidden md:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-gray-500 bg-slate-900 border border-slate-700 rounded shadow-sm">
             ⌘K
           </kbd>
         </button>
@@ -128,7 +128,7 @@ const navItems = [
           aria-expanded="false"
           aria-controls="mobile-nav-menu"
           aria-label="Toggle navigation menu"
-          class="md:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 border border-white/5 focus:outline-none"
+          class="md:hidden p-2 rounded-xl text-gray-500 hover:text-white hover:bg-slate-800/80 border border-white/5 focus:outline-none"
         >
           <svg id="menu-open-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -152,7 +152,7 @@ const navItems = [
             "flex items-center justify-between px-3 py-2 rounded-lg text-base font-medium transition-colors",
             item.isCurrent
               ? "text-emerald-400 bg-emerald-500/10 font-semibold"
-              : "text-slate-300 hover:text-white hover:bg-slate-800/60"
+              : "text-gray-600 hover:text-gray-900 hover:bg-slate-800/60"
           ]}
         >
           <span>{item.label}</span>

@@ -281,20 +281,20 @@ const isHighDiscount = Boolean(discountPercent && parseInt(discountPercent) >= 7
         href={targetLink}
         target="_blank"
         rel="noopener noreferrer sponsored"
-        class="text-sm font-semibold text-white group-hover:text-emerald-300 transition-colors line-clamp-2 leading-snug"
+        class="text-sm font-semibold text-gray-900 group-hover:text-emerald-300 transition-colors line-clamp-2 leading-snug"
         title={cleanedTitle}
       >
         {cleanedTitle}
       </a>
-      <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1">
+      <div class="flex items-center justify-between text-[11px] text-gray-400 mt-1">
         <span class="capitalize">{category}</span>
-        <span class="text-[10px] text-slate-400">{timeAgo}</span>
+        <span class="text-[10px] text-gray-400">{timeAgo}</span>
       <!-- Coupon Action Callout Box -->
       {couponText && (
         <div class="mt-2 p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-1.5 text-xs text-amber-200 shadow-sm">
           <span class="text-sm shrink-0 leading-none">✂️</span>
           <div class="leading-tight text-[11px]">
-            <span class="font-bold text-amber-300">Action Required:</span> Tick <span class="underline decoration-amber-400 font-semibold text-white">"{couponText}"</span> on {merchantLabel} before checkout.
+            <span class="font-bold text-amber-300">Action Required:</span> Tick <span class="underline decoration-amber-400 font-semibold text-gray-900">"{couponText}"</span> on {merchantLabel} before checkout.
           </div>
         </div>
       )}
@@ -316,7 +316,7 @@ const isHighDiscount = Boolean(discountPercent && parseInt(discountPercent) >= 7
           {numPrice > 0 ? "₹" + numPrice.toLocaleString("en-IN") : price}
         </span>
         {numOriginal > numPrice && (
-          <span class="text-xs text-slate-400 line-through">
+          <span class="text-xs text-gray-400 line-through">
             ₹{numOriginal.toLocaleString("en-IN")}
           </span>
         )}
@@ -355,7 +355,7 @@ const isHighDiscount = Boolean(discountPercent && parseInt(discountPercent) >= 7
         href={whatsappShareUrl}
         target="_blank"
         rel="noopener noreferrer"
-        class="deal-whatsapp-btn inline-flex items-center justify-center w-10 h-10 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366] text-[#25D366] hover:text-white border border-[#25D366]/30 hover:border-transparent transition-all hover:scale-105 active:scale-95 shrink-0 shadow-sm"
+        class="deal-whatsapp-btn inline-flex items-center justify-center w-10 h-10 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366] text-[#25D366] hover:text-gray-900 border border-[#25D366]/30 hover:border-transparent transition-all hover:scale-105 active:scale-95 shrink-0 shadow-sm"
         title="Share on WhatsApp"
         aria-label="Share deal on WhatsApp"
       >
@@ -367,7 +367,7 @@ const isHighDiscount = Boolean(discountPercent && parseInt(discountPercent) >= 7
       <!-- Copy Deal Link Button -->
       <button
         type="button"
-        class="deal-share-btn inline-flex items-center justify-center w-10 h-10 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-white/10 transition-all hover:scale-105 active:scale-95 shrink-0"
+        class="deal-share-btn inline-flex items-center justify-center w-10 h-10 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-gray-900 border border-white/10 transition-all hover:scale-105 active:scale-95 shrink-0"
         title="Copy deal link"
         aria-label="Copy deal link"
         data-url={targetLink}
@@ -381,7 +381,7 @@ const isHighDiscount = Boolean(discountPercent && parseInt(discountPercent) >= 7
     <!-- Multi-Link Variant Drawer -->
     {variants && variants.length > 0 && (
       <div class="pt-2 border-t border-white/5 mt-1">
-        <div class="text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1">
+        <div class="text-[10px] font-mono uppercase tracking-wider text-gray-400 mb-1 flex items-center gap-1">
           <span>🔗</span>
           <span>Variants ({variants.length})</span>
         </div>
@@ -396,11 +396,11 @@ const isHighDiscount = Boolean(discountPercent && parseInt(discountPercent) >= 7
             >
               <span class="max-w-[120px] truncate">{v.title}</span>
               {v.price && <span class="text-emerald-400 font-bold font-mono">₹{v.price}</span>}
-              <span class="text-[9px] text-slate-400">↗</span>
+              <span class="text-[9px] text-gray-400">↗</span>
             </a>
           ))}
           {variants.length > 3 && (
-            <span class="text-[10px] text-slate-400 self-center">+{variants.length - 3} more</span>
+            <span class="text-[10px] text-gray-400 self-center">+{variants.length - 3} more</span>
           )}
         </div>
       </div>
