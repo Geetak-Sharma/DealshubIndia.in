@@ -15,7 +15,7 @@ const stores = [
 ];
 ---
 
-<div id="stores" class="w-full py-4 border-y border-white/10 bg-slate-950/80 backdrop-blur-xl sticky top-16 z-30">
+<div id="stores" class="w-full py-4 border-y border-gray-200 bg-white/95 shadow-sm backdrop-blur-xl sticky top-16 z-30">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3">
     
     <!-- Primary Row: Categories and Active Count -->
@@ -32,8 +32,8 @@ const stores = [
             class:list={[
               "filter-cat-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer",
               cat.id === "all"
-                ? "bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20 active"
-                : "bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-white/10"
+                ? "bg-gray-900 text-white font-bold shadow-sm active"
+                : "bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 shadow-sm"
             ]}
           >
             <span>{cat.icon}</span>
@@ -43,8 +43,8 @@ const stores = [
       </div>
 
       <!-- Quick Store Dropdown or Pills on desktop -->
-      <div class="hidden sm:flex items-center gap-1.5 shrink-0 pl-4 border-l border-white/10">
-        <span class="text-xs text-slate-400 font-medium mr-1">Store:</span>
+      <div class="hidden sm:flex items-center gap-1.5 shrink-0 pl-4 border-l border-gray-200">
+        <span class="text-xs text-gray-500 font-medium mr-1">Store:</span>
         {stores.map((store) => (
           <button
             type="button"
@@ -52,8 +52,8 @@ const stores = [
             class:list={[
               "filter-store-btn inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer",
               store.id === "all"
-                ? "bg-slate-800 text-emerald-400 border border-emerald-500/40 active"
-                : "bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-white/5"
+                ? "bg-emerald-50 text-emerald-700 border border-emerald-300 font-bold active"
+                : "bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-900 border border-gray-200"
             ]}
           >
             <span>{store.icon}</span>
@@ -66,7 +66,7 @@ const stores = [
 
     <!-- Mobile Secondary Store Row -->
     <div class="sm:hidden flex items-center gap-2 overflow-x-auto no-scrollbar pt-1">
-      <span class="text-[11px] text-slate-400 font-medium shrink-0">Store:</span>
+      <span class="text-[11px] text-gray-500 font-medium shrink-0">Store:</span>
       {stores.map((store) => (
         <button
           type="button"
@@ -74,8 +74,8 @@ const stores = [
           class:list={[
             "filter-store-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium shrink-0 transition-all cursor-pointer",
             store.id === "all"
-              ? "bg-slate-800 text-emerald-400 border border-emerald-500/40 active"
-              : "bg-slate-900/60 text-slate-400 border border-white/5"
+              ? "bg-emerald-50 text-emerald-700 border border-emerald-300 font-bold active"
+              : "bg-white text-gray-600 border border-gray-200"
           ]}
         >
           <span>{store.icon}</span>
@@ -110,9 +110,9 @@ const stores = [
           const isActive = cat === currentCategory;
           btn.setAttribute("aria-selected", String(isActive));
           if (isActive) {
-            btn.className = "filter-cat-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20 active";
+            btn.className = "filter-cat-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer bg-gray-900 text-white font-bold shadow-sm active";
           } else {
-            btn.className = "filter-cat-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-white/10";
+            btn.className = "filter-cat-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 shadow-sm";
           }
         });
 
@@ -120,9 +120,9 @@ const stores = [
           const store = btn.getAttribute("data-store");
           const isActive = store === currentStore;
           if (isActive) {
-            btn.className = "filter-store-btn inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer bg-slate-800 text-emerald-400 border border-emerald-500/40 active";
+            btn.className = "filter-store-btn inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer bg-emerald-50 text-emerald-700 border border-emerald-300 font-bold active";
           } else {
-            btn.className = "filter-store-btn inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-white/5";
+            btn.className = "filter-store-btn inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-900 border border-gray-200";
           }
         });
 

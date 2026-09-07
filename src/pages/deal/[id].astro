@@ -1,116 +1,69 @@
 ---
-export const prerender = false; // Enable SSR for dynamic meta tags
+export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
-import SEO from '../../components/SEO.astro';
+import { TelegramDataStore } from '../../lib/telegramStore.js';
 import fs from 'node:fs/promises';
-import path from 'node:path';
 
 const { id } = Astro.params;
 
-// 1. Fetch deal data from cache with robust path resolution
-let deal = null;
+let deal: any = null;
 try {
-  // Use fileURLToPath for absolute path resolution that works in Node SSR
-  const cacheURL = new URL('../../data/deals_cache.json', import.meta.url);
-  const cacheData = await fs.readFile(cacheURL, 'utf-8');
-  const { deals } = JSON.parse(cacheData);
-  deal = deals.find(d => d.id === id);
+  const storeData = TelegramDataStore.load();
+  if (storeData && Array.isArray(storeData.posts)) {
+    deal = storeData.posts.find((d: any) => d.id === id || String(d.id) === String(id));
+  }
+  if (!deal) {
+    const tgURL = new URL('../../data/telegram_posts.json', import.meta.url);
+    const tgData = await fs.readFile(tgURL, 'utf-8');
+    const parsed = JSON.parse(tgData);
+    deal = (parsed.posts || []).find((d: any) => d.id === id || String(d.id) === String(id));
+  }
 } catch (e) {
-  console.error(`[Deal Route] Fetch failed for ID ${id}:`, e.message);
+  try {
+    const cacheURL = new URL('../../data/telegram_posts.json', import.meta.url);
+    const cacheData = await fs.readFile(cacheURL, 'utf-8');
+    const parsed = JSON.parse(cacheData); const deals = parsed.posts || parsed.deals || [];
+    deal = (deals || []).find((d: any) => d.id === id || String(d.id) === String(id));
+  } catch (err: any) {
+    console.error('[Deal Route] Fetch failed for ID ' + id, err?.message);
+  }
 }
 
-// 2. Redirect URL
-const homeRedirectUrl = `/?dealId=${id}`;
-
-// 3. SEO Metadata configuration
-const title = deal ? `${deal.title} - ${deal.price}` : "DealshubIndia.in: Best Loot Deals";
-const description = deal ? `Don't miss out! Get ${deal.title} for ${deal.price}. Verified by DealsHub India.` : "Discover the latest loot deals and offers in India.";
+const directUrl = deal?.checkoutUrl || deal?.url || deal?.link || ('/?dealId=' + id);
+const dealTitle = deal?.title || 'Loot Deal';
+const dealPrice = deal?.price || '';
+const title = deal ? (dealTitle + ' - ' + dealPrice) : 'DealshubIndia.in: Best Loot Deals';
+const description = deal ? ('Get ' + dealTitle + ' for ' + dealPrice + '. Verified by DealsHub India.') : 'Discover the latest loot deals and offers in India.';
 ---
 
 <Layout title={title} description={description} ogTitle={title} image={deal?.image}>
-  
-  <div class="redirect-container">
-    <div class="glass-panel">
-      <h2>🚀 Fetching your deal...</h2>
-      <p>Redirecting you to the latest loots on Dealshub India. One moment please!</p>
+  <div class="min-h-screen flex items-center justify-center p-4 bg-[#F8F9FA] text-gray-900 font-sans">
+    <div class="max-w-md w-full notion-card p-6 rounded-xl border border-gray-200 bg-white text-center shadow-sm">
+      <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg">⚡</div>
+      <h2 class="text-lg font-bold text-gray-900 mb-1">Redirecting to Deal...</h2>
+      <p class="text-xs text-gray-500 mb-5">Taking you directly to the verified store link. One moment please!</p>
       
       {deal && (
-        <div class="deal-preview">
-          <img src={deal.image} alt={deal.title} />
-          <div class="deal-meta">
-            <h3>{deal.title}</h3>
-            <span class="price">{deal.price}</span>
+        <div class="flex items-center gap-3 p-3 rounded-lg border border-gray-100 bg-gray-50/50 text-left mb-5">
+          {deal.image && (
+            <img src={deal.image} alt={deal.title} class="w-14 h-14 object-contain rounded bg-white p-1 border border-gray-200 shrink-0" />
+          )}
+          <div class="min-w-0">
+            <h3 class="text-xs font-semibold text-gray-900 truncate">{deal.title}</h3>
+            <span class="text-sm font-bold text-emerald-600 font-mono">{deal.price || ''}</span>
           </div>
         </div>
       )}
       
-      <a href={homeRedirectUrl} class="manual-btn">Open Homepage</a>
+      <a href={directUrl} class="inline-flex items-center justify-center w-full px-4 py-2.5 bg-gray-900 hover:bg-black text-white text-xs font-medium rounded-lg transition-colors">
+        Continue to Store ↗
+      </a>
     </div>
   </div>
 
-  <script define:vars={{ homeRedirectUrl }}>
-    // Perform instant redirect
-    window.location.href = homeRedirectUrl;
+  <script define:vars={{ directUrl }}>
+    setTimeout(() => {
+      window.location.href = directUrl;
+    }, 150);
   </script>
-
-  <style>
-    .redirect-container {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: radial-gradient(circle at top right, #001a1a 0%, #000 70%);
-      padding: 20px;
-      color: white;
-      text-align: center;
-    }
-    .glass-panel {
-      max-width: 500px;
-      padding: 40px;
-      border-radius: 24px;
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    }
-    .deal-preview {
-      margin: 30px 0;
-      padding: 15px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 16px;
-      display: flex;
-      gap: 15px;
-      text-align: left;
-      align-items: center;
-    }
-    .deal-preview img {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
-      border-radius: 12px;
-    }
-    .deal-meta h3 {
-      font-size: 14px;
-      margin: 0 0 5px 0;
-      opacity: 0.9;
-    }
-    .price {
-      font-weight: 800;
-      color: #22C55E;
-    }
-    .manual-btn {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 12px 24px;
-      background: #22C55E;
-      color: black;
-      font-weight: 700;
-      border-radius: 12px;
-      text-decoration: none;
-      transition: transform 0.2s;
-    }
-    .manual-btn:hover {
-      transform: scale(1.05);
-    }
-  </style>
 </Layout>
