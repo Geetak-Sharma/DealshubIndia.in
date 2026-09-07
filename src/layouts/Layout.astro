@@ -1,40 +1,46 @@
 ---
 import { ClientRouter } from 'astro:transitions';
-import Footer from '../components/ActiveFooter.astro';
 import SEO from '../components/SEO.astro';
 import '../styles/base.css';
 import '../styles/layout.css';
 import '../styles/components.css';
 import '../styles/utilities.css';
 import '../styles/glass3d.css';
+import '../styles/tailwind.css';
 import GlobalHeader from '../components/GlobalHeader.astro';
+import Footer from '../components/ActiveFooter.astro';
 import StructuredData from '../components/StructuredData.astro';
-
 import MobileBottomDock from '../components/MobileBottomDock.astro';
 import PWA from '../components/PWA.astro';
 
 interface Props {
-	title: string;
-	description?: string;
+  title: string;
+  description?: string;
   ogTitle?: string;
   image?: string;
   ogType?: string;
   deals?: any[];
+  includeHeader?: boolean;
+  includeFooter?: boolean;
+  activePath?: string;
 }
 
 const { 
   title, 
-  description,
-  ogTitle,
-  image,
+  description, 
+  ogTitle, 
+  image, 
   ogType = "website",
-  deals = []
+  deals = [],
+  includeHeader = true,
+  includeFooter = true,
+  activePath = Astro.url.pathname
 } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en">
-	<head>
+  <head>
     <SEO 
       title={title} 
       description={description} 
@@ -42,11 +48,11 @@ const {
       image={image} 
       ogType={ogType}
     />
-		<meta charset="UTF-8" />
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-		<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
     <link rel="manifest" href="/manifest.json" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -55,28 +61,20 @@ const {
     <ClientRouter />
 
     <style>
-      /* ── Global View Transition animations ── */
-
-      /* Main content: slide-fade in from below */
       ::view-transition-old(main-content) {
         animation: 220ms cubic-bezier(0.4, 0, 1, 1) both vt-slide-out;
       }
       ::view-transition-new(main-content) {
         animation: 320ms cubic-bezier(0, 0, 0.2, 1) both vt-slide-in;
       }
-
-      /* Header: stays put (no animation) */
       ::view-transition-old(site-header),
       ::view-transition-new(site-header) {
         animation: none;
       }
-
-      /* Deal card images: morph smoothly between pages */
       ::view-transition-old(deal-img-*),
       ::view-transition-new(deal-img-*) {
         animation: 400ms cubic-bezier(0.4, 0, 0.2, 1) both vt-image-morph;
       }
-
       @keyframes vt-slide-out {
         from { opacity: 1; transform: translateY(0); }
         to   { opacity: 0; transform: translateY(-16px); }
@@ -89,8 +87,6 @@ const {
         from { object-fit: contain; }
         to   { object-fit: cover; }
       }
-
-      /* Reduce motion: instant cut for accessibility */
       @media (prefers-reduced-motion: reduce) {
         ::view-transition-old(*), ::view-transition-new(*) {
           animation: none !important;
@@ -99,210 +95,29 @@ const {
     </style>
     
     <script is:inline>
-      // Blocking script to prevent theme flash
       (function() {
         const savedTheme = localStorage.getItem('theme');
         const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', savedTheme || systemTheme);
       })();
     </script>
-	</head>
-	<body class="theme-aware">
-    <!-- Liquid Glass Animated Background -->
-    <div class="liquid-bg">
-      <div class="liquid-blob blob-1"></div>
-      <div class="liquid-blob blob-2"></div>
-      <div class="liquid-blob blob-3"></div>
+  </head>
+  <body class="theme-aware">
+    {includeHeader && (
+      <div style="view-transition-name: site-header; position: relative; z-index: 200;">
+        <GlobalHeader activePath={activePath} />
+      </div>
+    )}
+
+    <div style="view-transition-name: main-content; isolation: isolate;">
+      <slot />
     </div>
-    <div style="view-transition-name: site-header; position: relative; z-index: 200;">
-      <GlobalHeader activePath={Astro.url.pathname} />
-    </div>
-		<div style="view-transition-name: main-content; isolation: isolate;">
-			<slot />
-		</div>
-     <Footer />
+
+    {includeFooter && (
+      <Footer />
+    )}
+
     <StructuredData deals={deals} />
-
-        <!-- Dynamic Command Palette -->
     <div id="cmd-palette-root"></div>
-    <script>
-      import { createLazyFeature } from '../lib/lazy/createLazyFeature';
-      import { globalKeyManager } from '../lib/performance/KeyboardManager';
-
-      const commandPaletteFeature = createLazyFeature({
-        name: 'CommandPalette',
-        loader: () => import('../components/CommandPalette'),
-        adapter: 'react',
-        prefetch: 'hover',
-        retry: true,
-        measure: true,
-        restoreFocus: true
-      });
-
-      // Initialize prefetch on the search icon
-      commandPaletteFeature.initPrefetch('search-trigger');
-
-      const loadPalette = () => {
-        commandPaletteFeature.mount('cmd-palette-root', { initialOpen: true });
-      };
-
-      globalKeyManager.register(
-        'cmd-k',
-        (e) => (e.ctrlKey || e.metaKey) && e.key === 'k',
-        () => loadPalette()
-      );
-
-      document.addEventListener('click', (e) => {
-        const target = e.target;
-        if (target && target.closest && target.closest('#search-trigger')) {
-          e.preventDefault();
-          loadPalette();
-        }
-      });
-    </script>
-    
-    <!-- INRDeals Auto-Affiliation Script -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js" is:inline></script>
-    <script type="text/javascript" is:inline>
-      var subID = 'squ649378917';
-      (function(d, t) {
-          var script   = document.createElement("script");script.type  = "text/javascript";
-          script.async = true;script.src   = (document.location.protocol == 'https:' ? 'https://cdn.jsdelivr.net/gh/inrdeals/inrdeals-js@latest/' : 'http://cdn.jsdelivr.net/gh/inrdeals/inrdeals-js@latest/')  + 'inrdeals.js';
-          document.body.appendChild(script);
-      }());
-    </script>
-	</body>
-
-	<style is:global>
-    .material-symbols-outlined {
-      font-variation-settings:
-        'FILL' 0,
-        'wght' 400,
-        'GRAD' 0,
-        'opsz' 24;
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-      display: inline-block;
-      line-height: 1;
-      vertical-align: middle;
-      font-family: 'Material Symbols Outlined';
-    }
-
-    /* Translucent body to let background blobs shine through */
-    body {
-      background-color: transparent !important;
-    }
-
-    /* ===== LIQUID GLASS BACKGROUND GLOWS ===== */
-    .liquid-bg {
-      position: fixed;
-      inset: 0;
-      z-index: -10;
-      overflow: hidden;
-      pointer-events: none;
-      background: #0B0E14; /* Base solid color */
-    }
-    .liquid-blob {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(120px);
-      opacity: 0.15;
-      animation: floatBlob 20s infinite alternate ease-in-out;
-    }
-    .blob-1 {
-      top: -10%;
-      left: -10%;
-      width: 50vw;
-      height: 50vw;
-      background: radial-gradient(circle, #fc8019, transparent);
-      animation-duration: 25s;
-    }
-    .blob-2 {
-      bottom: -10%;
-      right: -10%;
-      width: 60vw;
-      height: 60vw;
-      background: radial-gradient(circle, #22c55e, transparent);
-      animation-duration: 30s;
-      animation-delay: -5s;
-    }
-    .blob-3 {
-      top: 40%;
-      left: 60%;
-      width: 40vw;
-      height: 40vw;
-      background: radial-gradient(circle, #0088cc, transparent);
-      animation-duration: 22s;
-      animation-delay: -10s;
-    }
-    @keyframes floatBlob {
-      0% { transform: translate(0, 0) scale(1); }
-      50% { transform: translate(8vw, 6vh) scale(1.1); }
-      100% { transform: translate(-4vw, -8vh) scale(0.9); }
-    }
-
-    /* Reserve space for mobile dock so content isn't hidden behind it */
-    @media (max-width: 768px) {
-      body {
-        padding-bottom: calc(64px + env(safe-area-inset-bottom));
-      }
-    }
-
-    /* ===== NAV SEARCH BAR — injected globally on every page ===== */
-    .nav__search {
-      flex: 1;
-      min-width: 180px;
-      max-width: 380px;
-      padding-left: 16px;
-    }
-    @media (max-width: 768px) {
-      .nav__search { display: none !important; }
-    }
-    .nav__cmd-trigger {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      width: 100%;
-      padding: 9px 16px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      border-radius: 12px;
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-align: left;
-      white-space: nowrap;
-      font-family: inherit;
-    }
-    .nav__cmd-trigger:hover {
-      background: rgba(255, 255, 255, 0.13);
-      border-color: rgba(57, 255, 20, 0.55);
-      color: rgba(255, 255, 255, 0.95);
-      box-shadow: 0 0 20px rgba(57, 255, 20, 0.18);
-    }
-    .nav__cmd-label {
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .nav__cmd-kbd {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px 8px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      border-radius: 6px;
-      font-size: 10px;
-      font-weight: 700;
-      color: rgba(255, 255, 255, 0.8);
-      font-family: inherit;
-      flex-shrink: 0;
-      letter-spacing: 0.3px;
-    }
-    /* Hide the standalone cp-trigger React fallback button — header bar handles it */
-    .cp-trigger { display: none !important; }
-  </style>
+  </body>
 </html>
