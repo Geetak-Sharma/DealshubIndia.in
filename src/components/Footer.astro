@@ -1,27 +1,26 @@
----
+﻿---
+import BrandLogo from './BrandLogo.astro';
 const currentYear = new Date().getFullYear();
 ---
 
-<footer class="w-full bg-white border-t border-gray-200 text-gray-500 text-sm mt-16">
+<footer class="w-full bg-[#10131A] border-t border-white/10 text-slate-400 text-sm mt-16">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
     
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 pb-12 border-b border-gray-100">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 pb-12 border-b border-white/10">
       
       <!-- Brand & Summary Column (2 cols on lg) -->
       <div class="lg:col-span-2 space-y-4">
-        <a href="/" class="flex items-center gap-2 group focus:outline-none">
-          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-slate-950 font-black shadow-md">
-            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-            </svg>
+        <a href="/" class="flex items-center gap-2.5 group focus:outline-none" aria-label="DealsHub India Home">
+          <div class="flex-shrink-0 group-hover:scale-105 transition-transform duration-200">
+            <BrandLogo size={28} gradientId="ftr-brand-logo-grad" />
           </div>
           <div class="flex items-center">
-            <span class="font-extrabold text-xl tracking-tight text-gray-900">DealsHub</span>
-            <span class="text-emerald-400 font-extrabold text-xl">.in</span>
+            <span class="font-extrabold text-xl tracking-tight text-slate-100 group-hover:text-emerald-400 transition-colors">DealsHub</span>
+            <span class="text-emerald-600 font-extrabold text-xl">.in</span>
           </div>
         </a>
 
-        <p class="text-xs sm:text-sm text-gray-500 leading-relaxed max-w-sm">
+        <p class="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm">
           India’s trusted loot alerts and price-drop hunter since 2018. Hand-picking genuine discounts across Amazon, Flipkart, Myntra, and Blinkit with zero retail fluff.
         </p>
 
@@ -54,45 +53,45 @@ const currentYear = new Date().getFullYear();
 
       <!-- Quick Links -->
       <div class="space-y-3">
-        <h4 class="text-xs font-bold text-gray-900 uppercase tracking-wider">Quick Navigation</h4>
+        <h4 class="text-xs font-bold text-slate-100 uppercase tracking-wider">Quick Navigation</h4>
         <ul class="space-y-2 text-xs sm:text-sm">
-          <li><a href="/" class="hover:text-emerald-600 transition-colors">Today's Deals</a></li>
-          <li><a href="/#stores" class="hover:text-emerald-600 transition-colors">Store Drops</a></li>
-          <li><a href="/blog" class="hover:text-emerald-600 transition-colors">Shopping Guides & Blog</a></li>
-          <li><a href="/about" class="hover:text-emerald-600 transition-colors">About Us</a></li>
-          <li><a href="/tools/flipkart-review-analyzer" class="hover:text-emerald-600 transition-colors">Review Analyzer Tool</a></li>
+          <li><a href="/" class="hover:text-emerald-400 transition-colors">Today's Deals</a></li>
+          <li><a href="/#stores" class="hover:text-emerald-400 transition-colors">Store Drops</a></li>
+          <li><a href="/blog" class="hover:text-emerald-400 transition-colors">Shopping Guides & Blog</a></li>
+          <li><a href="/about" class="hover:text-emerald-400 transition-colors">About Us</a></li>
+          <li><a href="/tools/flipkart-review-analyzer" class="hover:text-emerald-400 transition-colors">Review Analyzer Tool</a></li>
         </ul>
       </div>
 
       <!-- Categories & Popular Stores -->
       <div class="space-y-3">
-        <h4 class="text-xs font-bold text-gray-900 uppercase tracking-wider">Popular Stores</h4>
+        <h4 class="text-xs font-bold text-slate-100 uppercase tracking-wider">Popular Stores</h4>
         <ul class="space-y-2 text-xs sm:text-sm">
-          <li><a href="/?store=amazon" class="hover:text-emerald-600 transition-colors">Amazon India Deals</a></li>
-          <li><a href="/?store=flipkart" class="hover:text-emerald-600 transition-colors">Flipkart GOAT Deals</a></li>
-          <li><a href="/?filter=loot" class="hover:text-emerald-600 transition-colors">90% Off Loot Deals</a></li>
-          <li><a href="/?filter=under99" class="hover:text-emerald-600 transition-colors">Under ₹99 Loots</a></li>
-          <li><a href="/quick-commerce" class="hover:text-emerald-600 transition-colors">Quick Commerce (Blinkit/Zepto)</a></li>
+          <li><a href="/?store=amazon" class="hover:text-emerald-400 transition-colors">Amazon India Deals</a></li>
+          <li><a href="/?store=flipkart" class="hover:text-emerald-400 transition-colors">Flipkart GOAT Deals</a></li>
+          <li><a href="/?filter=loot" class="hover:text-emerald-400 transition-colors">90% Off Loot Deals</a></li>
+          <li><a href="/?filter=under99" class="hover:text-emerald-400 transition-colors">Under ₹99 Loots</a></li>
+          <li><a href="/quick-commerce" class="hover:text-emerald-400 transition-colors">Quick Commerce (Blinkit/Zepto)</a></li>
         </ul>
       </div>
 
       <!-- Legal & Policies -->
       <div class="space-y-3">
-        <h4 class="text-xs font-bold text-gray-900 uppercase tracking-wider">Transparency & Legal</h4>
+        <h4 class="text-xs font-bold text-slate-100 uppercase tracking-wider">Transparency & Legal</h4>
         <ul class="space-y-2 text-xs sm:text-sm">
-          <li><a href="/disclosure" class="hover:text-emerald-600 transition-colors">Affiliate Disclosure</a></li>
-          <li><a href="/dmca" class="hover:text-emerald-600 transition-colors">DMCA Policy</a></li>
-          <li><a href="/contact" class="hover:text-emerald-600 transition-colors">Contact Support</a></li>
-          <li><a href="/feed.xml" class="hover:text-emerald-600 transition-colors">RSS Deal Feed</a></li>
+          <li><a href="/disclosure" class="hover:text-emerald-400 transition-colors">Affiliate Disclosure</a></li>
+          <li><a href="/dmca" class="hover:text-emerald-400 transition-colors">DMCA Policy</a></li>
+          <li><a href="/contact" class="hover:text-emerald-400 transition-colors">Contact Support</a></li>
+          <li><a href="/feed.xml" class="hover:text-emerald-400 transition-colors">RSS Deal Feed</a></li>
         </ul>
       </div>
 
     </div>
 
     <!-- Mandatory Affiliate Disclosure Notice -->
-    <div class="py-6 border-b border-gray-100 text-[11px] sm:text-xs text-gray-500 leading-relaxed space-y-2">
+    <div class="py-6 border-b border-white/10 text-[11px] sm:text-xs text-slate-400 leading-relaxed space-y-2">
       <p>
-        <strong class="text-gray-700">Affiliate Disclosure:</strong> DealsHub India is a participant in affiliate advertising programs including the Amazon Associates Program, Flipkart Affiliate Program, and other merchant networks designed to provide a means for sites to earn referral fees by advertising and linking to official e-commerce platforms. As an affiliate, we earn from qualifying purchases at <span class="text-emerald-400 font-medium">absolutely no extra cost to you</span>.
+        <strong class="text-slate-300">Affiliate Disclosure:</strong> DealsHub India is a participant in affiliate advertising programs including the Amazon Associates Program, Flipkart Affiliate Program, and other merchant networks designed to provide a means for sites to earn referral fees by advertising and linking to official e-commerce platforms. As an affiliate, we earn from qualifying purchases at <span class="text-emerald-400 font-medium">absolutely no extra cost to you</span>.
       </p>
       <p>
         Prices, coupons, and product availability are accurate as of the time of posting and are subject to real-time merchant changes. We do not sell any products directly; all transactions take place on merchant portals.
@@ -100,16 +99,18 @@ const currentYear = new Date().getFullYear();
     </div>
 
     <!-- Copyright & Disclaimer -->
-    <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+    <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
       <p>© {currentYear} DealsHub India. All rights reserved. Handpicked with ❤️ in India.</p>
       <div class="flex items-center gap-4">
-        <a href="/disclosure" class="hover:text-slate-200 transition-colors">Disclosure</a>
+        <a href="/disclosure" class="hover:text-white transition-colors">Disclosure</a>
         <span>•</span>
-        <a href="/dmca" class="hover:text-slate-200 transition-colors">DMCA</a>
+        <a href="/dmca" class="hover:text-white transition-colors">DMCA</a>
         <span>•</span>
-        <a href="/contact" class="hover:text-slate-200 transition-colors">Contact</a>
+        <a href="/contact" class="hover:text-white transition-colors">Contact</a>
       </div>
     </div>
 
   </div>
 </footer>
+
+

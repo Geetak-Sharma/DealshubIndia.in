@@ -37,25 +37,25 @@ const description = deal ? ('Get ' + dealTitle + ' for ' + dealPrice + '. Verifi
 ---
 
 <Layout title={title} description={description} ogTitle={title} image={deal?.image}>
-  <div class="min-h-screen flex items-center justify-center p-4 bg-[#F8F9FA] text-gray-900 font-sans">
-    <div class="max-w-md w-full notion-card p-6 rounded-xl border border-gray-200 bg-white text-center shadow-sm">
-      <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg">⚡</div>
-      <h2 class="text-lg font-bold text-gray-900 mb-1">Redirecting to Deal...</h2>
-      <p class="text-xs text-gray-500 mb-5">Taking you directly to the verified store link. One moment please!</p>
+  <div class="min-h-screen flex items-center justify-center p-4 bg-[#12151C] text-slate-100 font-sans">
+    <div class="max-w-md w-full p-6 rounded-2xl border border-white/10 bg-[#181D27] text-center shadow-2xl backdrop-blur-md">
+      <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-emerald-400/10 text-emerald-300 border border-emerald-400/20 flex items-center justify-center font-bold text-lg">⚡</div>
+      <h2 class="text-lg font-bold text-slate-100 mb-1">Redirecting to Deal...</h2>
+      <p class="text-xs text-slate-400 mb-5">Taking you directly to the verified store link. One moment please!</p>
       
       {deal && (
-        <div class="flex items-center gap-3 p-3 rounded-lg border border-gray-100 bg-gray-50/50 text-left mb-5">
+        <div class="flex items-center gap-3 p-3 rounded-lg border border-white/10 bg-[#141820] text-left mb-5">
           {deal.image && (
-            <img src={deal.image} alt={deal.title} class="w-14 h-14 object-contain rounded bg-white p-1 border border-gray-200 shrink-0" />
+            <img src={deal.image} alt={deal.title} class="w-14 h-14 object-contain rounded bg-white p-1 border border-white/10 shrink-0" />
           )}
           <div class="min-w-0">
-            <h3 class="text-xs font-semibold text-gray-900 truncate">{deal.title}</h3>
-            <span class="text-sm font-bold text-emerald-600 font-mono">{deal.price || ''}</span>
+            <h3 class="text-xs font-semibold text-slate-200 truncate">{deal.title}</h3>
+            <span class="text-sm font-bold text-emerald-300 font-mono">{deal.price || ''}</span>
           </div>
         </div>
       )}
       
-      <a href={directUrl} class="inline-flex items-center justify-center w-full px-4 py-2.5 bg-gray-900 hover:bg-black text-white text-xs font-medium rounded-lg transition-colors">
+      <a href={directUrl} class="inline-flex items-center justify-center w-full px-4 py-2.5 bg-emerald-400/20 hover:bg-emerald-400/30 text-emerald-200 border border-emerald-400/40 text-xs font-semibold rounded-xl transition-colors">
         Continue to Store ↗
       </a>
     </div>

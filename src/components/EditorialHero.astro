@@ -1,4 +1,4 @@
----
+﻿---
 interface Props {
   memberCount?: string;
   totalSaved?: string;
@@ -18,30 +18,30 @@ const {
       <!-- ================= LEFT COLUMN: EDITORIAL IDENTITY & SEARCH ================= -->
       <div class="lg:col-span-7 xl:col-span-8 flex flex-col justify-center">
         <!-- Newspaper Edition Bar -->
-        <div class="inline-flex items-center gap-2 pb-2 mb-3 border-b border-gray-200 text-[11px] font-mono uppercase tracking-widest text-gray-500">
+        <div class="inline-flex items-center gap-2 pb-2 mb-3 border-b border-white/10 text-[11px] font-mono uppercase tracking-widest text-slate-400">
           <span class="text-amber-400 font-bold">● DISPATCH EDITION</span>
           <span class="text-slate-600">|</span>
           <span>CURATED 24/7 FOR INDIA</span>
           <span class="text-slate-600">|</span>
-          <span class="text-gray-500">VOL. IV · NO. 293</span>
+          <span class="text-slate-400">VOL. IV · NO. 293</span>
         </div>
 
         <!-- Classic Newspaper Serif Headline -->
-        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-serif-editorial font-bold text-gray-900 tracking-tight leading-[1.12] mb-3">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-serif-editorial font-bold text-slate-100 tracking-tight leading-[1.12] mb-3">
           Curated Deals &amp; Shopping Guides. <br class="hidden sm:inline" />
-          <span class="italic font-normal text-emerald-700 underline decoration-emerald-500/50 decoration-2 underline-offset-8">Hand-verified, zero fluff.</span>
+          <span class="italic font-normal text-emerald-300 underline decoration-emerald-400/50 decoration-2 underline-offset-8">Hand-verified, zero fluff.</span>
         </h1>
 
         <!-- Subtitle -->
-        <p class="text-sm sm:text-base text-gray-600 leading-relaxed font-normal mb-6 max-w-2xl">
+        <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-normal mb-6 max-w-2xl">
           Our automated scrapers track 200+ drops daily across Amazon and Flipkart. We filter out the noise and publish only genuine, lowest-ever price drops.
         </p>
 
         <!-- Quick Search Bar Integrated Cleanly -->
         <form action="/livedeals" method="GET" class="w-full max-w-xl" id="hero-editorial-search">
-          <div class="relative flex items-center bg-white border border-gray-200 shadow-sm hover:border-slate-700 focus-within:border-emerald-500/70 focus-within:ring-2 focus-within:ring-emerald-500/20 rounded-xl transition-all p-1.5 shadow-sm">
-            <div class="pl-3 pr-2 text-gray-500 flex items-center">
-              <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <div class="relative flex items-center bg-[#181D27] border border-white/10 shadow-sm hover:border-white/20 focus-within:border-emerald-400/70 focus-within:ring-2 focus-within:ring-emerald-500/20 rounded-xl transition-all p-1.5 shadow-sm">
+            <div class="pl-3 pr-2 text-slate-400 flex items-center">
+              <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
@@ -53,7 +53,7 @@ const {
               autocomplete="off"
               spellcheck="false"
               placeholder="Search 200+ live deals by brand, product, or store..."
-              class="w-full bg-transparent text-gray-900 placeholder-gray-400 text-xs sm:text-sm px-2 py-1.5 focus:outline-none"
+              class="w-full bg-transparent text-slate-100 placeholder-slate-400 text-xs sm:text-sm px-2 py-1.5 focus:outline-none"
             />
 
             <button
@@ -65,8 +65,8 @@ const {
           </div>
 
           <!-- Fast shortcut chips -->
-          <div class="flex items-center gap-2 mt-2.5 flex-wrap text-[11px] text-gray-500 font-mono">
-            <span class="text-gray-500">Quick jump:</span>
+          <div class="flex items-center gap-2 mt-2.5 flex-wrap text-[11px] text-slate-400 font-mono">
+            <span class="text-slate-400">Quick jump:</span>
             <a href="/blog" class="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 font-bold underline decoration-emerald-500/40 hover:decoration-emerald-400 transition-colors"><span>📚 Sale Guides</span></a>
             <span>•</span>
             <a href="/livedeals?q=Amazon" class="hover:text-amber-400 underline decoration-slate-700 hover:decoration-amber-400 transition-colors">#Amazon</a>
@@ -84,7 +84,7 @@ const {
 
       <!-- ================= RIGHT COLUMN: DUAL COMMUNITY HUB / WHATSAPP & TELEGRAM ALERT BOX ================= -->
       <div class="lg:col-span-5 xl:col-span-4">
-        <div class="bg-white border border-gray-200 shadow-sm hover:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition-all shadow-xl shadow-black/40">
+        <div class="bg-[#181D27] border border-white/10 shadow-lg hover:border-emerald-400/30 rounded-2xl p-5 sm:p-6 transition-all shadow-xl shadow-black/40">
           <div class="flex items-center justify-between gap-2 mb-3">
             <div class="flex items-center gap-2.5">
               <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-[#25D366] to-[#0088cc] flex items-center justify-center text-white shrink-0 shadow-sm shadow-emerald-500/20">
@@ -92,7 +92,7 @@ const {
               </div>
               <div>
                 <div class="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400">⚡ INSTANT PRICE DROP CHANNELS</div>
-                <div class="flex items-center gap-1.5 text-[11px] text-gray-500">
+                <div class="flex items-center gap-1.5 text-[11px] text-slate-400">
                   <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                   <span>Instant Real-Time Alerts</span>
                 </div>
@@ -140,7 +140,7 @@ const {
             </a>
           </div>
 
-          <div class="mt-3 flex items-center justify-between text-[11px] text-gray-500 font-mono">
+          <div class="mt-3 flex items-center justify-between text-[11px] text-slate-400 font-mono">
             <span>⚡ Muteable alerts</span>
             <span>•</span>
             <span>Zero spam</span>
@@ -153,3 +153,5 @@ const {
     </div>
   </div>
 </section>
+
+

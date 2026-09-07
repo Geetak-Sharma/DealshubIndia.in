@@ -1,4 +1,4 @@
----
+﻿---
 import { ClientRouter } from 'astro:transitions';
 import SEO from '../components/SEO.astro';
 import '../styles/base.css';
@@ -7,8 +7,9 @@ import '../styles/components.css';
 import '../styles/utilities.css';
 import '../styles/glass3d.css';
 import '../styles/tailwind.css';
-import GlobalHeader from '../components/GlobalHeader.astro';
-import Footer from '../components/ActiveFooter.astro';
+import LootTicker from '../components/LootTicker.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
 import StructuredData from '../components/StructuredData.astro';
 import MobileBottomDock from '../components/MobileBottomDock.astro';
 import PWA from '../components/PWA.astro';
@@ -20,6 +21,7 @@ interface Props {
   image?: string;
   ogType?: string;
   deals?: any[];
+  includeTicker?: boolean;
   includeHeader?: boolean;
   includeFooter?: boolean;
   activePath?: string;
@@ -32,6 +34,7 @@ const {
   image, 
   ogType = "website",
   deals = [],
+  includeTicker = true,
   includeHeader = true,
   includeFooter = true,
   activePath = Astro.url.pathname
@@ -103,9 +106,12 @@ const {
     </script>
   </head>
   <body class="theme-aware">
+    {includeTicker && (
+      <LootTicker />
+    )}
     {includeHeader && (
       <div style="view-transition-name: site-header; position: relative; z-index: 200;">
-        <GlobalHeader activePath={activePath} />
+        <Header activePath={activePath} />
       </div>
     )}
 
@@ -121,3 +127,4 @@ const {
     <div id="cmd-palette-root"></div>
   </body>
 </html>
+

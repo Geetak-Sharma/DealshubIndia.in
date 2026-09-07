@@ -1,4 +1,4 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { execSync } from 'child_process';
 import type { FlipkartProduct, NormalizedReview, RatingDistribution } from '../../types/tools';

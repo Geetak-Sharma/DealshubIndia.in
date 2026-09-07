@@ -1,4 +1,4 @@
----
+﻿---
 export const prerender = false;
 import fs from 'node:fs/promises';
 import { getCollection } from 'astro:content';
@@ -304,16 +304,16 @@ const pageDescription = "Bespoke editorial deal intelligence. Automated scrapers
 <Layout
   title={pageTitle}
   description={pageDescription}
-  includeHeader={false}
-  includeFooter={false}
+  includeHeader={true}
+  includeFooter={true}
   deals={editorialDeals}
   activePath="/"
 >
   <!-- 1. Top Announcement Marquee -->
-  <LootTicker />
+  
 
   <!-- 2. Sticky Glass Header -->
-  <Header activePath="/" />
+  
 
   <main id="main-content" class="w-full">
     
@@ -324,70 +324,22 @@ const pageDescription = "Bespoke editorial deal intelligence. Automated scrapers
     />
 
     <!-- Section 1 (TOP): Curated Shopping Guides & Sale Playbooks (/blog) -->
-    {featuredGuides.length > 0 && (
-      <section id="shopping-guides" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 border-t border-gray-200">
-        
-        <!-- Clean Wirecutter Editorial Header -->
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 pb-4 border-b border-gray-200">
-          <div>
-            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-bold uppercase tracking-wider mb-2">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>EDITOR'S FIELD GUIDES &amp; SHOPPING HACKS</span>
-            </div>
-            <div class="flex items-center gap-3">
-              <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 tracking-tight">
-                📚 Curated Shopping Guides &amp; Sale Playbooks
-              </h2>
-            </div>
-            <p class="text-xs sm:text-sm text-gray-600 mt-1.5 font-normal max-w-2xl">
-              Wire-tested shopping strategies, card cashback stacking, and price-error playbooks from DealsHub editors. Tested before you buy.
-            </p>
-          </div>
-
-          <div class="shrink-0">
-            <a
-              href="/blog"
-              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-gray-200 hover:border-emerald-500/50 text-slate-200 hover:text-emerald-300 text-xs sm:text-sm font-bold transition-all shadow-sm group"
-            >
-              <span>Explore All Guides &amp; Insights (/blog)</span>
-              <span class="text-emerald-400 group-hover:translate-x-1 transition-transform">→</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- 3 Featured Field Guide Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {featuredGuides.map((post) => (
-            <BlogCard
-              title={post.data.title}
-              description={post.data.description}
-              pubDate={post.data.pubDate}
-              author={post.data.author || "DealsHub Editorial"}
-              image={post.data.image}
-              url={post.cleanUrl}
-              category={post.data.category}
-              readingTime={post.readingTime}
-              editorialBadge={post.editorialBadge}
-            />
-          ))}
-        </div>
-      </section>
-    )}
+    
 
     <!-- Section 2 (DIRECTLY NEXT/BELOW): Today's Live Deals (2 rows = 8 deals) -->
-    <section id="deals" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 border-t border-gray-200">
+    <section id="deals" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 border-t border-white/10">
       
       <!-- Clean Editorial Section Header -->
-      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 pb-4 border-b border-gray-200">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 pb-4 border-b border-white/10">
         <div>
           <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-bold uppercase tracking-wider mb-2">
             <span>EDITORIAL SHORTLIST</span>
           </div>
           <div class="flex items-center gap-3">
-            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 tracking-tight">Today's Live Deals</h2>
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-100 tracking-tight">Today's Live Deals</h2>
             <span class="pulse-indicator"></span>
           </div>
-          <p class="text-xs sm:text-sm text-gray-600 mt-1.5 font-normal">
+          <p class="text-xs sm:text-sm text-slate-300 mt-1.5 font-normal">
             Slashed MRP vs verified deal price. Hand-filtered from 200+ raw daily drops.
           </p>
         </div>
@@ -395,7 +347,7 @@ const pageDescription = "Bespoke editorial deal intelligence. Automated scrapers
         <div class="shrink-0">
           <a
             href="/livedeals"
-            class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-gray-200 hover:border-emerald-500/50 text-slate-200 hover:text-emerald-300 text-xs sm:text-sm font-bold transition-all shadow-sm group"
+            class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#1A202C] hover:bg-[#222938] border border-white/10 hover:border-emerald-500/50 text-slate-200 hover:text-emerald-300 text-xs sm:text-sm font-bold transition-all shadow-sm group"
           >
             <span>Browse All 200+ Live Deals →</span>
           </a>
@@ -427,7 +379,7 @@ const pageDescription = "Bespoke editorial deal intelligence. Automated scrapers
       </div>
 
       <!-- 5. Mature Editorial Live Stream Banner -->
-      <div class="mt-12 sm:mt-16 p-7 sm:p-10 rounded-2xl bg-white border border-gray-200 shadow-sm rounded-2xl relative overflow-hidden group">
+      <div class="mt-12 sm:mt-16 p-7 sm:p-10 rounded-2xl bg-[#181D27] border border-white/10 shadow-lg rounded-2xl relative overflow-hidden group">
         <div class="max-w-3xl mx-auto flex flex-col items-center text-center gap-4 relative z-10">
           
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-mono font-bold uppercase tracking-wider">
@@ -436,10 +388,10 @@ const pageDescription = "Bespoke editorial deal intelligence. Automated scrapers
           </div>
 
           <div class="space-y-2">
-            <h3 class="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 tracking-tight leading-snug">
+            <h3 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-100 tracking-tight leading-snug">
               Want the unfiltered feed? Explore all 200+ live Telegram drops as they happen.
             </h3>
-            <p class="text-sm sm:text-base text-gray-600 max-w-xl mx-auto leading-relaxed">
+            <p class="text-sm sm:text-base text-slate-300 max-w-xl mx-auto leading-relaxed">
               Fast merchant filtering for Amazon & Flipkart, instant budget toggles (&lt;₹500, &lt;₹1,000, &lt;₹5,000), and auto-refreshing live Telegram stream.
             </p>
           </div>
@@ -453,7 +405,7 @@ const pageDescription = "Bespoke editorial deal intelligence. Automated scrapers
             </a>
           </div>
 
-          <p class="text-xs text-gray-400 font-mono">
+          <p class="text-xs text-slate-400 font-mono">
             ⚡ 200+ drops scanned daily • Hand-verified price drops • 100% Free
           </p>
 
@@ -462,10 +414,59 @@ const pageDescription = "Bespoke editorial deal intelligence. Automated scrapers
 
     </section>
 
+    {featuredGuides.length > 0 && (
+      <section id="shopping-guides" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 border-t border-white/10">
+        
+        <!-- Clean Wirecutter Editorial Header -->
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 pb-4 border-b border-white/10">
+          <div>
+            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-bold uppercase tracking-wider mb-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>EDITOR'S FIELD GUIDES &amp; SHOPPING HACKS</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-100 tracking-tight">
+                📚 Curated Shopping Guides &amp; Sale Playbooks
+              </h2>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-300 mt-1.5 font-normal max-w-2xl">
+              Wire-tested shopping strategies, card cashback stacking, and price-error playbooks from DealsHub editors. Tested before you buy.
+            </p>
+          </div>
 
+          <div class="shrink-0">
+            <a
+              href="/blog"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1A202C] hover:bg-[#222938] border border-white/10 hover:border-emerald-500/50 text-slate-200 hover:text-emerald-300 text-xs sm:text-sm font-bold transition-all shadow-sm group"
+            >
+              <span>Explore All Guides &amp; Insights (/blog)</span>
+              <span class="text-emerald-400 group-hover:translate-x-1 transition-transform">→</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 3 Featured Field Guide Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {featuredGuides.map((post) => (
+            <BlogCard
+              title={post.data.title}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              author={post.data.author || "DealsHub Editorial"}
+              image={post.data.image}
+              url={post.cleanUrl}
+              category={post.data.category}
+              readingTime={post.readingTime}
+              editorialBadge={post.editorialBadge}
+            />
+          ))}
+        </div>
+      </section>
+    )}
 
   </main>
 
   <!-- 7. Master Clean Footer -->
-  <Footer />
+  
 </Layout>
+

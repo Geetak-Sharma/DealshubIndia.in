@@ -10,7 +10,7 @@ interface Props {
 const { title, description, href, isLive, icon } = Astro.props;
 ---
 
-<div class={`flex flex-col justify-between p-5 bg-white dark:bg-slate-900 border rounded-xl transition-all duration-300 ${isLive ? 'border-slate-200 dark:border-slate-800 hover:shadow-md hover:border-emerald-500/20 group' : 'border-slate-200/60 dark:border-slate-800/60 bg-slate-50/20 dark:bg-slate-950/10'}`}>
+<div class={`flex flex-col justify-between p-5 bg-[#181D27] border rounded-xl transition-all duration-300 ${isLive ? 'border-white/10 hover:shadow-md hover:border-emerald-500/20 group' : 'border-white/5 bg-[#141820]/40'}`}>
   <div class="space-y-3">
     
     <div class="flex items-center justify-between">
@@ -21,21 +21,21 @@ const { title, description, href, isLive, icon } = Astro.props;
     </div>
 
     <div class="space-y-1">
-      <h3 class="text-xs font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight">
+      <h3 class="text-xs font-black text-slate-100 uppercase tracking-tight">
         {title}
       </h3>
-      <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+      <p class="text-[11px] text-slate-400 leading-relaxed font-medium">
         {description}
       </p>
     </div>
 
   </div>
 
-  <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-850">
+  <div class="mt-4 pt-3 border-t border-white/10">
     {isLive ? (
       <a 
         href={href} 
-        class="flex items-center justify-center w-full py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] tracking-wider rounded-lg shadow-sm uppercase text-center transition-all"
+        class="flex items-center justify-center w-full py-2 px-4 bg-emerald-400/20 hover:bg-emerald-400/30 text-emerald-200 border border-emerald-400/30 font-extrabold text-[10px] tracking-wider rounded-lg shadow-sm uppercase text-center transition-all"
       >
         Launch Tool →
       </a>

@@ -1,24 +1,24 @@
-:root {
-  /* Brand Colors */
-  --primary-color: #10B981; /* Notion / Linear Emerald */
-  --primary-color-rgb: 16, 185, 129;
-  --accent-color: #0088cc; /* Telegram Blue */
+﻿:root {
+  /* Brand Pastel Accents */
+  --primary-color: #6EE7B7; /* Soft Pastel Emerald */
+  --primary-color-rgb: 110, 231, 183;
+  --accent-color: #7DD3FC; /* Soft Pastel Sky / Cyan */
 
-  /* Store Branding Colors */
-  --store-amazon: #ea580c;   /* Warm Orange */
-  --store-flipkart: #2563eb; /* Clean Blue */
-  --store-myntra: #e11d48;   /* Rose */
-  --store-telegram: #0088cc; /* Cyan */
-  --store-loot: #10b981;     /* Emerald */
+  /* Store Branding Colors (Refined for dark pastel background) */
+  --store-amazon: #FDBA74;   /* Soft Pastel Amber/Orange */
+  --store-flipkart: #93C5FD; /* Soft Pastel Blue */
+  --store-myntra: #F472B6;   /* Soft Pastel Rose */
+  --store-telegram: #7DD3FC; /* Soft Pastel Cyan */
+  --store-loot: #6EE7B7;     /* Soft Pastel Emerald */
 
-  /* Notion Clean Light Mode Canvas */
-  --bg-color: #F8F9FA;
-  --surface-color: #FFFFFF;
-  --surface-color-hover: #F1F3F5;
-  --text-primary: #111827;
-  --text-secondary: #4B5563;
-  --text-muted: #9CA3AF;
-  --border-color: #E5E7EB;
+  /* Bit-Dark Pastel Color Palette */
+  --bg-color: #12151C;              /* Deep Slate/Charcoal Canvas */
+  --surface-color: #1A1F2B;         /* Elevated Card / Panel Surface */
+  --surface-color-hover: #222938;   /* Card Hover Surface */
+  --text-primary: #F1F5F9;          /* High contrast crisp white-slate */
+  --text-secondary: #CBD5E1;        /* Soft readable muted slate */
+  --text-muted: #94A3B8;            /* Subtle labels / metadata */
+  --border-color: rgba(255, 255, 255, 0.08); /* Subtle crisp border */
 
   /* Spacing Scale */
   --spacing-1: 8px;
@@ -32,15 +32,15 @@
   --font-family: 'Inter', system-ui, -apple-system, sans-serif;
   
   /* Radii */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 10px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.45);
   
   /* Layout Constants */
   --container-max-width: 1200px;
@@ -61,13 +61,14 @@ body {
 }
 
 .notion-card {
-  background-color: #FFFFFF;
-  border: 1px solid #E5E7EB;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .notion-card:hover {
-  border-color: #D1D5DB;
-  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+  background-color: var(--surface-color-hover);
+  border-color: rgba(110, 231, 183, 0.3);
+  box-shadow: 0 8px 20px -2px rgba(0, 0, 0, 0.45);
   transform: translateY(-2px);
 }
