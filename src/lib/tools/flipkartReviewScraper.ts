@@ -14,8 +14,9 @@ const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKi
  */
 function isActualBotChallenge(html: string): boolean {
   const lower = html.toLowerCase();
-  const hasCaptchaWidget = lower.includes('g-recaptcha') || lower.includes('class="recaptcha"');
-  const hasCaptchaScript = lower.includes('www.google.com/recaptcha');
+  // Only detect actual CAPTCHA widgets and reCAPTCHA API script, not JSON config flags like isReCaptchaEnabled
+  const hasCaptchaWidget = lower.includes('class="g-recaptcha"') || lower.includes("class='g-recaptcha'");
+  const hasCaptchaScript = lower.includes('www.google.com/recaptcha/api');
   const hasE002Error = html.includes('E002') && lower.includes('something went wrong');
   return (hasCaptchaWidget || hasCaptchaScript || hasE002Error);
 }
@@ -328,15 +329,8 @@ export async function scrapeFlipkartReviews(productUrl: string, maxPages = 3, so
 
   const prodResult = await fetchHtmlWithFallback(productFetchUrl, warnings);
 
-  
   if (prodResult.isBlocked) {
-    return {
-      product,
-      reviews: [],
-      distribution,
-      warnings: [...warnings, 'Flipkart blocked the connection with an anti-bot challenge (reCAPTCHA/E002).'],
-      isBlocked: true
-    };
+    warnings.push('Flipkart product page was restricted or redirected; extracting metadata and reviews directly from reviews page.');
   }
 
   if (prodResult.html) {
@@ -399,7 +393,7 @@ export async function scrapeFlipkartReviews(productUrl: string, maxPages = 3, so
         }
         
         if (data?.dlsData?.label_2?.value?.text) {
-          product.title = data.dlsData.label_2.value.text;
+          const candidate = data.dlsData.label_2.value.text; if (candidate && !candidate.toLowerCase().includes('ask a question')) product.title = candidate;
         } else if (data?.dlsData?.customEllipsisData_0?.value?.prependingText) {
           product.title = data.dlsData.customEllipsisData_0.value.prependingText;
         }
@@ -462,6 +456,11 @@ export async function scrapeFlipkartReviews(productUrl: string, maxPages = 3, so
   }
 
   // 3. Resolve Reviews standalone target URL
+  // Extract title fallback from slug if title is still default
+  if ((product.title === 'Flipkart Product' || product.title.includes('Buy Products Online')) && slug && slug !== 'product' && slug !== 'dummy' && slug !== 'p') {
+    product.title = slug.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
+  }
+
   const finalItemId = itemId || 'itm2d1c2174f4a30'; // fallback to standard if not resolvable
   const reviewsBaseUrl = `https://www.flipkart.com/${slug}/product-reviews/${finalItemId}`;
   
@@ -717,19 +716,14 @@ export async function* scrapeFlipkartReviewsStreaming(
   let product: FlipkartProduct = { title: 'Flipkart Product', rating: 0, ratingCount: 0, reviewCount: 0 };
   let distribution: RatingDistribution = { star5: 0, star4: 0, star3: 0, star2: 0, star1: 0 };
 
+  // Try product page for metadata (best-effort, often returns homepage or restricted status)
   const productFetchUrl = itemId
     ? `https://www.flipkart.com/${slug}/p/${itemId}?pid=${pid}`
-    : `https://www.flipkart.com/p/dummy?pid=${pid}`;
+    : `https://www.flipkart.com/${slug}/p/itm?pid=${pid}`;
 
   const prodResult = await fetchHtmlWithFallback(productFetchUrl, warnings);
 
-  if (prodResult.isBlocked) {
-    yield { type: 'product', product, distribution, canonicalUrl: productFetchUrl,
-      warnings: [...warnings, 'Flipkart blocked the connection.'], isBlocked: true };
-    return;
-  }
-
-  if (prodResult.html) {
+  if (prodResult.html && !prodResult.isBlocked) {
     const $ = cheerio.load(prodResult.html);
     if (!itemId || ['dl','p','dummy','product'].includes(slug)) {
       const canonicalLink = $('link[rel="canonical"]').attr('href') || '';
@@ -753,7 +747,7 @@ export async function* scrapeFlipkartReviewsStreaming(
           const v = d?.rating?.value;
           if (v) { product.rating = v.average; const h = v.histogram || [];
             if (h.length >= 5) { distribution = normalizeRatingDistribution({ star1:h[0]||0,star2:h[1]||0,star3:h[2]||0,star4:h[3]||0,star5:h[4]||0 });
-              product.ratingCount = h.reduce((a:number,b:number)=>a+b,0); } }
+              if (!product.ratingCount) product.ratingCount = h.reduce((a:number,b:number)=>a+b,0); } }
         }
         if (d?.dlsData?.label_2?.value?.text) product.title = d.dlsData.label_2.value.text;
         else if (d?.dlsData?.customEllipsisData_0?.value?.prependingText) product.title = d.dlsData.customEllipsisData_0.value.prependingText;
@@ -774,9 +768,13 @@ export async function* scrapeFlipkartReviewsStreaming(
     if (dc.length >= 5) distribution = normalizeRatingDistribution({ star5:dc[0],star4:dc[1],star3:dc[2],star2:dc[3],star1:dc[4] });
   }
 
+  // Derive human title from slug fallback if still default
+  if ((product.title === 'Flipkart Product' || product.title.includes('Buy Products Online')) && slug && slug !== 'product' && slug !== 'dummy' && slug !== 'p') {
+    product.title = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
   const finalItemId = itemId || 'itm2d1c2174f4a30';
   const canonicalUrl = `https://www.flipkart.com/${slug}/p/${finalItemId}?pid=${pid}`;
-  yield { type: 'product', product, distribution, canonicalUrl, warnings: [...warnings] };
 
   const reviewsBaseUrl = `https://www.flipkart.com/${slug}/product-reviews/${finalItemId}`;
   let sortOrder = 'MOST_HELPFUL';
@@ -786,6 +784,7 @@ export async function* scrapeFlipkartReviewsStreaming(
 
   let reviewIndex = 0;
   let totalFetched = 0;
+  let productEventYielded = false;
 
   for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
     if (pageNum > 1) await new Promise(r => setTimeout(r, 600 + Math.floor(Math.random()*400)));
@@ -794,7 +793,11 @@ export async function* scrapeFlipkartReviewsStreaming(
     const rr = await fetchHtmlWithFallback(pageUrl, pw);
 
     if (rr.isBlocked || !rr.html) {
-      pw.push(`Could not fetch page ${pageNum} â€” blocked.`);
+      pw.push(`Could not fetch page ${pageNum} — reviews page restricted or unavailable.`);
+      if (!productEventYielded) {
+        yield { type: 'product', product, distribution, canonicalUrl, warnings: [...warnings, ...pw], isBlocked: false };
+        productEventYielded = true;
+      }
       yield { type: 'reviews', reviews: [], pageNum, hasMore: false, warnings: pw };
       break;
     }
@@ -804,38 +807,80 @@ export async function* scrapeFlipkartReviewsStreaming(
     let extracted = false;
 
     if (rs) {
-      (rs.multiWidgetState?.widgetsData?.slots || []).forEach((s: any) => {
-        const w = s.slotData?.widget; if (!w) return;
-        if (w.type === 'RATING' || s.slotData?.elementId?.includes('RATING')) {
+      const slots = rs.multiWidgetState?.widgetsData?.slots || [];
+
+      // Extract metadata from RATING widget on reviews page (very reliable)
+      for (const s of slots) {
+        const w = s.slotData?.widget; if (!w) continue;
+        if (w.type === 'RATING' || (s.slotData?.elementId || '').includes('RATING')) {
           const v = w.data?.rating?.value;
-          if (v) { product.rating = v.average;
-            if (v.ratingCount) product.ratingCount = v.ratingCount;
-            if (v.reviewCount) product.reviewCount = v.reviewCount;
-            const h = v.histogram||[];
-            if (h.length>=5) distribution = normalizeRatingDistribution({star1:h[0]||0,star2:h[1]||0,star3:h[2]||0,star4:h[3]||0,star5:h[4]||0});
+          if (v) {
+            if (v.average && (!product.rating || product.rating === 0)) product.rating = v.average;
+            if (v.ratingCount && (!product.ratingCount || product.ratingCount === 0)) product.ratingCount = v.ratingCount;
+            if (v.reviewCount && (!product.reviewCount || product.reviewCount === 0)) product.reviewCount = v.reviewCount;
+            const h = v.histogram || [];
+            if (h.length >= 5) {
+              distribution = normalizeRatingDistribution({ star1:h[0]||0, star2:h[1]||0, star3:h[2]||0, star4:h[3]||0, star5:h[4]||0 });
+              if (!product.ratingCount) product.ratingCount = h.reduce((a:number,b:number)=>a+b,0);
+            }
           }
         }
-        if (w.type === 'REVIEWS' || s.slotData?.elementId?.includes('REVIEWS')) {
-          (w.data?.renderableComponents||[]).forEach((c: any) => {
-            const v = c.value; if (!v) return;
-            const loc = [v.location?.city||'',v.location?.state||''].filter(Boolean).join(', ');
-            const imgs = (v.images||v.media||[]).map((i:any)=>resolveFlipkartImageUrl(i.value?.imageURL||i.imageURL||i.url||i.urlTemplate||'')).filter(Boolean);
-            pr2.push(normalizeFlipkartReview({ id:v.id||`fk-json-${reviewIndex}`, rating:String(v.rating||5),
-              title:v.title||'', body:(v.text||'').replace(/READ MORE/g,'').trim(),
-              author:v.author||'Flipkart Buyer', isVerified:!!v.certifiedBuyer,
-              helpfulCount:String(v.helpfulCount||0), date:v.created||'Recent',
-              location:loc, permalink:v.url||'', images:imgs }, reviewIndex++));
-            extracted = true;
-          });
+      }
+
+      // Check title from reviews HTML if needed
+      if (product.title === 'Flipkart Product' || product.title.includes('Buy Products Online')) {
+        const $ = cheerio.load(rr.html);
+        const pageTitle = $('title').text().trim();
+        if (pageTitle && !pageTitle.includes('Buy Products Online')) {
+          const cleanTitle = pageTitle.replace(/\s*[-|]\s*(Reviews|Flipkart\.com|Product Reviews).*$/i, '').trim();
+          if (cleanTitle && cleanTitle.length > 3) product.title = cleanTitle;
         }
-      });
+      }
+
+      // Iterate ALL REVIEWS slots
+      for (const s of slots) {
+        const w = s.slotData?.widget; if (!w) continue;
+        if (w.type === 'REVIEWS' || (s.slotData?.elementId || '').includes('REVIEWS')) {
+          const components = w.data?.renderableComponents || [];
+          for (const c of components) {
+            const v = c.value; if (!v) continue;
+            const loc = [v.location?.city||'', v.location?.state||''].filter(Boolean).join(', ');
+            const rawImages = v.images || v.media || [];
+            const imgs = rawImages.map((i: any) => {
+              const url = i.value?.imageURL || i.imageURL || i.url || i.urlTemplate || '';
+              return resolveFlipkartImageUrl(url);
+            }).filter(Boolean);
+            pr2.push(normalizeFlipkartReview({
+              id: v.id || `fk-json-${pageNum}-${reviewIndex}`,
+              rating: String(v.rating || 5),
+              title: v.title || '',
+              body: (v.text || '').replace(/READ MORE/g, '').trim(),
+              author: v.author || 'Flipkart Buyer',
+              isVerified: !!v.certifiedBuyer,
+              helpfulCount: String(v.helpfulCount || 0),
+              date: v.created || 'Recent',
+              location: loc,
+              permalink: v.url || '',
+              images: imgs
+            }, reviewIndex++));
+            extracted = true;
+          }
+        }
+      }
     }
 
     if (!extracted) {
       const $2 = cheerio.load(rr.html);
       const cards = $2('.QccLnz, div._2wzgFH, .col._2wzgFH, ._27M-Tj');
-      if (cards.length === 0) { yield { type:'reviews', reviews:[], pageNum, hasMore:false, warnings:pw }; break; }
-      cards.each((_,el) => {
+      if (cards.length === 0 && pr2.length === 0) {
+        if (!productEventYielded) {
+          yield { type: 'product', product, distribution, canonicalUrl, warnings: [...warnings] };
+          productEventYielded = true;
+        }
+        yield { type: 'reviews', reviews: [], pageNum, hasMore: false, warnings: pw };
+        break;
+      }
+      cards.each((_, el) => {
         const $e = $2(el);
         const rt = $e.find('.MKiFS6').first().text().trim()||$e.find('._3LWZlK').first().text().trim()||'5';
         const tit = $e.find('.qW2QI1').first().text().trim()||$e.find('._2-N1sw,._2t14_8').first().text().trim()||'Review';
@@ -855,10 +900,19 @@ export async function* scrapeFlipkartReviewsStreaming(
       });
     }
 
+    if (!productEventYielded) {
+      yield { type: 'product', product, distribution, canonicalUrl, warnings: [...warnings] };
+      productEventYielded = true;
+    }
+
     totalFetched += pr2.length;
     const hasMore = pr2.length >= 8 && pageNum < maxPages;
     yield { type: 'reviews', reviews: pr2, pageNum, hasMore, warnings: pw };
     if (!hasMore) break;
+  }
+
+  if (!productEventYielded) {
+    yield { type: 'product', product, distribution, canonicalUrl, warnings: [...warnings, 'No reviews found for this product.'] };
   }
 
   yield { type: 'done', totalFetched };
