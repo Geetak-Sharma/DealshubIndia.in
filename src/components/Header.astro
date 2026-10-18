@@ -9,6 +9,7 @@ const { activePath = Astro.url.pathname } = Astro.props;
 
 const navItems = [
   { label: "Live Deals", href: "/livedeals", isCurrent: activePath === "/livedeals" || activePath.startsWith("/livedeals"), badge: null },
+  { label: "Tools", href: "/tools", isCurrent: activePath.startsWith("/tools"), badge: "New" },
   { label: "Stores", href: "/livedeals#stores", isCurrent: false, badge: null },
   { label: "Blog", href: "/blog", isCurrent: activePath.startsWith("/blog"), badge: "Insights" },
   { label: "About", href: "/about", isCurrent: activePath === "/about", badge: null },

@@ -2,11 +2,66 @@
 export const prerender = true;
 
 import Layout from '../../layouts/Layout.astro';
-
 import ReviewAnalyzerForm from '../../components/tools/reviews/ReviewAnalyzerForm.tsx';
+
+const pageTitle = "Flipkart Review Analyzer — Genuine Buyer Ratings & Consensus | DealsHub India";
+const pageDescription = "Analyze any Flipkart product URL instantly. Uncover verified buyer consensus, genuine customer images, rating breakdowns, and spot fake or paid reviews before you buy.";
+
+// WebPage + SoftwareApplication Schema for Rich Snippets
+const softwareAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Flipkart Review Analyzer",
+  "operatingSystem": "All (Web-based)",
+  "applicationCategory": "ShoppingApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+  },
+  "description": pageDescription,
+  "url": "https://dealshubindia.in/tools/flipkart-review-analyzer"
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How does the Flipkart Review Analyzer work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Simply paste any Flipkart product URL into the analyzer. It streams verified buyer feedback, ratings breakdown, buyer photos, and consensus in real time directly to your screen."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I analyze mobile app short links like dl.flipkart.com?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! You can either open the link on your phone and copy the full web URL (flipkart.com/.../p/itm...), or paste the complete shared text with the product name."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is DealsHub Flipkart Review Analyzer free to use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, it is 100% free with no account or registration required."
+      }
+    }
+  ]
+};
 ---
 
-<Layout title="Flipkart Review Analyzer | Smart Shopping Tools | Dealshub India">
+<Layout 
+  title={pageTitle}
+  description={pageDescription}
+  activePath="/tools/flipkart-review-analyzer"
+>
+  <script type="application/ld+json" set:html={JSON.stringify(softwareAppSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
 
 
   <main class="post-layout">

@@ -86,3 +86,10 @@ html, body {
   padding-top: var(--spacing-4);
   padding-bottom: var(--spacing-4);
 }
+
+/* Mobile Safe Area & Bottom Dock spacing */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
