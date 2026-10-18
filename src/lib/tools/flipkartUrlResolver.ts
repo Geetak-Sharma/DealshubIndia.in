@@ -87,8 +87,50 @@ export function extractUrlFromInput(input: string): string {
 /**
  * Parses and canonicalizes any supported Flipkart URL format.
  */
+export function extractProductTitleFromInput(input: string): string | null {
+  let cleaned = input.replace(/https?:\/\/\S+/gi, '').trim();
+  cleaned = cleaned.replace(/^Take a look at this\s+/i, '');
+  cleaned = cleaned.replace(/\s+on Flipkart.*$/i, '');
+  cleaned = cleaned.replace(/Flipkart.*$/i, '');
+  cleaned = cleaned.trim();
+  return cleaned.length >= 3 ? cleaned : null;
+}
+
+export async function searchFlipkartProductByTitle(title: string): Promise<{ slug: string | null; itemId: string | null; pid: string | null } | null> {
+  try {
+    const searchUrl = 'https://www.flipkart.com/search?q=' + encodeURIComponent(title);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7000);
+    const res = await fetch(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+      },
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) return null;
+    const html = await res.text();
+    
+    const slugItemMatch = html.match(/\/([a-zA-Z0-9-]+)\/p\/(itm[a-f0-9]{12,16})/);
+    const pidMatch = html.match(/[?&]pid=([A-Z0-9]{16})/i) || html.match(/"productId"\s*:\s*"([A-Z0-9]{16})"/i);
+
+    if (slugItemMatch) {
+      return {
+        slug: slugItemMatch[1],
+        itemId: slugItemMatch[2],
+        pid: pidMatch ? pidMatch[1] : null
+      };
+    }
+  } catch (e) {
+    console.error('[flipkartUrlResolver] Flipkart title search fallback failed:', e);
+  }
+  return null;
+}
+
 export async function resolveFlipkartUrl(inputUrl: string): Promise<ResolvedFlipkartUrl> {
   let url = extractUrlFromInput(inputUrl);
+  const detectedTitle = extractProductTitleFromInput(inputUrl);
 
   const isShort = url.includes('fkrt.cc') || url.includes('/s/') || url.includes('/s/ ');
   
@@ -140,8 +182,17 @@ export async function resolveFlipkartUrl(inputUrl: string): Promise<ResolvedFlip
     slug = pathParts[slugIndex];
   }
 
-  // If pid is still missing, try fetching the page to resolve the default product FSN/PID
-  // If short URL failed to resolve to full product page
+  // If short URL failed to resolve directly, attempt title search fallback before throwing
+  if (isShort && (!pid || !itemId) && detectedTitle) {
+    const searchResult = await searchFlipkartProductByTitle(detectedTitle);
+    if (searchResult && searchResult.itemId && searchResult.pid) {
+      itemId = searchResult.itemId;
+      pid = searchResult.pid;
+      if (searchResult.slug) slug = searchResult.slug;
+    }
+  }
+
+  // If short URL still failed to resolve to full product page
   if (isShort && !pid && !itemId) {
     throw new Error('SHORT_URL_BLOCKED: Flipkart blocked automatic expansion of this app link. Please open the link in your phone or browser once and paste the complete product link (flipkart.com/.../p/itm...).');
   }

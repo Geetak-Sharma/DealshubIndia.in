@@ -1,5 +1,7 @@
 ﻿import React, { useState, useRef, useCallback } from 'react';
 import type { NormalizedReview } from '../../../types/tools';
+import { BubuDuduLoader } from './BubuDuduLoader';
+import { BubuDuduModal } from './BubuDuduModal';
 
 interface ProductInfo {
   title: string;
@@ -49,6 +51,9 @@ export default function ReviewAnalyzerForm() {
   const [currentPage, setCurrentPage] = useState(1);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalAction, setModalAction] = useState<'copy' | 'view'>('copy');
+  const [modalTargetUrl, setModalTargetUrl] = useState('');
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -132,9 +137,10 @@ export default function ReviewAnalyzerForm() {
               setLoading(false);
               return;
             }
-            setLoading(false);
+            // Keep loading active until first batch of reviews arrives so user actually sees the Bubu Dudu animation
             setFetchingMore(true);
           } else if (event.type === 'reviews') {
+            setLoading(false);
             if (event.reviews?.length > 0) {
               setAllReviews(prev => [...prev, ...event.reviews]);
               setTotalFetched(prev => prev + event.reviews.length);
@@ -167,10 +173,16 @@ export default function ReviewAnalyzerForm() {
   }, []);
 
   const handleSubmit = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!urlInput.trim()) { setError('Please paste a valid Flipkart product URL.'); return; }
-    const targetUrl = extractUrl(urlInput);
-    startStream(targetUrl, sortMode);
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const raw = urlInput.trim();
+    if (!raw) {
+      setError('Please paste a valid Flipkart product URL.');
+      return;
+    }
+    startStream(raw, sortMode);
   };
 
   const handleSortChange = (newSort: string) => {
@@ -185,6 +197,18 @@ export default function ReviewAnalyzerForm() {
     navigator.clipboard.writeText(text);
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 2000);
+    // Open Bubu Dudu WhatsApp invite overlay
+    setModalAction('copy');
+    setModalTargetUrl(text);
+    setModalOpen(true);
+  };
+
+  const handleViewOnFlipkart = (e: React.MouseEvent, url: string) => {
+    e.preventDefault();
+    // Open Bubu Dudu WhatsApp invite overlay before visiting Flipkart
+    setModalAction('view');
+    setModalTargetUrl(url);
+    setModalOpen(true);
   };
 
   const hasPrevPage = safePage > 1;
@@ -246,14 +270,11 @@ export default function ReviewAnalyzerForm() {
         )}
       </div>
 
-      {/* Connecting skeleton */}
+      {/* Bubu & Dudu Animated Loader */}
       {loading && (
-        <div className="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-4 shadow-sm animate-pulse">
-          <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 mx-auto"></div>
-          <div className="h-4 w-48 bg-slate-100 dark:bg-slate-800 mx-auto rounded"></div>
-          <div className="h-3 w-72 bg-slate-100 dark:bg-slate-800 mx-auto rounded"></div>
-          <p className="text-xs text-slate-400 font-medium">Connecting to Flipkart...</p>
-        </div>
+        <React.Suspense fallback={<div className="p-8 text-center text-xs text-slate-400">Loading...</div>}>
+          <BubuDuduLoader />
+        </React.Suspense>
       )}
 
       {/* Results */}
@@ -435,10 +456,10 @@ export default function ReviewAnalyzerForm() {
                             className="px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 font-bold text-[10px] rounded border border-slate-200 dark:border-slate-800 cursor-pointer transition-colors min-h-[36px]">
                             {copiedIndex === idx ? 'Copied!' : 'Copy URL'}
                           </button>
-                          <a href={viewOnFkUrl} target="_blank" rel="noopener noreferrer"
-                            className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 font-bold text-[10px] rounded transition-colors min-h-[36px] flex items-center">
+                          <button onClick={(e) => handleViewOnFlipkart(e, viewOnFkUrl)}
+                            className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 font-bold text-[10px] rounded transition-colors min-h-[36px] flex items-center cursor-pointer">
                             View on Flipkart
-                          </a>
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -468,6 +489,15 @@ export default function ReviewAnalyzerForm() {
 
         </div>
       )}
+      {/* Bubu & Dudu WhatsApp Invite Overlay Modal */}
+      <BubuDuduModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        targetActionName={modalAction}
+        targetUrl={modalTargetUrl}
+        mainChannelUrl="https://whatsapp.com/channel/0029Va8sOrp4SpkEQKVElV1i"
+        deals99Url="https://whatsapp.com/channel/0029Vb81sJqGk1FxL7t9lW0h"
+      />
     </div>
   );
 }
