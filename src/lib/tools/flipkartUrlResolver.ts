@@ -1,5 +1,3 @@
-
-
 export interface ResolvedFlipkartUrl {
   canonicalUrl: string;
   itemId: string | null;
@@ -9,24 +7,50 @@ export interface ResolvedFlipkartUrl {
 }
 
 /**
- * Resolves short links (like fkrt.cc, dl.flipkart.com) to their absolute target URLs by following redirects.
+ * Resolves short links (like fkrt.cc, dl.flipkart.com/s/...) to their absolute target URLs by following redirects.
  */
-
-
 export async function resolveRedirect(shortUrl: string): Promise<string> {
   try {
-    const userAgent = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
+    const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
     
-    const res = await fetch(shortUrl, {
+    // First try manual redirect to capture raw Location header (especially for dl.flipkart.com/s/... which returns 301)
+    const manualRes = await fetch(shortUrl, {
       method: 'GET',
-      headers: { 'User-Agent': userAgent },
-      redirect: 'follow',
+      headers: {
+        'User-Agent': userAgent,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+      },
+      redirect: 'manual',
       signal: controller.signal
     });
     
     clearTimeout(timeoutId);
+
+    let loc = manualRes.headers.get('location');
+    if (loc) {
+      if (loc.includes('http://') && loc.indexOf('http://') > 0) {
+        loc = loc.slice(loc.indexOf('http://'));
+      } else if (loc.includes('https://') && loc.indexOf('https://') > 0) {
+        loc = loc.slice(loc.indexOf('https://'));
+      }
+      if (loc.includes('m.flipkart.com')) {
+        loc = loc.replace('m.flipkart.com', 'www.flipkart.com');
+      }
+      return loc;
+    }
+
+    // Fallback: Follow redirect if no direct 301/302 location header
+    const followController = new AbortController();
+    const followTimeoutId = setTimeout(() => followController.abort(), 8000);
+    const res = await fetch(shortUrl, {
+      method: 'GET',
+      headers: { 'User-Agent': userAgent },
+      redirect: 'follow',
+      signal: followController.signal
+    });
+    clearTimeout(followTimeoutId);
     return res.url || shortUrl;
   } catch (e) {
     console.error('[flipkartUrlResolver] Failed to resolve redirect via native fetch:', e);
@@ -35,11 +59,27 @@ export async function resolveRedirect(shortUrl: string): Promise<string> {
 }
 
 /**
+ * Extracts pure URL from messy text (e.g. "Take a look at this product on Flipkart https://...")
+ */
+export function extractUrlFromInput(input: string): string {
+  const trimmed = input.trim();
+  const words = trimmed.split(/\s+/);
+  const found = words.find(w => w.startsWith('http://') || w.startsWith('https://'));
+  if (found) return found;
+  
+  const domainFound = words.find(w => w.includes('flipkart.com') || w.includes('fkrt.cc'));
+  if (domainFound) return domainFound;
+
+  return trimmed;
+}
+
+/**
  * Parses and canonicalizes any supported Flipkart URL format.
  */
 export async function resolveFlipkartUrl(inputUrl: string): Promise<ResolvedFlipkartUrl> {
-  let url = inputUrl.trim();
-  const isShort = url.includes('fkrt.cc') || url.includes('/s/') || url.includes('/s/ '); // excludes dl.flipkart.com from redirect tracing
+  let url = extractUrlFromInput(inputUrl);
+
+  const isShort = url.includes('fkrt.cc') || url.includes('/s/') || url.includes('/s/ ');
   
   if (isShort) {
     url = await resolveRedirect(url);
@@ -48,6 +88,16 @@ export async function resolveFlipkartUrl(inputUrl: string): Promise<ResolvedFlip
   // Normalize protocol
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
     url = 'https://' + url;
+  }
+
+  if (url.includes('http://') && url.indexOf('http://') > 0) {
+    url = url.slice(url.indexOf('http://'));
+  } else if (url.includes('https://') && url.indexOf('https://') > 0) {
+    url = url.slice(url.indexOf('https://'));
+  }
+
+  if (url.includes('m.flipkart.com')) {
+    url = url.replace('m.flipkart.com', 'www.flipkart.com');
   }
 
   let parsed: URL;
@@ -74,8 +124,6 @@ export async function resolveFlipkartUrl(inputUrl: string): Promise<ResolvedFlip
   // Extract product slug
   let slug: string | null = null;
   const pathParts = parsed.pathname.split('/');
-  // Usually, the slug is the first non-empty segment in the pathname
-  // e.g. /apple-iphone-15-black-128-gb/p/itm2d83c19c3b88e
   const slugIndex = pathParts.findIndex(part => part.length > 0);
   if (slugIndex !== -1 && pathParts[slugIndex] !== 'p' && pathParts[slugIndex] !== 'product-reviews') {
     slug = pathParts[slugIndex];
@@ -116,8 +164,6 @@ export async function resolveFlipkartUrl(inputUrl: string): Promise<ResolvedFlip
   }
 
   // Build canonical URL
-  // If we have slug and itemId: https://www.flipkart.com/slug/p/itemId?pid=pid
-  // If no slug: https://www.flipkart.com/product-reviews/itemId?pid=pid
   let canonicalUrl = url;
   if (itemId) {
     if (slug) {
