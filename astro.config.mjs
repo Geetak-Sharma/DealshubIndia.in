@@ -7,6 +7,9 @@ import tailwind from '@astrojs/tailwind';
 
 export default defineConfig({
   site: 'https://dealshubindia.in',
+  security: {
+    checkOrigin: false
+  },
   integrations: [sitemap(), react(), svelte(), tailwind({ applyBaseStyles: false })],
   output: 'server',
   adapter: node({ mode: 'standalone' }),
