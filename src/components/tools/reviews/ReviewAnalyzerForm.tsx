@@ -40,6 +40,7 @@ export default function ReviewAnalyzerForm() {
   const [loading, setLoading] = useState(false);
   const [fetchingMore, setFetchingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isShortUrlBlocked, setIsShortUrlBlocked] = useState(false);
   const [product, setProduct] = useState<ProductInfo | null>(null);
   const [distribution, setDistribution] = useState<DistributionInfo | null>(null);
   const [canonicalUrl, setCanonicalUrl] = useState<string>('');
@@ -83,6 +84,7 @@ export default function ReviewAnalyzerForm() {
     abortRef.current = controller;
 
     setError(null);
+    setIsShortUrlBlocked(false);
     setLoading(true);
     setFetchingMore(false);
     setProduct(null);
@@ -157,7 +159,13 @@ export default function ReviewAnalyzerForm() {
             setStreamDone(true);
             setFetchingMore(false);
           } else if (event.type === 'error') {
-            setError(event.error || 'Error fetching reviews.');
+            const errMsg: string = event.error || 'Error fetching reviews.';
+            if (errMsg.startsWith('SHORT_URL_BLOCKED')) {
+              setIsShortUrlBlocked(true);
+              setError(null);
+            } else {
+              setError(errMsg);
+            }
             setLoading(false);
             setFetchingMore(false);
           }
@@ -263,7 +271,28 @@ export default function ReviewAnalyzerForm() {
           </div>
         </form>
 
-        {error && (
+        {isShortUrlBlocked && (
+          <div className="mt-3 rounded-2xl overflow-hidden border border-amber-500/30 bg-amber-950/20">
+            <div className="px-4 py-3 bg-amber-500/10 flex items-center gap-2">
+              <span className="text-xl">📱</span>
+              <p className="text-xs font-black text-amber-400 uppercase tracking-wider">App Short Link — Can't Auto-Expand</p>
+            </div>
+            <div className="p-4 space-y-3">
+              <p className="text-xs font-semibold text-slate-300 leading-relaxed">
+                Flipkart blocks <code className="text-amber-400 bg-amber-950/40 px-1 rounded">dl.flipkart.com/s/...</code> links from servers. Here's how to fix it in 10 seconds:
+              </p>
+              <ol className="space-y-2 text-xs text-slate-400 font-medium">
+                <li className="flex items-start gap-2"><span className="text-emerald-400 font-black shrink-0">1.</span><span>Open the link on your <strong className="text-slate-200">phone</strong> (tap it in WhatsApp/Telegram)</span></li>
+                <li className="flex items-start gap-2"><span className="text-emerald-400 font-black shrink-0">2.</span><span>Copy the full URL from your browser — it'll look like <code className="text-emerald-400 bg-slate-950 px-1 rounded">flipkart.com/.../p/itm...</code></span></li>
+                <li className="flex items-start gap-2"><span className="text-emerald-400 font-black shrink-0">3.</span><span>Paste that full link here and click <strong className="text-slate-200">Get Reviews</strong> again</span></li>
+              </ol>
+              <p className="text-[10px] text-slate-500 pt-1">
+                💡 Alternatively, paste the full product name or paste a WhatsApp-shared text (e.g. "Take a look at this Noise smartwatch on Flipkart https://...")
+              </p>
+            </div>
+          </div>
+        )}
+        {error && !isShortUrlBlocked && (
           <div className="p-4 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30 rounded-lg text-xs font-bold leading-relaxed">
             ⚠️ {error}
           </div>

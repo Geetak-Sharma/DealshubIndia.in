@@ -10,64 +10,99 @@ export interface ResolvedFlipkartUrl {
  * Resolves short links (like fkrt.cc, dl.flipkart.com/s/...) to their absolute target URLs by following redirects.
  */
 export async function resolveRedirect(shortUrl: string): Promise<string> {
+  const browserUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+  const mobileUA = 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.6367.82 Mobile Safari/537.36';
+
+  const browserHeaders: Record<string, string> = {
+    'User-Agent': browserUA,
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+    'Accept-Language': 'en-IN,en;q=0.9',
+    'Sec-Ch-Ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+    'Sec-Ch-Ua-Mobile': '?0',
+    'Sec-Ch-Ua-Platform': '"Windows"',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+    'Upgrade-Insecure-Requests': '1'
+  };
+
+  // Strategy 1: Manual redirect (fast path)
   try {
-    const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
-    
-    // First try manual redirect with full browser headers to avoid Flipkart 529 bot-block
-    const browserHeaders = {
-      'User-Agent': userAgent,
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.9',
-      'Sec-Ch-Ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
-      'Sec-Ch-Ua-Mobile': '?0',
-      'Sec-Ch-Ua-Platform': '"Windows"',
-      'Sec-Fetch-Dest': 'document',
-      'Sec-Fetch-Mode': 'navigate',
-      'Sec-Fetch-Site': 'none',
-      'Sec-Fetch-User': '?1',
-      'Upgrade-Insecure-Requests': '1'
-    };
-
-    const manualRes = await fetch(shortUrl, {
-      method: 'GET',
-      headers: browserHeaders,
-      redirect: 'manual',
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeoutId);
-
-    let loc = manualRes.headers.get('location');
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 8000);
+    const res = await fetch(shortUrl, { method: 'GET', headers: browserHeaders, redirect: 'manual', signal: ctrl.signal });
+    clearTimeout(t);
+    let loc = res.headers.get('location');
     if (loc) {
-      if (loc.includes('http://') && loc.indexOf('http://') > 0) {
-        loc = loc.slice(loc.indexOf('http://'));
-      } else if (loc.includes('https://') && loc.indexOf('https://') > 0) {
-        loc = loc.slice(loc.indexOf('https://'));
-      }
-      if (loc.includes('m.flipkart.com')) {
-        loc = loc.replace('m.flipkart.com', 'www.flipkart.com');
-      }
-      return loc;
+      if (loc.includes('http://') && loc.indexOf('http://') > 0) loc = loc.slice(loc.indexOf('http://'));
+      else if (loc.includes('https://') && loc.indexOf('https://') > 0) loc = loc.slice(loc.indexOf('https://'));
+      if (loc.includes('m.flipkart.com')) loc = loc.replace('m.flipkart.com', 'www.flipkart.com');
+      if (loc.includes('flipkart.com')) return loc;
     }
+  } catch (_) {}
 
-    // Fallback: Follow redirect if no direct 301/302 location header
-    const followController = new AbortController();
-    const followTimeoutId = setTimeout(() => followController.abort(), 8000);
-    const res = await fetch(shortUrl, {
-      method: 'GET',
-      headers: { 'User-Agent': userAgent },
+  // Strategy 2: Firebase Dynamic Links ?d=1 preview page
+  // dl.flipkart.com uses Firebase Dynamic Links. The "?d=1" parameter returns a static
+  // HTML preview page (not a JS redirect) which is NOT blocked by Flipkart 529 rate-limiting.
+  // This page embeds the actual target Flipkart product URL in its HTML.
+  try {
+    const previewUrl = shortUrl.includes('?') ? shortUrl + '&d=1' : shortUrl + '?d=1';
+    const ctrl2 = new AbortController();
+    const t2 = setTimeout(() => ctrl2.abort(), 10000);
+    const previewRes = await fetch(previewUrl, {
+      headers: { ...browserHeaders, 'User-Agent': mobileUA },
       redirect: 'follow',
-      signal: followController.signal
+      signal: ctrl2.signal
     });
-    clearTimeout(followTimeoutId);
-    return res.url || shortUrl;
-  } catch (e) {
-    console.error('[flipkartUrlResolver] Failed to resolve redirect via native fetch:', e);
-  }
+    clearTimeout(t2);
+    const html = await previewRes.text().catch(() => '');
+    if (html) {
+      // Try multiple URL extraction patterns from the preview HTML
+      const flipkartUrlRegexes = [
+        /"(https:\/\/www\.flipkart\.com\/(?:[^\/\"]+\/)*p\/itm[^\"]{0,120})"/,
+        /'(https:\/\/www\.flipkart\.com\/(?:[^\/\']+\/)*p\/itm[^\']{0,120})'/,
+        /href="(https:\/\/www\.flipkart\.com\/[^"]{10,})"/,
+        /content="(https:\/\/www\.flipkart\.com\/[^"]{10,})"/,
+        /url=(https?:\/\/[^\s&"]+flipkart\.com[^\s"&]+)/i,
+      ];
+      for (const pat of flipkartUrlRegexes) {
+        const m = html.match(pat);
+        if (m && m[1] && m[1].includes('flipkart.com')) {
+          let found = m[1];
+          if (found.includes('m.flipkart.com')) found = found.replace('m.flipkart.com', 'www.flipkart.com');
+          return found;
+        }
+      }
+      // Reconstruct URL from embedded fragments (itemId + pid + slug)
+      const itmM = html.match(/(itm[a-f0-9]{13,16})/i);
+      const pidM = html.match(/[?&]pid=([A-Z0-9]{16})/i);
+      const slugM = html.match(/flipkart\.com\/([a-zA-Z0-9][a-zA-Z0-9-]{4,})\/(?:p\/|product-reviews\/)/);
+      if (itmM && pidM) {
+        const slug = (slugM && slugM[1] !== 'p') ? slugM[1] : 'product';
+        return 'https://www.flipkart.com/' + slug + '/p/' + itmM[1] + '?pid=' + pidM[1];
+      }
+    }
+  } catch (_) {}
+
+  // Strategy 3: Mobile UA redirect follow
+  try {
+    const ctrl3 = new AbortController();
+    const t3 = setTimeout(() => ctrl3.abort(), 8000);
+    const res3 = await fetch(shortUrl, {
+      headers: { 'User-Agent': mobileUA, 'Accept': 'text/html,*/*', 'Accept-Language': 'en-IN,en;q=0.9' },
+      redirect: 'follow',
+      signal: ctrl3.signal
+    });
+    clearTimeout(t3);
+    if (res3.url && res3.url !== shortUrl && res3.url.includes('flipkart.com')) {
+      return res3.url.replace('m.flipkart.com', 'www.flipkart.com');
+    }
+  } catch (_) {}
+
   return shortUrl;
 }
+
 
 /**
  * Extracts pure URL from messy text (e.g. "Take a look at this product on Flipkart https://...")
