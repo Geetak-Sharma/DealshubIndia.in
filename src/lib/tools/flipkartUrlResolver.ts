@@ -81,6 +81,40 @@ export async function resolveFlipkartUrl(inputUrl: string): Promise<ResolvedFlip
     slug = pathParts[slugIndex];
   }
 
+  // If pid is still missing, try fetching the page to resolve the default product FSN/PID
+  if (!pid && (itemId || (slug && slug !== 'p'))) {
+    try {
+      const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const res = await fetch(url, {
+        headers: {
+          'User-Agent': userAgent,
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+        },
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const html = await res.text();
+        const fsnMatch = html.match(/"fsn"\s*:\s*"([A-Z0-9]{16})"/i);
+        if (fsnMatch) {
+          pid = fsnMatch[1];
+        } else {
+          const prodIdMatch = html.match(/"productId"\s*:\s*"([A-Z0-9]{16})"/i);
+          if (prodIdMatch) {
+            pid = prodIdMatch[1];
+          } else {
+            const pagePidMatch = html.match(/[?&]pid=([A-Z0-9]{16})/i);
+            if (pagePidMatch) pid = pagePidMatch[1];
+          }
+        }
+      }
+    } catch (_) {
+      // Ignore network timeout or fetch errors
+    }
+  }
+
   // Build canonical URL
   // If we have slug and itemId: https://www.flipkart.com/slug/p/itemId?pid=pid
   // If no slug: https://www.flipkart.com/product-reviews/itemId?pid=pid
