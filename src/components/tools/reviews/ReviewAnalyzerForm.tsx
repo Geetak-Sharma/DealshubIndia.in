@@ -77,7 +77,7 @@ export default function ReviewAnalyzerForm() {
     setWarnings([]);
 
     try {
-      const response = await fetch('/api/tools/flipkart-reviews-stream', {
+      const response = await fetch('/api/tools/flipkart-review-analyzer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: urlStr, sort: sortVal }),
