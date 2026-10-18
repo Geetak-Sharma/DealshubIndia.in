@@ -23,14 +23,19 @@ interface DistributionInfo {
 const PAGE_SIZE = 10;
 
 
-// Extracts pure URL from noisy text
+// Extracts pure URL from noisy text and un-mangles nested /dl/http:// prefixes
 function extractUrl(input: string): string {
-  const trimmed = input.trim();
-  const words = trimmed.split(/\s+/);
+  let cleaned = input.trim();
+  const lastHttp = Math.max(cleaned.lastIndexOf('http://'), cleaned.lastIndexOf('https://'));
+  if (lastHttp > 0) {
+    cleaned = cleaned.substring(lastHttp);
+  }
+  cleaned = cleaned.replace('://m.flipkart.com', '://www.flipkart.com');
+  const words = cleaned.split(/\s+/);
   const found = words.find(w => w.startsWith('http://') || w.startsWith('https://'));
   if (found) return found;
   const domainFound = words.find(w => w.includes('flipkart.com') || w.includes('fkrt.cc'));
-  return domainFound || trimmed;
+  return domainFound || cleaned;
 }
 
 
@@ -322,20 +327,31 @@ export default function ReviewAnalyzerForm() {
               </div>
 
               {/* Direct Open Button */}
-              {urlInput.trim().startsWith('http') && (
-                <div className="pt-1 flex flex-wrap items-center gap-3">
-                  <a
-                    href={urlInput.trim()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition-colors shadow-md cursor-pointer"
-                  >
-                    <span>Open This Link on Flipkart</span>
-                    <span>↗</span>
-                  </a>
-                  <span className="text-xs text-slate-400">Once opened, copy the URL from your browser address bar and paste it here!</span>
-                </div>
-              )}
+              {urlInput.trim().length > 0 && (() => {
+                let targetHref = urlInput.trim();
+                // Fix corrupted deep link prefixes if present
+                const lastHttp = Math.max(targetHref.lastIndexOf('http://'), targetHref.lastIndexOf('https://'));
+                if (lastHttp > 0) {
+                  targetHref = targetHref.substring(lastHttp);
+                }
+                targetHref = targetHref.replace('://m.flipkart.com', '://www.flipkart.com');
+                if (!targetHref.startsWith('http')) targetHref = 'https://' + targetHref;
+
+                return (
+                  <div className="pt-1 flex flex-wrap items-center gap-3">
+                    <a
+                      href={targetHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition-colors shadow-md cursor-pointer"
+                    >
+                      <span>Open Link on Flipkart</span>
+                      <span>↗</span>
+                    </a>
+                    <span className="text-xs text-slate-400">Loads Flipkart directly. Then copy the address bar link here.</span>
+                  </div>
+                );
+              })()}
 
               {/* Pro-Tip */}
               <div className="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-900/40 flex items-start gap-2.5 text-xs text-slate-300">

@@ -107,16 +107,43 @@ export async function resolveRedirect(shortUrl: string): Promise<string> {
 /**
  * Extracts pure URL from messy text (e.g. "Take a look at this product on Flipkart https://...")
  */
+export function cleanFlipkartUrl(raw: string): string {
+  let cleaned = raw.trim();
+  
+  // Unwrap nested http(s) inside deep links like dl.flipkart.com/dl/http://m.flipkart.com/...
+  // Look for the last occurrence of http:// or https:// if nested
+  const lastHttp = cleaned.lastIndexOf('http://');
+  const lastHttps = cleaned.lastIndexOf('https://');
+  const targetIdx = Math.max(lastHttp, lastHttps);
+  if (targetIdx > 0) {
+    cleaned = cleaned.substring(targetIdx);
+  } else if (cleaned.includes('/dl/http')) {
+    const idx = cleaned.indexOf('http');
+    if (idx !== -1) cleaned = cleaned.substring(idx);
+  } else if (cleaned.includes('/dl/m.flipkart.com')) {
+    cleaned = cleaned.replace('/dl/m.flipkart.com', '/www.flipkart.com');
+  }
+
+  // Replace m.flipkart.com with www.flipkart.com
+  cleaned = cleaned.replace('://m.flipkart.com', '://www.flipkart.com');
+  cleaned = cleaned.replace('//m.flipkart.com', '//www.flipkart.com');
+
+  if (!cleaned.startsWith('http://') && !cleaned.startsWith('https://')) {
+    cleaned = 'https://' + cleaned;
+  }
+  return cleaned;
+}
+
 export function extractUrlFromInput(input: string): string {
   const trimmed = input.trim();
   const words = trimmed.split(/\s+/);
   const found = words.find(w => w.startsWith('http://') || w.startsWith('https://'));
-  if (found) return found;
+  if (found) return cleanFlipkartUrl(found);
   
   const domainFound = words.find(w => w.includes('flipkart.com') || w.includes('fkrt.cc'));
-  if (domainFound) return domainFound;
+  if (domainFound) return cleanFlipkartUrl(domainFound);
 
-  return trimmed;
+  return cleanFlipkartUrl(trimmed);
 }
 
 /**
