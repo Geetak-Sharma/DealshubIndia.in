@@ -31,33 +31,7 @@ function extractUrl(input: string): string {
   return domainFound || trimmed;
 }
 
-// Client-side expansion attempt (Plan A)
-async function attemptClientUnshorten(url: string): Promise<string> {
-  const clean = extractUrl(url);
-  const isShort = clean.includes('dl.flipkart.com') || clean.includes('fkrt.cc') || clean.includes('/s/');
-  if (!isShort) return clean;
 
-  // Try unshorten endpoints that support CORS
-  const services = [
-    async () => {
-      const res = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(clean), { signal: AbortSignal.timeout(3500) });
-      const data = await res.json();
-      if (data && data.status && data.status.url && data.status.url.includes('pid=')) {
-        return data.status.url;
-      }
-      return null;
-    }
-  ];
-
-  for (const fn of services) {
-    try {
-      const resolved = await fn();
-      if (resolved) return resolved;
-    } catch (_) {}
-  }
-
-  return clean;
-}
 
 export default function ReviewAnalyzerForm() {
   const [urlInput, setUrlInput] = useState('');
@@ -192,24 +166,10 @@ export default function ReviewAnalyzerForm() {
     }
   }, []);
 
-  const handleSubmit = async (e?: React.FormEvent) => {
+  const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!urlInput.trim()) { setError('Please paste a valid Flipkart product URL.'); return; }
-    
-    // Plan A: Try resolving client-side if it's a short URL
-    let targetUrl = extractUrl(urlInput);
-    if (targetUrl.includes('dl.flipkart.com') || targetUrl.includes('fkrt.cc') || targetUrl.includes('/s/')) {
-      setLoading(true);
-      try {
-        const resolved = await attemptClientUnshorten(targetUrl);
-        if (resolved && resolved !== targetUrl) {
-          targetUrl = resolved;
-          setUrlInput(resolved);
-        }
-      } catch (_) {}
-      setLoading(false);
-    }
-
+    const targetUrl = extractUrl(urlInput);
     startStream(targetUrl, sortMode);
   };
 
