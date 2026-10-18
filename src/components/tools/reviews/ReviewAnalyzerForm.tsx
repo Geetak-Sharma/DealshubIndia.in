@@ -283,13 +283,13 @@ export default function ReviewAnalyzerForm() {
         </form>
 
         {isShortUrlBlocked && (
-          <div className="mt-4 rounded-2xl overflow-hidden border border-amber-500/40 bg-[#161a23] shadow-lg text-left animate-in fade-in duration-200">
+          <div className="mt-4 rounded-2xl overflow-hidden border border-amber-500/40 bg-[#161a23] shadow-xl text-left animate-in fade-in duration-200">
             {/* Header */}
             <div className="px-5 py-3.5 bg-amber-500/15 border-b border-amber-500/20 flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
-                <span className="text-xl">⚠️</span>
+                <span className="text-xl">📱</span>
                 <span className="text-sm font-black text-amber-300 tracking-wide uppercase">
-                  Flipkart App Short Link Detected
+                  Mobile App Link Detected
                 </span>
               </div>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-200 border border-amber-500/30">
@@ -299,66 +299,67 @@ export default function ReviewAnalyzerForm() {
 
             {/* Explanation & Steps */}
             <div className="p-5 space-y-4">
-              <p className="text-sm text-slate-200 leading-normal font-medium">
-                Flipkart blocks servers from auto-expanding mobile short links (<code className="text-amber-300 bg-amber-950/60 px-1.5 py-0.5 rounded text-xs font-mono font-bold">dl.flipkart.com/s/...</code>). Please follow these 2 quick steps:
+              <p className="text-sm text-slate-200 leading-relaxed">
+                Flipkart short links (<code className="text-amber-300 bg-amber-950/60 px-1.5 py-0.5 rounded text-xs font-mono font-bold">dl.flipkart.com/s/...</code>) only open inside the Flipkart phone app and show an error page on computers.
               </p>
 
-              {/* Action Steps Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-700/60 flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 font-black text-sm flex items-center justify-center shrink-0 border border-emerald-500/30">
+              {/* Step by step cards */}
+              <div className="space-y-3">
+                <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-700/60 flex items-start gap-3.5">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 font-black text-sm flex items-center justify-center shrink-0 border border-emerald-500/30">
                     1
                   </div>
-                  <div className="space-y-1 text-xs">
-                    <p className="font-bold text-slate-100">Open link in your browser or phone</p>
-                    <p className="text-slate-400 leading-relaxed">Tap or click the link once so Flipkart loads the actual product page.</p>
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-slate-100">Open this link on your phone</p>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      Tap the shared link inside <strong className="text-slate-300">WhatsApp or Telegram on your smartphone</strong>. It will open the real product page inside the Flipkart app.
+                    </p>
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-700/60 flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 font-black text-sm flex items-center justify-center shrink-0 border border-emerald-500/30">
+                <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-700/60 flex items-start gap-3.5">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 font-black text-sm flex items-center justify-center shrink-0 border border-emerald-500/30">
                     2
                   </div>
-                  <div className="space-y-1 text-xs">
-                    <p className="font-bold text-slate-100">Copy & paste the full product URL</p>
-                    <p className="text-slate-400 leading-relaxed">Copy the full URL from your browser address bar (it starts with <code className="text-emerald-400 font-mono">flipkart.com/.../p/itm...</code>).</p>
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-slate-100">Tap "Share" & copy the full link or text</p>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      On the product page in the Flipkart app, tap the <strong className="text-slate-300">Share icon</strong> (top right) and choose <strong className="text-emerald-400">Copy Link</strong>.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-700/60 flex items-start gap-3.5">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 font-black text-sm flex items-center justify-center shrink-0 border border-emerald-500/30">
+                    3
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-slate-100">Paste it here & click "Get Reviews"</p>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      Paste either the full product URL (<code className="text-emerald-400 font-mono">flipkart.com/.../p/itm...</code>) or the entire shared message with the product name — DealsHub will load all reviews instantly!
+                    </p>
                   </div>
                 </div>
               </div>
 
-              {/* Direct Open Button */}
-              {urlInput.trim().length > 0 && (() => {
-                let targetHref = urlInput.trim();
-                // Fix corrupted deep link prefixes if present
-                const lastHttp = Math.max(targetHref.lastIndexOf('http://'), targetHref.lastIndexOf('https://'));
-                if (lastHttp > 0) {
-                  targetHref = targetHref.substring(lastHttp);
-                }
-                targetHref = targetHref.replace('://m.flipkart.com', '://www.flipkart.com');
-                if (!targetHref.startsWith('http')) targetHref = 'https://' + targetHref;
-
-                return (
-                  <div className="pt-1 flex flex-wrap items-center gap-3">
-                    <a
-                      href={targetHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition-colors shadow-md cursor-pointer"
-                    >
-                      <span>Open Link on Flipkart</span>
-                      <span>↗</span>
-                    </a>
-                    <span className="text-xs text-slate-400">Loads Flipkart directly. Then copy the address bar link here.</span>
+              {/* Direct Desktop Search Fallback */}
+              <div className="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-900/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-300">
+                <div className="flex items-start gap-2.5">
+                  <span className="text-base shrink-0">💻</span>
+                  <div>
+                    <p className="font-bold text-emerald-400">On a computer right now?</p>
+                    <p className="text-slate-400 text-[11px] leading-relaxed">Search the product directly on Flipkart web, then paste the URL from your browser address bar.</p>
                   </div>
-                );
-              })()}
-
-              {/* Pro-Tip */}
-              <div className="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-900/40 flex items-start gap-2.5 text-xs text-slate-300">
-                <span className="text-base shrink-0">💡</span>
-                <p className="leading-relaxed">
-                  <strong className="text-emerald-400">Pro-Tip:</strong> When sharing from the Flipkart app, paste the <em>entire message with the product name</em> (e.g. <em>"Take a look at Noise Smartwatch on Flipkart https://..."</em>) — DealsHub will automatically identify the product for you!
-                </p>
+                </div>
+                <a
+                  href="https://www.flipkart.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shrink-0 whitespace-nowrap transition-colors flex items-center gap-1.5 shadow"
+                >
+                  <span>Go to Flipkart Web</span>
+                  <span>↗</span>
+                </a>
               </div>
             </div>
           </div>
