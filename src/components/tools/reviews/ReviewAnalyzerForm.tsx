@@ -278,27 +278,76 @@ export default function ReviewAnalyzerForm() {
         </form>
 
         {isShortUrlBlocked && (
-          <div className="mt-3 rounded-2xl overflow-hidden border border-amber-500/30 bg-amber-950/20">
-            <div className="px-4 py-3 bg-amber-500/10 flex items-center gap-2">
-              <span className="text-xl">📱</span>
-              <p className="text-xs font-black text-amber-400 uppercase tracking-wider">App Short Link — Can't Auto-Expand</p>
+          <div className="mt-4 rounded-2xl overflow-hidden border border-amber-500/40 bg-[#161a23] shadow-lg text-left animate-in fade-in duration-200">
+            {/* Header */}
+            <div className="px-5 py-3.5 bg-amber-500/15 border-b border-amber-500/20 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <span className="text-xl">⚠️</span>
+                <span className="text-sm font-black text-amber-300 tracking-wide uppercase">
+                  Flipkart App Short Link Detected
+                </span>
+              </div>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-200 border border-amber-500/30">
+                Action Required
+              </span>
             </div>
-            <div className="p-4 space-y-3">
-              <p className="text-xs font-semibold text-slate-300 leading-relaxed">
-                Flipkart blocks <code className="text-amber-400 bg-amber-950/40 px-1 rounded">dl.flipkart.com/s/...</code> links from servers. Here's how to fix it in 10 seconds:
+
+            {/* Explanation & Steps */}
+            <div className="p-5 space-y-4">
+              <p className="text-sm text-slate-200 leading-normal font-medium">
+                Flipkart blocks servers from auto-expanding mobile short links (<code className="text-amber-300 bg-amber-950/60 px-1.5 py-0.5 rounded text-xs font-mono font-bold">dl.flipkart.com/s/...</code>). Please follow these 2 quick steps:
               </p>
-              <ol className="space-y-2 text-xs text-slate-400 font-medium">
-                <li className="flex items-start gap-2"><span className="text-emerald-400 font-black shrink-0">1.</span><span>Open the link on your <strong className="text-slate-200">phone</strong> (tap it in WhatsApp/Telegram)</span></li>
-                <li className="flex items-start gap-2"><span className="text-emerald-400 font-black shrink-0">2.</span><span>Copy the full URL from your browser — it'll look like <code className="text-emerald-400 bg-slate-950 px-1 rounded">flipkart.com/.../p/itm...</code></span></li>
-                <li className="flex items-start gap-2"><span className="text-emerald-400 font-black shrink-0">3.</span><span>Paste that full link here and click <strong className="text-slate-200">Get Reviews</strong> again</span></li>
-              </ol>
-              <p className="text-[10px] text-slate-500 pt-1">
-                💡 Alternatively, paste the full product name or paste a WhatsApp-shared text (e.g. "Take a look at this Noise smartwatch on Flipkart https://...")
-              </p>
+
+              {/* Action Steps Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-700/60 flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 font-black text-sm flex items-center justify-center shrink-0 border border-emerald-500/30">
+                    1
+                  </div>
+                  <div className="space-y-1 text-xs">
+                    <p className="font-bold text-slate-100">Open link in your browser or phone</p>
+                    <p className="text-slate-400 leading-relaxed">Tap or click the link once so Flipkart loads the actual product page.</p>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-700/60 flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 font-black text-sm flex items-center justify-center shrink-0 border border-emerald-500/30">
+                    2
+                  </div>
+                  <div className="space-y-1 text-xs">
+                    <p className="font-bold text-slate-100">Copy & paste the full product URL</p>
+                    <p className="text-slate-400 leading-relaxed">Copy the full URL from your browser address bar (it starts with <code className="text-emerald-400 font-mono">flipkart.com/.../p/itm...</code>).</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Direct Open Button */}
+              {urlInput.trim().startsWith('http') && (
+                <div className="pt-1 flex flex-wrap items-center gap-3">
+                  <a
+                    href={urlInput.trim()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition-colors shadow-md cursor-pointer"
+                  >
+                    <span>Open This Link on Flipkart</span>
+                    <span>↗</span>
+                  </a>
+                  <span className="text-xs text-slate-400">Once opened, copy the URL from your browser address bar and paste it here!</span>
+                </div>
+              )}
+
+              {/* Pro-Tip */}
+              <div className="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-900/40 flex items-start gap-2.5 text-xs text-slate-300">
+                <span className="text-base shrink-0">💡</span>
+                <p className="leading-relaxed">
+                  <strong className="text-emerald-400">Pro-Tip:</strong> When sharing from the Flipkart app, paste the <em>entire message with the product name</em> (e.g. <em>"Take a look at Noise Smartwatch on Flipkart https://..."</em>) — DealsHub will automatically identify the product for you!
+                </p>
+              </div>
             </div>
           </div>
         )}
-        {error && !isShortUrlBlocked && (
+                {error && !isShortUrlBlocked && (
           <div className="p-4 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30 rounded-lg text-xs font-bold leading-relaxed">
             ⚠️ {error}
           </div>
