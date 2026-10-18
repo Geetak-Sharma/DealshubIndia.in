@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import type { NormalizedReview } from '../../../types/tools';
 import { BubuDuduLoader } from './BubuDuduLoader';
 import { BubuDuduModal } from './BubuDuduModal';
@@ -273,7 +273,7 @@ export default function ReviewAnalyzerForm() {
       {/* Bubu & Dudu Animated Loader */}
       {loading && (
         <React.Suspense fallback={<div className="p-8 text-center text-xs text-slate-400">Loading...</div>}>
-          <BubuDuduLoader />
+          <BubuDuduLoader telegramUrl='https://t.me/DealsHubIndiaa' whatsappUrl='https://whatsapp.com/channel/0029Va8sOrp4SpkEQKVElV1i' />
         </React.Suspense>
       )}
 
@@ -501,6 +501,7 @@ export default function ReviewAnalyzerForm() {
     </div>
   );
 }
+
 
 
 

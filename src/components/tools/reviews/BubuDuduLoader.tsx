@@ -6,8 +6,8 @@ export interface BubuDuduLoaderProps {
 }
 
 export const BubuDuduLoader: React.FC<BubuDuduLoaderProps> = ({
-  telegramUrl = 'https://t.me/dealshub_india',
-  whatsappUrl = 'https://whatsapp.com/channel/dealshub'
+  telegramUrl = 'https://t.me/DealsHubIndiaa',
+  whatsappUrl = 'https://whatsapp.com/channel/0029Va8sOrp4SpkEQKVElV1i'
 }) => {
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden text-center space-y-5 animate-in fade-in duration-300">
@@ -218,3 +218,5 @@ export const BubuDuduLoader: React.FC<BubuDuduLoaderProps> = ({
     </div>
   );
 };
+
+
