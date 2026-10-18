@@ -106,7 +106,13 @@ export default function ReviewAnalyzerForm() {
 
       if (!response.ok || !response.body) {
         const errData = await response.json().catch(() => ({}));
-        setError((errData as any).error || 'Failed to connect to analyzer.');
+        const rawErr: string = (errData as any).error || 'Failed to connect to analyzer.';
+        if (rawErr.includes('SHORT_URL_BLOCKED')) {
+          setIsShortUrlBlocked(true);
+          setError(null);
+        } else {
+          setError(rawErr);
+        }
         setLoading(false);
         return;
       }
