@@ -280,31 +280,8 @@ export default function ReviewAnalyzerForm() {
         </form>
 
         {error && (
-          <div className="p-4 bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/40 rounded-xl text-xs leading-relaxed space-y-2">
-            <div className="flex items-start gap-2">
-              <span className="text-sm">⚠️</span>
-              <div className="flex-1 space-y-1">
-                <p className="font-extrabold">{error.includes('SHORT_URL_BLOCKED') ? 'Short Link Resolution Notice' : 'Notice'}</p>
-                <p className="text-slate-600 dark:text-slate-300 font-medium">
-                  {error.includes('SHORT_URL_BLOCKED') 
-                    ? 'Flipkart app short links (dl.flipkart.com/s/...) restrict automated lookup. Simply tap the link below to open the product in your browser, then copy the full address bar URL and paste it here!'
-                    : error}
-                </p>
-                {extractUrl(urlInput).startsWith('http') && (
-                  <div className="pt-1.5 flex flex-wrap gap-2">
-                    <a
-                      href={extractUrl(urlInput)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg font-bold text-[11px] transition-all shadow-sm"
-                    >
-                      <span>Open Link in New Tab</span>
-                      <span>↗</span>
-                    </a>
-                  </div>
-                )}
-              </div>
-            </div>
+          <div className="p-4 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30 rounded-lg text-xs font-bold leading-relaxed">
+            ⚠️ {error}
           </div>
         )}
       </div>

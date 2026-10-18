@@ -15,13 +15,24 @@ export async function resolveRedirect(shortUrl: string): Promise<string> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
     
-    // First try manual redirect to capture raw Location header (especially for dl.flipkart.com/s/... which returns 301)
+    // First try manual redirect with full browser headers to avoid Flipkart 529 bot-block
+    const browserHeaders = {
+      'User-Agent': userAgent,
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Sec-Ch-Ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+      'Sec-Ch-Ua-Mobile': '?0',
+      'Sec-Ch-Ua-Platform': '"Windows"',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+      'Sec-Fetch-User': '?1',
+      'Upgrade-Insecure-Requests': '1'
+    };
+
     const manualRes = await fetch(shortUrl, {
       method: 'GET',
-      headers: {
-        'User-Agent': userAgent,
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-      },
+      headers: browserHeaders,
       redirect: 'manual',
       signal: controller.signal
     });
