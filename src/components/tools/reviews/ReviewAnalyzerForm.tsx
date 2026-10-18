@@ -20,6 +20,45 @@ interface DistributionInfo {
 
 const PAGE_SIZE = 10;
 
+
+// Extracts pure URL from noisy text
+function extractUrl(input: string): string {
+  const trimmed = input.trim();
+  const words = trimmed.split(/\s+/);
+  const found = words.find(w => w.startsWith('http://') || w.startsWith('https://'));
+  if (found) return found;
+  const domainFound = words.find(w => w.includes('flipkart.com') || w.includes('fkrt.cc'));
+  return domainFound || trimmed;
+}
+
+// Client-side expansion attempt (Plan A)
+async function attemptClientUnshorten(url: string): Promise<string> {
+  const clean = extractUrl(url);
+  const isShort = clean.includes('dl.flipkart.com') || clean.includes('fkrt.cc') || clean.includes('/s/');
+  if (!isShort) return clean;
+
+  // Try unshorten endpoints that support CORS
+  const services = [
+    async () => {
+      const res = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(clean), { signal: AbortSignal.timeout(3500) });
+      const data = await res.json();
+      if (data && data.status && data.status.url && data.status.url.includes('pid=')) {
+        return data.status.url;
+      }
+      return null;
+    }
+  ];
+
+  for (const fn of services) {
+    try {
+      const resolved = await fn();
+      if (resolved) return resolved;
+    } catch (_) {}
+  }
+
+  return clean;
+}
+
 export default function ReviewAnalyzerForm() {
   const [urlInput, setUrlInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -153,10 +192,25 @@ export default function ReviewAnalyzerForm() {
     }
   }, []);
 
-  const handleSubmit = (e?: React.FormEvent) => {
+  const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!urlInput.trim()) { setError('Please paste a valid Flipkart product URL.'); return; }
-    startStream(urlInput, sortMode);
+    
+    // Plan A: Try resolving client-side if it's a short URL
+    let targetUrl = extractUrl(urlInput);
+    if (targetUrl.includes('dl.flipkart.com') || targetUrl.includes('fkrt.cc') || targetUrl.includes('/s/')) {
+      setLoading(true);
+      try {
+        const resolved = await attemptClientUnshorten(targetUrl);
+        if (resolved && resolved !== targetUrl) {
+          targetUrl = resolved;
+          setUrlInput(resolved);
+        }
+      } catch (_) {}
+      setLoading(false);
+    }
+
+    startStream(targetUrl, sortMode);
   };
 
   const handleSortChange = (newSort: string) => {
@@ -226,8 +280,31 @@ export default function ReviewAnalyzerForm() {
         </form>
 
         {error && (
-          <div className="p-4 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30 rounded-lg text-xs font-bold leading-relaxed">
-            ⚠️ {error}
+          <div className="p-4 bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/40 rounded-xl text-xs leading-relaxed space-y-2">
+            <div className="flex items-start gap-2">
+              <span className="text-sm">⚠️</span>
+              <div className="flex-1 space-y-1">
+                <p className="font-extrabold">{error.includes('SHORT_URL_BLOCKED') ? 'Short Link Resolution Notice' : 'Notice'}</p>
+                <p className="text-slate-600 dark:text-slate-300 font-medium">
+                  {error.includes('SHORT_URL_BLOCKED') 
+                    ? 'Flipkart app short links (dl.flipkart.com/s/...) restrict automated lookup. Simply tap the link below to open the product in your browser, then copy the full address bar URL and paste it here!'
+                    : error}
+                </p>
+                {extractUrl(urlInput).startsWith('http') && (
+                  <div className="pt-1.5 flex flex-wrap gap-2">
+                    <a
+                      href={extractUrl(urlInput)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg font-bold text-[11px] transition-all shadow-sm"
+                    >
+                      <span>Open Link in New Tab</span>
+                      <span>↗</span>
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>

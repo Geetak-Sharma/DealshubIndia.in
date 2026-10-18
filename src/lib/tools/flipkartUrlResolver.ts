@@ -130,6 +130,11 @@ export async function resolveFlipkartUrl(inputUrl: string): Promise<ResolvedFlip
   }
 
   // If pid is still missing, try fetching the page to resolve the default product FSN/PID
+  // If short URL failed to resolve to full product page
+  if (isShort && !pid && !itemId) {
+    throw new Error('SHORT_URL_BLOCKED: Flipkart blocked automatic expansion of this app link. Please open the link in your phone or browser once and paste the complete product link (flipkart.com/.../p/itm...).');
+  }
+
   if (!pid && (itemId || (slug && slug !== 'p'))) {
     try {
       const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
