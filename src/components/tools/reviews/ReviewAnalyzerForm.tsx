@@ -180,70 +180,47 @@ export default function ReviewAnalyzerForm() {
     <div className="space-y-6 w-full max-w-4xl mx-auto px-4 sm:px-6">
 
       {/* Input panel */}
-      <div className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm space-y-4">
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="p-4 sm:p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-sm space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div className="space-y-2">
-            <div className="flex flex-col gap-2">
-              <label htmlFor="flipkart-url" className="text-xs font-bold text-slate-800 dark:text-slate-200 tracking-wider uppercase">
+            <div className="flex flex-col gap-1">
+              <label htmlFor="flipkart-url" className="text-xs font-extrabold text-slate-800 dark:text-slate-200 tracking-wider uppercase">
                 Flipkart Product URL
               </label>
-              <span className="text-[10.5px] text-slate-400 dark:text-slate-500 italic">
-                Supported: product URLs, review URLs, short links (fkrt.cc / dl.flipkart.com), tracking-heavy links.
+              <span className="text-[11px] text-slate-400 dark:text-slate-500">
+                Paste any product, review, or short link (e.g. fkrt.cc / dl.flipkart.com).
               </span>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-2.5">
               <input
                 id="flipkart-url"
                 type="text"
-                placeholder="Paste Flipkart product or review link..."
+                placeholder="https://www.flipkart.com/... or https://dl.flipkart.com/..."
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
-                className="flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:border-emerald-500 transition-colors"
+                className="flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
                 disabled={loading}
               />
               <button
                 type="submit"
                 disabled={loading}
-                className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/60 text-white font-extrabold text-[10px] tracking-wider rounded-lg shadow-sm hover:shadow uppercase transition-all whitespace-nowrap min-h-[44px] flex items-center justify-center cursor-pointer"
+                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] disabled:bg-emerald-600/60 disabled:cursor-not-allowed text-white font-black text-xs tracking-wider rounded-xl shadow-md hover:shadow-emerald-500/10 uppercase transition-all whitespace-nowrap min-h-[46px] flex items-center justify-center cursor-pointer gap-2"
               >
-                {loading ? 'Connecting...' : 'Get Reviews'}
+                {loading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                    </svg>
+                    <span>Connecting...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Get Reviews</span>
+                    <span className="text-emerald-200">→</span>
+                  </>
+                )}
               </button>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-            <div className="flex flex-col sm:flex-row gap-3 flex-1 max-w-md">
-              <input
-                id="search-reviews"
-                type="text"
-                placeholder="Search reviews or authors..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); setCurrentPage(1); } }}
-                className="flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:border-emerald-500 transition-colors min-h-[44px]"
-              />
-              <button
-                type="button"
-                onClick={() => setCurrentPage(1)}
-                className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] tracking-wider rounded-lg shadow-sm hover:shadow uppercase transition-all whitespace-nowrap min-h-[44px] flex items-center justify-center cursor-pointer"
-              >
-                Search
-              </button>
-            </div>
-            <div className="flex items-center gap-2">
-              <label htmlFor="sort-select" className="text-xs font-bold text-slate-500 uppercase tracking-wide whitespace-nowrap">Sort:</label>
-              <select
-                id="sort-select"
-                value={sortMode}
-                onChange={(e) => handleSortChange(e.target.value)}
-                disabled={loading}
-                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:border-emerald-500 cursor-pointer min-h-[44px]"
-              >
-                <option value="helpful">Most Helpful</option>
-                <option value="recent">Most Recent</option>
-                <option value="positive">Positive First</option>
-                <option value="negative">Negative First</option>
-              </select>
             </div>
           </div>
         </form>
@@ -349,10 +326,53 @@ export default function ReviewAnalyzerForm() {
             </div>
           )}
 
-          {/* Review list */}
+          {/* Review list & In-place Toolbar */}
           {allReviews.length > 0 && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              {/* Search & Sort toolbar: only visible once reviews exist */}
+              <div className="p-3 sm:p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+                <div className="relative flex-1">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                    🔍
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="Filter reviews by keyword, author..."
+                    value={searchQuery}
+                    onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                    className="w-full pl-8 pr-8 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs text-slate-400 hover:text-slate-200 cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 justify-end">
+                  <label htmlFor="sort-select" className="text-[11px] font-bold text-slate-500 uppercase tracking-wide whitespace-nowrap">
+                    Sort:
+                  </label>
+                  <select
+                    id="sort-select"
+                    value={sortMode}
+                    onChange={(e) => handleSortChange(e.target.value)}
+                    disabled={loading}
+                    className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:border-emerald-500 cursor-pointer"
+                  >
+                    <option value="helpful">Most Helpful</option>
+                    <option value="recent">Most Recent</option>
+                    <option value="positive">Positive First</option>
+                    <option value="negative">Negative First</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
                 <h3 className="text-xs font-black tracking-widest text-slate-400 dark:text-slate-600 uppercase">
                   Product Reviews ({sortedReviews.length}{!streamDone ? '+' : ''})
                 </h3>
