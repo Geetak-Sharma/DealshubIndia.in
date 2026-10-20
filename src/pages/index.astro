@@ -206,8 +206,19 @@ const mappedContentDeals = contentDeals
     d.numPrice > 0
   );
 
-// Combine deals: fresh live telegram deals first
-const allDeals = [...normalizedDeals, ...mappedContentDeals];
+// Deduplicate deals by checkout URL / title fingerprint so duplicate IDs or scraped variants don't repeat
+const seenKeys = new Set();
+const deduplicatedDeals: any[] = [];
+for (const deal of [...normalizedDeals, ...mappedContentDeals]) {
+  const normUrl = (deal.link || "").replace(/\?.*/, "").toLowerCase();
+  const cleanTitle = (deal.title || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 30);
+  const key = normUrl && normUrl !== "#" ? normUrl : cleanTitle;
+  if (!seenKeys.has(key)) {
+    seenKeys.add(key);
+    deduplicatedDeals.push(deal);
+  }
+}
+const allDeals = deduplicatedDeals;
 
 // Curate top 8 Handpicked Drops for Today's Live Deals (2 rows = 8 deals):
 // Ensure ANY deal curated for the homepage MUST have a valid, verified image
