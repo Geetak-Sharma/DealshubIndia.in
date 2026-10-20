@@ -299,17 +299,11 @@ const navItems = [
       };
     }
 
-    // 6. Search Trigger Focus
+    // 6. Search Trigger Focus / Command Palette Opening
     if (searchBtn) {
-      searchBtn.onclick = () => {
-        const searchInput = (document.getElementById("hero-editorial-search-input") ||
-          document.getElementById("live-search-input")) as HTMLInputElement | null;
-        if (searchInput) {
-          searchInput.focus();
-          searchInput.scrollIntoView({ behavior: "smooth", block: "center" });
-        } else {
-          window.location.href = "/livedeals";
-        }
+      searchBtn.onclick = (e) => {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent("open-command-palette"));
       };
     }
   }

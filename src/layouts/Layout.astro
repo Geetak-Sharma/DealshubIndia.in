@@ -11,6 +11,7 @@ import LootTicker from '../components/LootTicker.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import StructuredData from '../components/StructuredData.astro';
+import CommandPalette from '../components/CommandPalette.tsx';
 import MobileBottomDock from '../components/MobileBottomDock.astro';
 import PWA from '../components/PWA.astro';
 
@@ -124,7 +125,7 @@ const {
     )}
 
     <StructuredData deals={deals} />
-    <div id="cmd-palette-root"></div>
+    <CommandPalette client:idle />
   </body>
 </html>
 
