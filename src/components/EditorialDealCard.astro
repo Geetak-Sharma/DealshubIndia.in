@@ -207,12 +207,19 @@ const fallbackImage = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/200
 
     <div class="flex items-center gap-1.5 shrink-0">
       <!-- WhatsApp share -->
-      <a
-        href={whatsappShareUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Share deal" title="Share deal"
-        class="p-1.5 rounded-md hover:bg-white/10 text-slate-400 hover:text-emerald-300 transition-colors"
+      <button
+        type="button"
+        aria-label="Share deal"
+        title="Share deal"
+        class="smart-share-trigger p-1.5 rounded-md hover:bg-white/10 text-slate-400 hover:text-emerald-300 transition-all hover:scale-110 active:scale-95 cursor-pointer"
+        data-deal-id={id}
+        data-deal-title={title}
+        data-deal-price={price}
+        data-deal-original={originalPrice}
+        data-deal-discount={discount}
+        data-deal-merchant={merchant}
+        data-deal-link={targetLink}
+        data-deal-image={cardImage}
       >
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="18" cy="5" r="3"></circle>
@@ -221,7 +228,7 @@ const fallbackImage = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/200
           <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
           <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
         </svg>
-      </a>
+      </button>
 
       <!-- Direct Outbound Grab Button -->
       <a

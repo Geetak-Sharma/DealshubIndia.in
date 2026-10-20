@@ -12,6 +12,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import StructuredData from '../components/StructuredData.astro';
 import CommandPalette from '../components/CommandPalette.tsx';
+import SmartShareModal from '../components/share/SmartShareModal.tsx';
 import MobileBottomDock from '../components/MobileBottomDock.astro';
 import PWA from '../components/PWA.astro';
 
@@ -126,6 +127,35 @@ const {
 
     <StructuredData deals={deals} />
     <CommandPalette client:idle />
+    <SmartShareModal client:idle />
+  
+    <!-- Global Smart Share Event Delegation Listener -->
+    <script is:inline>
+      (function() {
+        function handleGlobalShareClick(e) {
+          const btn = e.target.closest(".smart-share-trigger");
+          if (!btn) return;
+          e.preventDefault();
+          e.stopPropagation();
+
+          const payload = {
+            id: btn.dataset.dealId || "",
+            title: btn.dataset.dealTitle || "",
+            price: btn.dataset.dealPrice || "",
+            originalPrice: btn.dataset.dealOriginal || "",
+            discount: btn.dataset.dealDiscount || "",
+            merchant: btn.dataset.dealMerchant || "",
+            link: btn.dataset.dealLink || "",
+            image: btn.dataset.dealImage || ""
+          };
+
+          window.dispatchEvent(new CustomEvent("open-smart-share", { detail: payload }));
+        }
+
+        document.addEventListener("click", handleGlobalShareClick);
+      })();
+    </script>
+
   </body>
 </html>
 
