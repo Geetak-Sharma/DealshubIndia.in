@@ -62,13 +62,13 @@ export class TelegramDataStore {
         existingMap.set(post.id, post);
         addedCount++;
 
-        // Trigger Google Indexing API ping for the newly added deal
+        // Trigger Google Indexing API ping for the newly added deal (optional)
         import('./googleIndexer.js').then(({ pingGoogleIndexing }) => {
-          pingGoogleIndexing(`https://dealshubindia.in/deal/${post.id}`).catch(err => {
-            console.error('[TelegramStore] Indexing ping failed:', err);
-          });
-        }).catch(err => {
-          console.error('[TelegramStore] Failed to load googleIndexer:', err);
+          if (typeof pingGoogleIndexing === 'function') {
+            pingGoogleIndexing(`https://dealshubindia.in/deal/${post.id}`).catch(() => {});
+          }
+        }).catch(() => {
+          // googleIndexer or googleapis dependency is optional
         });
       } else {
         const existing = existingMap.get(post.id);

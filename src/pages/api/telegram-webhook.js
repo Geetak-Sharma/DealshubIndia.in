@@ -86,7 +86,8 @@ export const POST = async ({ request }) => {
     let originalPriceNum = 0;
     let discount = '';
 
-    const priceMatches = [...text.matchAll(/(?:₹|Rs\.?|INR)\s*([\d,]+)/gi)];
+    // Match @ 1,899, @1899/-, at 1899, ₹1899, Rs. 1899
+    const priceMatches = [...text.matchAll(/(?:@|at\s*|₹|Rs\.?|INR)\s*([\d,]+)/gi)];
     if (priceMatches.length > 0) {
       priceNum = parseInt(priceMatches[0][1].replace(/,/g, ''), 10);
       price = '₹' + priceNum;
