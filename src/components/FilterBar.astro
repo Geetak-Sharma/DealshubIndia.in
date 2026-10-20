@@ -82,13 +82,12 @@ const dynamicStores = [
 <div id="stores" class="w-full py-2.5 border-y border-white/10 bg-[#151922]/95 shadow-md backdrop-blur-xl sticky top-16 z-30">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-2">
     
-    <!-- Primary Filter Bar Row: Top Stores (Replacing All Drops), Categories & Embedded Search Bar -->
+    <!-- Primary Filter Bar Row: Top Stores, Quick Sort & Search Bar -->
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
       
-      <!-- Left side: Combined Top Stores & Category Pills in a single sleek scrollable rail -->
-      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 flex-grow">
-        
-        <!-- Dynamic Top 5 Stores Section (Replaces old 'All Drops' button) -->
+      <!-- Left side: Combined Top Stores in a single sleek scrollable rail -->
+      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 shrink-0">
+        <!-- Dynamic Top 5 Stores Section -->
         <div class="flex items-center gap-1.5 shrink-0" role="tablist" aria-label="Filter deals by store">
           <span class="text-[10px] text-emerald-400 font-bold tracking-wider uppercase inline-flex items-center gap-1 mr-0.5">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -111,9 +110,44 @@ const dynamicStores = [
             </button>
           ))}
         </div>
+      </div>
 
+      <!-- Center / Mid-space: Quick Sort Segmented Controls & Live Count Badge -->
+      <div class="flex items-center justify-between lg:justify-center gap-2.5 flex-grow px-1">
+        <!-- Quick Sort Pills -->
+        <div class="flex items-center gap-1 bg-[#181D27]/90 p-0.5 rounded-lg border border-white/10 text-xs shrink-0" role="group" aria-label="Sort deals">
+          <span class="text-[10px] text-slate-400 font-semibold uppercase px-1.5 hidden sm:inline-block">Sort:</span>
+          <button
+            type="button"
+            data-sort="latest"
+            class="filter-sort-btn px-2.5 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer whitespace-nowrap bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 active"
+            title="Sort by latest drops"
+          >
+            ⚡ Latest
+          </button>
+          <button
+            type="button"
+            data-sort="discount"
+            class="filter-sort-btn px-2.5 py-1 rounded-md text-xs font-medium text-slate-300 hover:text-white transition-all cursor-pointer whitespace-nowrap hover:bg-[#202735]"
+            title="Sort by highest discount"
+          >
+            🔥 % Off
+          </button>
+          <button
+            type="button"
+            data-sort="price-asc"
+            class="filter-sort-btn px-2.5 py-1 rounded-md text-xs font-medium text-slate-300 hover:text-white transition-all cursor-pointer whitespace-nowrap hover:bg-[#202735]"
+            title="Sort by price: Low to High"
+          >
+            🏷️ Price: Low → High
+          </button>
+        </div>
 
-
+        <!-- Live Deal Counter in bar -->
+        <div class="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#181D27] border border-white/10 text-[11px] text-slate-400 shrink-0 font-mono">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+          <span id="filter-bar-count-badge" class="text-slate-300 font-bold">...</span> deals
+        </div>
       </div>
 
       <!-- Right side: Clean Embedded Live Search Bar (Relocated from Top Hero) -->
@@ -155,9 +189,11 @@ const dynamicStores = [
     function setupFilterBar() {
       const catBtns = document.querySelectorAll(".filter-cat-btn");
       const storeBtns = document.querySelectorAll(".filter-store-btn");
+      const sortBtns = document.querySelectorAll(".filter-sort-btn");
 
       let currentCategory = "all";
       let currentStore = "all";
+      let currentSort = "latest";
 
       const urlParams = new URLSearchParams(window.location.search);
       const urlCat = urlParams.get("filter") || urlParams.get("category");
@@ -206,6 +242,23 @@ const dynamicStores = [
         btn.addEventListener("click", () => {
           currentStore = btn.getAttribute("data-store") || "all";
           updateActiveUI();
+        });
+      });
+
+      sortBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+          currentSort = btn.getAttribute("data-sort") || "latest";
+          sortBtns.forEach(b => {
+            const isSortActive = b.getAttribute("data-sort") === currentSort;
+            if (isSortActive) {
+              b.className = "filter-sort-btn px-2.5 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer whitespace-nowrap bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 active";
+            } else {
+              b.className = "filter-sort-btn px-2.5 py-1 rounded-md text-xs font-medium text-slate-300 hover:text-white transition-all cursor-pointer whitespace-nowrap hover:bg-[#202735]";
+            }
+          });
+          window.dispatchEvent(new CustomEvent("deals-sort", {
+            detail: { sort: currentSort }
+          }));
         });
       });
 

@@ -419,10 +419,12 @@ const pageDescription = "Live 24/7 stream of verified Telegram loot deals, secre
       const PAGE_SIZE = 24;
       let activeCategory = "all";
       let activeStore = "all";
+      let activeSort = "latest";
       let activeQuery = "";
       let currentRenderedCount = PAGE_SIZE;
       let filteredDeals = [...allDeals];
       let pendingNewDeals = [];
+      const filterBarCountBadge = document.getElementById("filter-bar-count-badge");
 
       function getMerchantSvg(merchant) {
         const m = (merchant || '').toLowerCase();
@@ -658,6 +660,28 @@ const pageDescription = "Live 24/7 stream of verified Telegram loot deals, secre
           return matchCat && matchStore && matchQuery;
         });
 
+        // Apply dynamic sorting
+        if (activeSort === "discount") {
+          filteredDeals.sort((a, b) => {
+            const discA = parseFloat(String(a.discount || "0").replace(/[^0-9]/g, "")) || 0;
+            const discB = parseFloat(String(b.discount || "0").replace(/[^0-9]/g, "")) || 0;
+            return discB - discA;
+          });
+        } else if (activeSort === "price-asc") {
+          filteredDeals.sort((a, b) => {
+            const pA = parseFloat(String(a.price || "0").replace(/[^0-9.]/g, "")) || 9999999;
+            const pB = parseFloat(String(b.price || "0").replace(/[^0-9.]/g, "")) || 9999999;
+            return pA - pB;
+          });
+        } else {
+          // Default: latest by timestamp
+          filteredDeals.sort((a, b) => {
+            const tA = a.timestamp || (a.date ? new Date(a.date).getTime() : 0);
+            const tB = b.timestamp || (b.date ? new Date(b.date).getTime() : 0);
+            return tB - tA;
+          });
+        }
+
         currentRenderedCount = Math.min(PAGE_SIZE, filteredDeals.length);
         renderGridContent();
       }
@@ -669,6 +693,7 @@ const pageDescription = "Live 24/7 stream of verified Telegram loot deals, secre
         if (visibleNumEl) visibleNumEl.textContent = String(visibleSlice.length);
         if (totalNumEl) totalNumEl.textContent = String(total);
         if (statActiveCount) statActiveCount.textContent = total + "+";
+        if (filterBarCountBadge) filterBarCountBadge.textContent = String(total);
 
         if (total === 0) {
           if (grid) grid.innerHTML = "";
@@ -749,6 +774,12 @@ const pageDescription = "Live 24/7 stream of verified Telegram loot deals, secre
         if (!e.detail) return;
         if (e.detail.category !== undefined) activeCategory = e.detail.category;
         if (e.detail.store !== undefined) activeStore = e.detail.store;
+        filterAndRender();
+      });
+
+      window.addEventListener("deals-sort", (e) => {
+        if (!e.detail || !e.detail.sort) return;
+        activeSort = e.detail.sort;
         filterAndRender();
       });
 
