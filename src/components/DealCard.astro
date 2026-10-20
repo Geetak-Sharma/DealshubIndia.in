@@ -108,7 +108,7 @@ if (merchantLower.includes("flipkart")) {
 }
 
 // Time calculation
-let timeAgo = "Active Now";
+let timeAgo = "";
 if (targetDate) {
   const d = new Date(targetDate);
   if (!isNaN(d.getTime())) {
@@ -288,7 +288,7 @@ const isHighDiscount = Boolean(discountPercent && parseInt(discountPercent) >= 7
       </a>
       <div class="flex items-center justify-between text-[11px] text-gray-400 mt-1">
         <span class="capitalize">{category}</span>
-        <span class="text-[10px] text-gray-400">{timeAgo}</span>
+        {timeAgo && <span class="text-[10px] text-gray-400">{timeAgo}</span>}
       <!-- Coupon Action Callout Box -->
       {couponText && (
         <div class="mt-2 p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-1.5 text-xs text-amber-200 shadow-sm">
