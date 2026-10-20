@@ -506,16 +506,6 @@ const pageDescription = "Live 24/7 stream of verified Telegram loot deals, secre
         const displayImage = deal.image && !deal.image.includes("Telegram_logo") ? deal.image : null;
         const fallbackSvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'><rect width='400' height='300' fill='%230f141d'/><circle cx='200' cy='120' r='42' fill='%23161f2f'/><text x='200' y='128' dominant-baseline='middle' text-anchor='middle' font-size='28'>🛍️</text><text x='200' y='195' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' font-weight='bold' fill='%2322c55e'>DealsHub Verified</text><text x='200' y='220' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='12' fill='%2394a3b8'>" + merchant + "</text></svg>";
 
-        let whatsappMsg = "🔥 *" + cleanedTitle + "*\n";
-        whatsappMsg += "💰 *Deal Price:* " + priceDisplay + "\n";
-        if (originalDisplay && discountVal) {
-          whatsappMsg += "🏷️ *Discount:* " + discountVal + "% OFF (MRP: " + originalDisplay + ")\n";
-        }
-        whatsappMsg += "⚡ *Store:* " + merchant + "\n";
-        whatsappMsg += "👉 *Grab Deal before it expires:*\n" + targetLink + "\n\n📢 Verified via DealsHub India 🇮🇳";
-
-        const whatsappUrl = "https://api.whatsapp.com/send?text=" + encodeURIComponent(whatsappMsg);
-
         return `
           <article
             class="deal-card-item notion-card group flex flex-col justify-between p-3.5 sm:p-4 rounded-xl relative"
@@ -589,31 +579,50 @@ const pageDescription = "Live 24/7 stream of verified Telegram loot deals, secre
                 ` : ''}
               </div>
 
+              <!-- Bottom Price & Actions Row -->
               <div class="pt-3 border-t border-white/10 mt-3 flex items-center justify-between gap-2">
-                <div class="flex items-baseline gap-2 flex-wrap">
-                  <span class="text-base sm:text-lg font-bold text-slate-100 font-mono">${priceDisplay}</span>
+                <div class="font-mono flex items-baseline gap-1.5">
+                  <span class="text-base sm:text-lg font-bold text-emerald-300">${priceDisplay}</span>
                   ${originalDisplay ? `<span class="text-xs text-slate-400 line-through">${originalDisplay}</span>` : ''}
+                  ${discountVal && parseInt(discountVal) > 0 ? `<span class="text-[10px] font-bold text-emerald-200 bg-emerald-500/20 px-1.5 py-0.5 rounded border border-emerald-400/40">${discountVal}% OFF</span>` : ''}
                 </div>
 
-                <div class="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
-                  ${savingsAmount > 0 ? `<span class="px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/25 text-emerald-300 text-[11px] font-bold shrink-0">Save ₹${savingsAmount.toLocaleString("en-IN")}</span>` : ''}
-                  ${discountVal && parseInt(discountVal) > 0 ? `<span class="px-2 py-0.5 rounded-md bg-rose-500/20 border border-rose-500/30 text-rose-400 text-xs font-black shrink-0 tracking-wide">🔥 ${discountVal}% OFF</span>` : ''}
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <!-- Smart Share Modal Trigger -->
+                  <button
+                    type="button"
+                    aria-label="Share deal"
+                    title="Share deal"
+                    class="smart-share-trigger p-1.5 rounded-md hover:bg-white/10 text-slate-400 hover:text-emerald-300 transition-all hover:scale-110 active:scale-95 cursor-pointer"
+                    data-deal-id="${deal.id}"
+                    data-deal-title="${cleanedTitle}"
+                    data-deal-price="${priceDisplay}"
+                    data-deal-original="${originalDisplay}"
+                    data-deal-discount="${discountVal ? discountVal + '%' : ''}"
+                    data-deal-merchant="${merchant}"
+                    data-deal-link="${targetLink}"
+                    data-deal-image="${displayImage || ''}"
+                  >
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="18" cy="5" r="3"></circle>
+                      <circle cx="6" cy="12" r="3"></circle>
+                      <circle cx="18" cy="19" r="3"></circle>
+                      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                    </svg>
+                  </button>
+
+                  <!-- Direct Outbound Grab Button -->
+                  <a
+                    href="${targetLink}"
+                    target="_blank"
+                    rel="noopener noreferrer sponsored"
+                    class="px-3 py-1 bg-emerald-400/20 hover:bg-emerald-400/30 border border-emerald-400/40 text-emerald-200 text-xs font-semibold rounded-md transition-all shadow-sm flex items-center gap-1"
+                  >
+                    <span>Grab</span>
+                    <span class="text-emerald-400 text-[11px]">↗</span>
+                  </a>
                 </div>
-              </div>
-
-              <div class="flex items-center gap-2 pt-1">
-                <a href="${targetLink}" target="_blank" rel="noopener noreferrer sponsored" class="px-3 py-1 bg-emerald-400/20 hover:bg-emerald-400/30 text-emerald-200 border border-emerald-400/40 text-xs font-medium rounded-md transition-all shadow-sm flex items-center gap-1">
-                  <span class="btn-text">Grab Deal</span>
-                  <span class="btn-icon font-extrabold text-sm leading-none transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5">↗</span>
-                </a>
-
-                <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="p-1.5 rounded-md hover:bg-gray-100 text-slate-400 hover:text-emerald-300 transition-colors" title="Share deal" aria-label="Share deal">
-                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                </a>
-
-                <button type="button" class="p-1.5 rounded-md hover:bg-gray-100 text-slate-400 hover:text-slate-300 transition-colors" title="Copy deal link" aria-label="Copy deal link" data-url="${targetLink}" data-title="${cleanedTitle}">
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                </button>
               </div>
 
               ${deal.variants && deal.variants.length > 0 ? `
