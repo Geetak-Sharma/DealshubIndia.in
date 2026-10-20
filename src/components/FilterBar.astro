@@ -1,4 +1,10 @@
 ---
+interface Props {
+  deals?: any[];
+}
+
+const { deals = [] } = Astro.props;
+
 const categories = [
   { id: "all", label: "All Drops", icon: "✨" },
   { id: "loot", label: "Loot Deals", icon: "🔥" },
@@ -9,21 +15,81 @@ const categories = [
   { id: "home", label: "Home", icon: "🏠" },
 ];
 
-const stores = [
-  { id: "all", label: "All Stores", icon: "🌐" },
-  { id: "amazon", label: "Amazon", icon: "📦" },
-  { id: "flipkart", label: "Flipkart", icon: "🛍️" },
-  { id: "myntra", label: "Myntra", icon: "👗" },
-  { id: "ajio", label: "Ajio", icon: "🏷️" },
-  { id: "croma", label: "Croma", icon: "⚡" },
-  { id: "meesho", label: "Meesho", icon: "🛒" },
+const knownStoreMeta: Record<string, { label: string; icon: string }> = {
+  amazon: { label: "Amazon", icon: "📦" },
+  flipkart: { label: "Flipkart", icon: "🛍️" },
+  myntra: { label: "Myntra", icon: "👗" },
+  ajio: { label: "Ajio", icon: "🏷️" },
+  croma: { label: "Croma", icon: "⚡" },
+  meesho: { label: "Meesho", icon: "🛒" },
+  tatacliq: { label: "Tata CLiQ", icon: "✨" },
+};
+
+// Compute dynamic top 5 stores based on deals posted in the last 4 hours
+const fourHoursMs = 4 * 60 * 60 * 1000;
+const now = Date.now();
+
+const recentStoreCounts: Record<string, number> = {};
+const allStoreCounts: Record<string, number> = {};
+
+if (Array.isArray(deals) && deals.length > 0) {
+  deals.forEach((d: any) => {
+    const rawMerchant = (d.merchant || "Amazon").toLowerCase();
+    let norm = "amazon";
+    if (rawMerchant.includes("flipkart") || rawMerchant.includes("fkrt")) norm = "flipkart";
+    else if (rawMerchant.includes("myntra")) norm = "myntra";
+    else if (rawMerchant.includes("ajio")) norm = "ajio";
+    else if (rawMerchant.includes("croma")) norm = "croma";
+    else if (rawMerchant.includes("meesho")) norm = "meesho";
+    else if (rawMerchant.includes("tatacliq")) norm = "tatacliq";
+    else norm = "amazon";
+
+    const timestamp = d.timestamp ? Number(d.timestamp) : (d.date ? new Date(d.date).getTime() : 0);
+    allStoreCounts[norm] = (allStoreCounts[norm] || 0) + 1;
+
+    if (now - timestamp <= fourHoursMs && timestamp > 0) {
+      recentStoreCounts[norm] = (recentStoreCounts[norm] || 0) + 1;
+    }
+  });
+}
+
+// Rank stores: first by last 4-hour deal volume, then fall back to all-time deal volume
+const sortedRecent = Object.keys(recentStoreCounts).sort((a, b) => recentStoreCounts[b] - recentStoreCounts[a]);
+const sortedAll = Object.keys(allStoreCounts).sort((a, b) => allStoreCounts[b] - allStoreCounts[a]);
+
+const dynamicStoreKeys: string[] = [...sortedRecent];
+for (const s of sortedAll) {
+  if (!dynamicStoreKeys.includes(s) && knownStoreMeta[s]) {
+    dynamicStoreKeys.push(s);
+  }
+}
+
+// Fallback safety to default top stores if fresh list is under 5
+const defaultFallback = ["amazon", "flipkart", "myntra", "ajio", "croma"];
+for (const s of defaultFallback) {
+  if (!dynamicStoreKeys.includes(s)) {
+    dynamicStoreKeys.push(s);
+  }
+}
+
+// Pick the Top 5 stores
+const top5StoreKeys = dynamicStoreKeys.slice(0, 5);
+
+const dynamicStores = [
+  { id: "all", label: "All Stores", icon: "🌐", count: 0 },
+  ...top5StoreKeys.map(k => ({
+    id: k,
+    label: knownStoreMeta[k]?.label || (k.charAt(0).toUpperCase() + k.slice(1)),
+    icon: knownStoreMeta[k]?.icon || "🏬",
+    count: recentStoreCounts[k] || 0,
+  }))
 ];
 ---
 
 <div id="stores" class="w-full py-2.5 border-y border-white/10 bg-[#151922]/95 shadow-md backdrop-blur-xl sticky top-16 z-30">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-2">
     
-    <!-- Primary Row: Categories and Active Store Pills -->
+    <!-- Primary Row: Categories and Dynamic Top 5 Store Pills -->
     <div class="flex items-center justify-between gap-3 overflow-x-auto no-scrollbar py-0.5">
       
       <!-- Category Pills -->
@@ -47,10 +113,13 @@ const stores = [
         ))}
       </div>
 
-      <!-- Quick Store Dropdown or Pills on desktop -->
-      <div class="hidden md:flex items-center gap-1 shrink-0 pl-3 border-l border-white/10">
-        <span class="text-[11px] text-slate-400 font-medium mr-1 uppercase tracking-wider">Store:</span>
-        {stores.map((store) => (
+      <!-- Dynamic Top 5 Stores on desktop (calculated from last 4h drops) -->
+      <div id="store-pills-desktop" class="hidden md:flex items-center gap-1 shrink-0 pl-3 border-l border-white/10">
+        <span class="text-[10px] text-emerald-400/90 font-bold tracking-wider uppercase inline-flex items-center gap-1 mr-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          Top Stores:
+        </span>
+        {dynamicStores.map((store) => (
           <button
             type="button"
             data-store={store.id}
@@ -60,6 +129,7 @@ const stores = [
                 ? "bg-emerald-400/20 text-emerald-300 border border-emerald-400/40 font-bold active"
                 : "bg-[#181D27] hover:bg-[#202735] text-slate-300 hover:text-white border border-white/10"
             ]}
+            title={store.count > 0 ? `${store.label} (${store.count} drops in last 4h)` : store.label}
           >
             <span>{store.icon}</span>
             <span>{store.label}</span>
@@ -69,10 +139,13 @@ const stores = [
 
     </div>
 
-    <!-- Mobile / Tablet Secondary Store Row -->
-    <div class="md:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
-      <span class="text-[11px] text-slate-400 font-medium shrink-0 uppercase tracking-wider">Store:</span>
-      {stores.map((store) => (
+    <!-- Mobile / Tablet Secondary Store Row with Dynamic Top 5 -->
+    <div id="store-pills-mobile" class="md:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
+      <span class="text-[10px] text-emerald-400/90 font-bold tracking-wider uppercase shrink-0 inline-flex items-center gap-1">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        Top Stores:
+      </span>
+      {dynamicStores.map((store) => (
         <button
           type="button"
           data-store={store.id}
@@ -101,7 +174,6 @@ const stores = [
       let currentCategory = "all";
       let currentStore = "all";
 
-      // Read URL params if preset
       const urlParams = new URLSearchParams(window.location.search);
       const urlCat = urlParams.get("filter") || urlParams.get("category");
       const urlStore = urlParams.get("store");
@@ -131,7 +203,6 @@ const stores = [
           }
         });
 
-        // Broadcast filter event
         window.dispatchEvent(new CustomEvent("deals-filter", {
           detail: { category: currentCategory, store: currentStore }
         }));
@@ -151,7 +222,6 @@ const stores = [
         });
       });
 
-      // Initial trigger if params were set
       if (urlCat || urlStore) {
         updateActiveUI();
       }
