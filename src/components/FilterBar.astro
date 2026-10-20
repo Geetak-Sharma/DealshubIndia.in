@@ -5,12 +5,8 @@ interface Props {
 
 const { deals = [] } = Astro.props;
 
-const categories = [
-  { id: "under499", label: "Under ₹499", icon: "🎯" },
-  { id: "tech", label: "Tech", icon: "📱" },
-  { id: "fashion", label: "Fashion", icon: "👕" },
-  { id: "home", label: "Home", icon: "🏠" },
-];
+// Categories removed as requested
+const categories: any[] = [];
 
 const knownStoreMeta: Record<string, { label: string; icon: string }> = {
   amazon: { label: "Amazon", icon: "📦" },
@@ -116,24 +112,7 @@ const dynamicStores = [
           ))}
         </div>
 
-        <!-- Vertical Separator Divider -->
-        <div class="h-4 w-px bg-white/15 shrink-0 mx-1"></div>
 
-        <!-- Category Pills (Without 'All Drops') -->
-        <div class="flex items-center gap-1.5 shrink-0" role="tablist" aria-label="Filter deals by category">
-          {categories.map((cat) => (
-            <button
-              type="button"
-              role="tab"
-              aria-selected="false"
-              data-category={cat.id}
-              class="filter-cat-btn inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all whitespace-nowrap cursor-pointer bg-[#181D27] hover:bg-[#202735] text-slate-300 hover:text-white border border-white/10 shadow-sm"
-            >
-              <span>{cat.icon}</span>
-              <span>{cat.label}</span>
-            </button>
-          ))}
-        </div>
 
       </div>
 
