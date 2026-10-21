@@ -1,27 +1,34 @@
 ﻿---
 export const prerender = false;
-import Layout from "../layouts/Layout.astro";
 ---
-
-<Layout title="Affiliate Link Engine — Personal Station" description="Private affiliate tool" includeHeader={false} includeFooter={false}>
-<style is:global>
-  #aff-main textarea,
-  #aff-main input {
-    background-color: #0c1017 !important;
-    color: #34d399 !important;
-    border-color: rgba(255, 255, 255, 0.12) !important;
-  }
-  #aff-main textarea:focus,
-  #aff-main input:focus {
-    border-color: #10b981 !important;
-    box-shadow: 0 0 0 1px #10b981 !important;
-  }
-  #aff-main textarea::placeholder {
-    color: #475569 !important;
-  }
-</style>
-
-<div id="aff-main" class="min-h-screen bg-[#07090e] text-slate-100 flex flex-col justify-between selection:bg-emerald-500 selection:text-slate-950 font-sans">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Affiliate Link Engine — Personal Station</title>
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #07090e;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    textarea, input {
+      background-color: #0c1017 !important;
+      color: #34d399 !important;
+      border-color: rgba(255, 255, 255, 0.12) !important;
+    }
+    textarea:focus, input:focus {
+      border-color: #10b981 !important;
+      box-shadow: 0 0 0 1px #10b981 !important;
+    }
+    textarea::placeholder {
+      color: #475569 !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-100 flex flex-col justify-between selection:bg-emerald-500 selection:text-slate-950 font-sans">
 
     <!-- Top Minimal Header -->
     <header class="border-b border-white/5 py-3 px-4 sm:px-8 bg-[#090c12]/95 backdrop-blur-md flex items-center justify-between sticky top-0 z-40">
@@ -35,10 +42,10 @@ import Layout from "../layouts/Layout.astro";
       
       <!-- Mode Tabs (Single / Multi Batch) -->
       <div class="flex items-center gap-1.5 p-1 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-mono">
-        <button id="tab-single-btn" type="button" class="px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-bold transition-all">
+        <button id="tab-single-btn" type="button" class="px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-bold transition-all cursor-pointer">
           Single / Post
         </button>
-        <button id="tab-batch-btn" type="button" class="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition-all">
+        <button id="tab-batch-btn" type="button" class="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition-all cursor-pointer">
           Multi-Batch
         </button>
       </div>
@@ -51,10 +58,10 @@ import Layout from "../layouts/Layout.astro";
         <!-- Header Row -->
         <div class="mb-5 flex items-center justify-between gap-2 border-b border-white/5 pb-3.5">
           <div>
-            <h1 class="text-lg sm:text-xl font-black text-white tracking-tight flex items-center gap-2" id="tool-heading">
+            <h1 class="text-lg sm:text-xl font-black text-white tracking-tight flex items-center gap-2">
               Instant Link & Deal Affiliator
             </h1>
-            <p class="text-xs text-slate-400 mt-0.5" id="tool-subheading">
+            <p class="text-xs text-slate-400 mt-0.5">
               Paste product link or full forwarded message. Auto-replaces competitor links & converts to your affiliate link.
             </p>
           </div>
@@ -85,12 +92,12 @@ import Layout from "../layouts/Layout.astro";
               class="w-full rounded-2xl p-3.5 text-xs sm:text-sm text-emerald-300 placeholder:text-slate-600 focus:outline-none transition-all font-mono resize-none border border-white/10 focus:border-emerald-500 shadow-inner"></textarea>
             
             <div class="flex items-center justify-between mt-2.5">
-              <div class="flex items-center gap-2">
-                <button id="convert-now-btn" type="button" class="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition-all active:scale-95 shadow-md shadow-emerald-500/20">
-                  Convert Link
-                </button>
-                <button id="clear-btn" type="button" class="text-xs font-mono text-slate-400 hover:text-rose-400 transition-colors">Clear</button>
-              </div>
+              <button id="convert-now-btn" type="button" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition-all active:scale-95 shadow-md shadow-emerald-500/20 cursor-pointer">
+                ⚡ Convert Link
+              </button>
+              <button id="clear-btn" type="button" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-300 hover:text-rose-400 transition-colors cursor-pointer border border-white/10">
+                Clear
+              </button>
             </div>
           </div>
 
@@ -117,13 +124,13 @@ import Layout from "../layouts/Layout.astro";
             </div>
             
             <div class="grid grid-cols-3 gap-2 mb-3">
-              <button id="fmt-link-only-btn" type="button" class="p-2 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/30 text-xs font-mono text-slate-300 font-bold transition-all text-center">
+              <button id="fmt-link-only-btn" type="button" class="p-2 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/30 text-xs font-mono text-slate-300 font-bold transition-all text-center cursor-pointer">
                 🔗 Link Only
               </button>
-              <button id="fmt-short-deal-btn" type="button" class="p-2 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/30 text-xs font-mono text-slate-300 font-bold transition-all text-center">
+              <button id="fmt-short-deal-btn" type="button" class="p-2 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/30 text-xs font-mono text-slate-300 font-bold transition-all text-center cursor-pointer">
                 ⚡ Short Deal
               </button>
-              <button id="fmt-full-loot-btn" type="button" class="p-2 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/30 text-xs font-mono text-slate-300 font-bold transition-all text-center">
+              <button id="fmt-full-loot-btn" type="button" class="p-2 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/30 text-xs font-mono text-slate-300 font-bold transition-all text-center cursor-pointer">
                 🔥 Full Loot
               </button>
             </div>
@@ -140,7 +147,7 @@ import Layout from "../layouts/Layout.astro";
             <button
               id="copy-inline-btn"
               type="button"
-              class="absolute right-2.5 top-2.5 px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black transition-all active:scale-95 flex items-center gap-1 shadow-md shadow-emerald-500/20"
+              class="absolute right-2.5 top-2.5 px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black transition-all active:scale-95 flex items-center gap-1 shadow-md shadow-emerald-500/20 cursor-pointer"
             >
               <span>📋</span> Copy
             </button>
@@ -151,14 +158,14 @@ import Layout from "../layouts/Layout.astro";
             <button
               id="whatsapp-share-btn"
               type="button"
-              class="w-full py-3.5 px-4 rounded-2xl bg-[#25D366] hover:bg-[#20ba59] text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#25D366]/20 active:scale-98">
+              class="w-full py-3.5 px-4 rounded-2xl bg-[#25D366] hover:bg-[#20ba59] text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#25D366]/20 active:scale-98 cursor-pointer">
               <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.010-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
               <span>Share on WhatsApp</span>
             </button>
             <button
               id="test-open-btn"
               type="button"
-              class="w-full py-3.5 px-4 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border border-white/10 transition-all active:scale-98">
+              class="w-full py-3.5 px-4 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border border-white/10 transition-all active:scale-98 cursor-pointer">
               <span>↗</span><span>Open in New Tab</span>
             </button>
           </div>
@@ -177,17 +184,17 @@ import Layout from "../layouts/Layout.astro";
               class="w-full rounded-2xl p-3.5 text-xs sm:text-sm text-emerald-300 placeholder:text-slate-600 focus:outline-none transition-all font-mono resize-none border border-white/10 focus:border-emerald-500 shadow-inner"></textarea>
             
             <div class="flex items-center justify-between mt-2.5">
-              <button id="batch-convert-btn" type="button" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition-all active:scale-95 shadow-md shadow-emerald-500/20">
+              <button id="batch-convert-btn" type="button" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition-all active:scale-95 shadow-md shadow-emerald-500/20 cursor-pointer">
                 Convert All Links
               </button>
-              <button id="batch-clear-btn" type="button" class="text-xs font-mono text-slate-400 hover:text-rose-400 transition-colors">Clear</button>
+              <button id="batch-clear-btn" type="button" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-300 hover:text-rose-400 transition-colors cursor-pointer border border-white/10">Clear</button>
             </div>
           </div>
 
           <div id="batch-results-container" class="hidden space-y-2 pt-2 border-t border-white/5">
             <div class="flex items-center justify-between mb-2">
               <span class="text-xs font-bold uppercase font-mono text-emerald-400">Converted Links</span>
-              <button id="copy-all-batch-btn" type="button" class="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-mono font-bold text-slate-200 transition-all">
+              <button id="copy-all-batch-btn" type="button" class="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-mono font-bold text-slate-200 transition-all cursor-pointer">
                 Copy All Links
               </button>
             </div>
@@ -201,13 +208,13 @@ import Layout from "../layouts/Layout.astro";
             <span class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono flex items-center gap-1.5">
               <span>🕒</span> Recent Conversions (<span id="history-count">0</span>)
             </span>
-            <button type="button" class="text-xs font-mono text-slate-500 hover:text-emerald-400 transition-colors" id="history-toggle-text">Show</button>
+            <button type="button" class="text-xs font-mono text-slate-500 hover:text-emerald-400 transition-colors cursor-pointer" id="history-toggle-text">Show</button>
           </div>
           
           <div id="history-drawer" class="hidden mt-3 space-y-2 max-h-48 overflow-y-auto pr-1">
             <div id="history-items-container" class="space-y-1.5 text-xs font-mono"></div>
             <div class="pt-2 text-right">
-              <button id="clear-history-btn" type="button" class="text-[11px] font-mono text-slate-600 hover:text-rose-400 transition-colors">Clear History</button>
+              <button id="clear-history-btn" type="button" class="text-[11px] font-mono text-slate-600 hover:text-rose-400 transition-colors cursor-pointer">Clear History</button>
             </div>
           </div>
         </div>
@@ -224,245 +231,253 @@ import Layout from "../layouts/Layout.astro";
     </footer>
 
     <script is:inline>
-      (function() {
-        // Elements
-        const rawInput = document.getElementById("raw-input");
-        const outputText = document.getElementById("output-text");
-        const convertNowBtn = document.getElementById("convert-now-btn");
-        const clearBtn = document.getElementById("clear-btn");
-        const copyInlineBtn = document.getElementById("copy-inline-btn");
-        const whatsappBtn = document.getElementById("whatsapp-share-btn");
-        const testOpenBtn = document.getElementById("test-open-btn");
-        const loadingSpinner = document.getElementById("loading-spinner");
-        const cleanCompetitorCb = document.getElementById("clean-competitor-cb");
-        const toast = document.getElementById("toast");
-        const toastMsg = document.getElementById("toast-msg");
+      function initAffTool() {
+        var rawInput = document.getElementById("raw-input");
+        var outputText = document.getElementById("output-text");
+        var convertNowBtn = document.getElementById("convert-now-btn");
+        var clearBtn = document.getElementById("clear-btn");
+        var copyInlineBtn = document.getElementById("copy-inline-btn");
+        var whatsappBtn = document.getElementById("whatsapp-share-btn");
+        var testOpenBtn = document.getElementById("test-open-btn");
+        var loadingSpinner = document.getElementById("loading-spinner");
+        var cleanCompetitorCb = document.getElementById("clean-competitor-cb");
+        var toast = document.getElementById("toast");
+        var toastMsg = document.getElementById("toast-msg");
 
-        // Format Preset Buttons
-        const fmtLinkOnlyBtn = document.getElementById("fmt-link-only-btn");
-        const fmtShortDealBtn = document.getElementById("fmt-short-deal-btn");
-        const fmtFullLootBtn = document.getElementById("fmt-full-loot-btn");
+        if (!rawInput || !convertNowBtn) return;
 
-        // Product Preview Elements
-        const productPreviewCard = document.getElementById("product-preview-card");
-        const previewImg = document.getElementById("preview-img");
-        const previewTitle = document.getElementById("preview-title");
-        const previewPrice = document.getElementById("preview-price");
-        const previewMrp = document.getElementById("preview-mrp");
-        const previewDiscount = document.getElementById("preview-discount");
+        var fmtLinkOnlyBtn = document.getElementById("fmt-link-only-btn");
+        var fmtShortDealBtn = document.getElementById("fmt-short-deal-btn");
+        var fmtFullLootBtn = document.getElementById("fmt-full-loot-btn");
 
-        // Mode Tabs
-        const tabSingleBtn = document.getElementById("tab-single-btn");
-        const tabBatchBtn = document.getElementById("tab-batch-btn");
-        const singleView = document.getElementById("single-view");
-        const batchView = document.getElementById("batch-view");
+        var productPreviewCard = document.getElementById("product-preview-card");
+        var previewImg = document.getElementById("preview-img");
+        var previewTitle = document.getElementById("preview-title");
+        var previewPrice = document.getElementById("preview-price");
+        var previewMrp = document.getElementById("preview-mrp");
+        var previewDiscount = document.getElementById("preview-discount");
 
-        // Batch Elements
-        const batchInput = document.getElementById("batch-input");
-        const batchConvertBtn = document.getElementById("batch-convert-btn");
-        const batchClearBtn = document.getElementById("batch-clear-btn");
-        const batchResultsContainer = document.getElementById("batch-results-container");
-        const batchList = document.getElementById("batch-list");
-        const copyAllBatchBtn = document.getElementById("copy-all-batch-btn");
+        var tabSingleBtn = document.getElementById("tab-single-btn");
+        var tabBatchBtn = document.getElementById("tab-batch-btn");
+        var singleView = document.getElementById("single-view");
+        var batchView = document.getElementById("batch-view");
 
-        // History Elements
-        const historyToggleHead = document.getElementById("history-toggle-head");
-        const historyToggleText = document.getElementById("history-toggle-text");
-        const historyDrawer = document.getElementById("history-drawer");
-        const historyCount = document.getElementById("history-count");
-        const historyItemsContainer = document.getElementById("history-items-container");
-        const clearHistoryBtn = document.getElementById("clear-history-btn");
+        var batchInput = document.getElementById("batch-input");
+        var batchConvertBtn = document.getElementById("batch-convert-btn");
+        var batchClearBtn = document.getElementById("batch-clear-btn");
+        var batchResultsContainer = document.getElementById("batch-results-container");
+        var batchList = document.getElementById("batch-list");
+        var copyAllBatchBtn = document.getElementById("copy-all-batch-btn");
 
-        // Current Active Converted State
-        let currentPrimaryUrl = "";
-        let currentFullText = "";
-        let currentProductMeta = null;
+        var historyToggleHead = document.getElementById("history-toggle-head");
+        var historyToggleText = document.getElementById("history-toggle-text");
+        var historyDrawer = document.getElementById("history-drawer");
+        var historyCount = document.getElementById("history-count");
+        var historyItemsContainer = document.getElementById("history-items-container");
+        var clearHistoryBtn = document.getElementById("clear-history-btn");
+
+        var currentPrimaryUrl = "";
+        var currentFullText = "";
+        var currentProductMeta = null;
 
         function showToast(msg) {
+          if (!toast || !toastMsg) return;
           toastMsg.textContent = msg;
           toast.classList.remove("hidden");
-          setTimeout(() => toast.classList.add("hidden"), 2000);
+          setTimeout(function() { toast.classList.add("hidden"); }, 2000);
         }
 
-        // Tab Switching
-        tabSingleBtn.addEventListener("click", () => {
-          tabSingleBtn.className = "px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-bold transition-all";
-          tabBatchBtn.className = "px-3 py-1 rounded-lg text-slate-400 hover:text-white transition-all";
-          singleView.classList.remove("hidden");
-          batchView.classList.add("hidden");
-        });
+        if (tabSingleBtn && tabBatchBtn) {
+          tabSingleBtn.onclick = function() {
+            tabSingleBtn.className = "px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-bold transition-all cursor-pointer";
+            tabBatchBtn.className = "px-3 py-1 rounded-lg text-slate-400 hover:text-white transition-all cursor-pointer";
+            singleView.classList.remove("hidden");
+            batchView.classList.add("hidden");
+          };
 
-        tabBatchBtn.addEventListener("click", () => {
-          tabBatchBtn.className = "px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-bold transition-all";
-          tabSingleBtn.className = "px-3 py-1 rounded-lg text-slate-400 hover:text-white transition-all";
-          batchView.classList.remove("hidden");
-          singleView.classList.add("hidden");
-        });
+          tabBatchBtn.onclick = function() {
+            tabBatchBtn.className = "px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-bold transition-all cursor-pointer";
+            tabSingleBtn.className = "px-3 py-1 rounded-lg text-slate-400 hover:text-white transition-all cursor-pointer";
+            batchView.classList.remove("hidden");
+            singleView.classList.add("hidden");
+          };
+        }
 
-        // Conversion Function
-        let debounceTimer = null;
+        var debounceTimer = null;
         async function convertDeal() {
-          const dealContent = rawInput.value.trim();
+          var dealContent = rawInput.value.trim();
           if (!dealContent) {
             outputText.value = "";
-            productPreviewCard.classList.add("hidden");
+            if (productPreviewCard) productPreviewCard.classList.add("hidden");
             currentPrimaryUrl = "";
             currentFullText = "";
             return;
           }
 
-          loadingSpinner.classList.remove("hidden");
-          loadingSpinner.classList.add("flex");
+          if (loadingSpinner) {
+            loadingSpinner.classList.remove("hidden");
+            loadingSpinner.classList.add("flex");
+          }
 
           try {
-            const res = await fetch("/api/convert-aff", {
+            var res = await fetch("/api/convert-aff", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 deal: dealContent,
-                cleanCompetitors: cleanCompetitorCb.checked
+                cleanCompetitors: cleanCompetitorCb ? cleanCompetitorCb.checked : true
               })
             });
 
-            const data = await res.json();
+            var data = await res.json();
             if (data && data.success) {
               currentFullText = data.convertedText || "";
               currentPrimaryUrl = data.primaryUrl || "";
               
-              // Default view: if user pasted multiple lines, show converted text; else link
-              const isMultiLine = dealContent.includes("\n") || dealContent.length > 120;
+              var isMultiLine = dealContent.indexOf("\n") !== -1 || dealContent.length > 120;
               outputText.value = isMultiLine ? currentFullText : currentPrimaryUrl;
 
-              // Save to History
               saveToHistory(currentPrimaryUrl, dealContent);
-
-              // Fetch Live Product Preview if single link
               fetchProductPreview(currentPrimaryUrl || dealContent);
             } else {
               showToast(data.message || "Conversion failed");
             }
           } catch (err) {
-            console.error(err);
+            console.error("Conversion error:", err);
+            showToast("Server error converting link");
           } finally {
-            loadingSpinner.classList.add("hidden");
-            loadingSpinner.classList.remove("flex");
+            if (loadingSpinner) {
+              loadingSpinner.classList.add("hidden");
+              loadingSpinner.classList.remove("flex");
+            }
           }
         }
 
-        // Fetch Live Product Preview
         async function fetchProductPreview(rawUrl) {
           try {
-            const m = rawUrl.match(/https?:\/\/[^\s"'<>]+/i);
-            const target = m ? m[0] : "";
+            var m = rawUrl.match(/https?:\/\/[^\s"'<>]+/i);
+            var target = m ? m[0] : "";
             if (!target) return;
 
-            const res = await fetch("/api/preview-meta?url=" + encodeURIComponent(target));
-            const meta = await res.json();
+            var res = await fetch("/api/preview-meta?url=" + encodeURIComponent(target));
+            var meta = await res.json();
             if (meta && meta.success && (meta.title || meta.image)) {
               currentProductMeta = meta;
-              previewTitle.textContent = meta.title || "Product";
-              previewPrice.textContent = meta.price || "";
-              previewMrp.textContent = meta.mrp || "";
-              previewDiscount.textContent = meta.discount ? ${meta.discount} OFF : "";
-              if (meta.image) {
+              if (previewTitle) previewTitle.textContent = meta.title || "Product";
+              if (previewPrice) previewPrice.textContent = meta.price || "";
+              if (previewMrp) previewMrp.textContent = meta.mrp || "";
+              if (previewDiscount) previewDiscount.textContent = meta.discount ? meta.discount + " OFF" : "";
+              if (meta.image && previewImg) {
                 previewImg.src = meta.image;
                 previewImg.classList.remove("hidden");
-              } else {
+              } else if (previewImg) {
                 previewImg.classList.add("hidden");
               }
-              productPreviewCard.classList.remove("hidden");
-            } else {
+              if (productPreviewCard) productPreviewCard.classList.remove("hidden");
+            } else if (productPreviewCard) {
               productPreviewCard.classList.add("hidden");
             }
           } catch(e) {
-            productPreviewCard.classList.add("hidden");
+            if (productPreviewCard) productPreviewCard.classList.add("hidden");
           }
         }
 
-        // Format Preset Handlers
-        fmtLinkOnlyBtn.addEventListener("click", () => {
-          if (currentPrimaryUrl) {
-            outputText.value = currentPrimaryUrl;
-            showToast("Set format: Link Only");
-          }
-        });
-
-        fmtShortDealBtn.addEventListener("click", () => {
-          if (!currentPrimaryUrl) return;
-          const title = currentProductMeta?.title || "Exclusive Deal";
-          const price = currentProductMeta?.price ?  @  : "";
-          const disc = currentProductMeta?.discount ?  ( OFF) : "";
-          outputText.value = ⚡ \n👉 ;
-          showToast("Set format: Short Deal");
-        });
-
-        fmtFullLootBtn.addEventListener("click", () => {
-          if (!currentPrimaryUrl) return;
-          const title = currentProductMeta?.title || "Hot Loot Offer";
-          const price = currentProductMeta?.price ? Offer Price:  : "";
-          const mrp = currentProductMeta?.mrp ?  | MRP:  : "";
-          const disc = currentProductMeta?.discount ? \n🔥 Flat  Discount : "";
-          outputText.value = 🔥 LOOT DEAL 🔥\n\n📌 \n💰 \n\n🛒 Buy Now: ;
-          showToast("Set format: Full Loot");
-        });
-
-        // Batch Conversion
-        batchConvertBtn.addEventListener("click", async () => {
-          const text = batchInput.value.trim();
-          if (!text) return;
-
-          batchConvertBtn.disabled = true;
-          batchConvertBtn.textContent = "Converting...";
-
-          try {
-            const res = await fetch("/api/convert-aff", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ deal: text, cleanCompetitors: false })
-            });
-
-            const data = await res.json();
-            if (data && data.success && data.convertedText) {
-              const links = data.convertedText.match(/https?:\/\/[^\s"'<>]+/gi) || [];
-              batchList.innerHTML = "";
-              links.forEach((l, idx) => {
-                const item = document.createElement("div");
-                item.className = "flex items-center justify-between p-2 rounded-xl bg-white/[0.03] border border-white/5 text-xs font-mono";
-                item.innerHTML = 
-                  <span class="truncate text-emerald-300 flex-1 mr-2"></span>
-                  <button type="button" class="copy-item-btn px-2.5 py-1 rounded bg-white/10 hover:bg-emerald-500 hover:text-slate-950 transition-all font-bold">Copy</button>
-                ;
-                item.querySelector(".copy-item-btn").addEventListener("click", async () => {
-                  await navigator.clipboard.writeText(l);
-                  showToast("Link Copied!");
-                });
-                batchList.appendChild(item);
-              });
-              batchResultsContainer.classList.remove("hidden");
+        if (fmtLinkOnlyBtn) {
+          fmtLinkOnlyBtn.onclick = function() {
+            if (currentPrimaryUrl) {
+              outputText.value = currentPrimaryUrl;
+              showToast("Format: Link Only");
             }
-          } catch(e) {
-            console.error(e);
-          } finally {
-            batchConvertBtn.disabled = false;
-            batchConvertBtn.textContent = "Convert All Links";
-          }
-        });
+          };
+        }
 
-        copyAllBatchBtn.addEventListener("click", async () => {
-          const links = [...batchList.querySelectorAll("span")].map(s => s.textContent.trim()).join("\n");
-          if (links) {
-            await navigator.clipboard.writeText(links);
-            showToast("All Links Copied!");
-          }
-        });
+        if (fmtShortDealBtn) {
+          fmtShortDealBtn.onclick = function() {
+            if (!currentPrimaryUrl) return;
+            var title = (currentProductMeta && currentProductMeta.title) ? currentProductMeta.title : "Exclusive Deal";
+            var price = (currentProductMeta && currentProductMeta.price) ? " @ " + currentProductMeta.price : "";
+            var disc = (currentProductMeta && currentProductMeta.discount) ? " (" + currentProductMeta.discount + " OFF)" : "";
+            outputText.value = "⚡ " + title + price + disc + "\n👉 " + currentPrimaryUrl;
+            showToast("Format: Short Deal");
+          };
+        }
 
-        batchClearBtn.addEventListener("click", () => {
-          batchInput.value = "";
-          batchList.innerHTML = "";
-          batchResultsContainer.classList.add("hidden");
-        });
+        if (fmtFullLootBtn) {
+          fmtFullLootBtn.onclick = function() {
+            if (!currentPrimaryUrl) return;
+            var title = (currentProductMeta && currentProductMeta.title) ? currentProductMeta.title : "Hot Loot Offer";
+            var price = (currentProductMeta && currentProductMeta.price) ? "Offer Price: " + currentProductMeta.price : "";
+            var mrp = (currentProductMeta && currentProductMeta.mrp) ? " | MRP: " + currentProductMeta.mrp : "";
+            var disc = (currentProductMeta && currentProductMeta.discount) ? "\n🔥 Flat " + currentProductMeta.discount + " Discount" : "";
+            outputText.value = "🔥 LOOT DEAL 🔥\n\n📌 " + title + "\n💰 " + price + mrp + disc + "\n\n🛒 Buy Now: " + currentPrimaryUrl;
+            showToast("Format: Full Loot");
+          };
+        }
 
-        // History Management
+        if (batchConvertBtn) {
+          batchConvertBtn.onclick = async function() {
+            var text = batchInput ? batchInput.value.trim() : "";
+            if (!text) return;
+
+            batchConvertBtn.disabled = true;
+            batchConvertBtn.textContent = "Converting...";
+
+            try {
+              var res = await fetch("/api/convert-aff", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ deal: text, cleanCompetitors: false })
+              });
+
+              var data = await res.json();
+              if (data && data.success && data.convertedText) {
+                var links = data.convertedText.match(/https?:\/\/[^\s"'<>]+/gi) || [];
+                if (batchList) {
+                  batchList.innerHTML = "";
+                  links.forEach(function(l) {
+                    var item = document.createElement("div");
+                    item.className = "flex items-center justify-between p-2 rounded-xl bg-white/[0.03] border border-white/5 text-xs font-mono";
+                    item.innerHTML = "<span class=\"truncate text-emerald-300 flex-1 mr-2\">" + l + "</span><button type=\"button\" class=\"copy-item-btn px-2.5 py-1 rounded bg-white/10 hover:bg-emerald-500 hover:text-slate-950 transition-all font-bold cursor-pointer\">Copy</button>";
+                    item.querySelector(".copy-item-btn").onclick = async function() {
+                      await navigator.clipboard.writeText(l);
+                      showToast("Link Copied!");
+                    };
+                    batchList.appendChild(item);
+                  });
+                }
+                if (batchResultsContainer) batchResultsContainer.classList.remove("hidden");
+              }
+            } catch(e) {
+              console.error(e);
+            } finally {
+              batchConvertBtn.disabled = false;
+              batchConvertBtn.textContent = "Convert All Links";
+            }
+          };
+        }
+
+        if (copyAllBatchBtn && batchList) {
+          copyAllBatchBtn.onclick = async function() {
+            var spans = batchList.querySelectorAll("span");
+            var linksArr = [];
+            for (var i = 0; i < spans.length; i++) {
+              linksArr.push(spans[i].textContent.trim());
+            }
+            if (linksArr.length > 0) {
+              await navigator.clipboard.writeText(linksArr.join("\n"));
+              showToast("All Links Copied!");
+            }
+          };
+        }
+
+        if (batchClearBtn && batchInput) {
+          batchClearBtn.onclick = function() {
+            batchInput.value = "";
+            if (batchList) batchList.innerHTML = "";
+            if (batchResultsContainer) batchResultsContainer.classList.add("hidden");
+          };
+        }
+
         function getHistory() {
           try {
             return JSON.parse(localStorage.getItem("dh_aff_history") || "[]");
@@ -471,12 +486,12 @@ import Layout from "../layouts/Layout.astro";
 
         function saveToHistory(affUrl, rawText) {
           if (!affUrl) return;
-          let hist = getHistory();
-          hist = hist.filter(h => h.url !== affUrl); // avoid dupes
+          var hist = getHistory();
+          hist = hist.filter(function(h) { return h.url !== affUrl; });
           hist.unshift({
             url: affUrl,
-            snippet: rawText.slice(0, 45).replace(/\n/g, ' '),
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            snippet: rawText.slice(0, 45).replace(/\n/g, " "),
+            time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
           });
           if (hist.length > 25) hist.pop();
           localStorage.setItem("dh_aff_history", JSON.stringify(hist));
@@ -484,88 +499,95 @@ import Layout from "../layouts/Layout.astro";
         }
 
         function renderHistory() {
-          const hist = getHistory();
+          if (!historyCount || !historyItemsContainer) return;
+          var hist = getHistory();
           historyCount.textContent = hist.length;
           historyItemsContainer.innerHTML = "";
           if (hist.length === 0) {
-            historyItemsContainer.innerHTML = '<div class="text-slate-500 py-1">No recent conversions</div>';
+            historyItemsContainer.innerHTML = "<div class=\"text-slate-500 py-1\">No recent conversions</div>";
             return;
           }
-          hist.forEach(item => {
-            const row = document.createElement("div");
+          hist.forEach(function(item) {
+            var row = document.createElement("div");
             row.className = "flex items-center justify-between p-2 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-colors";
-            row.innerHTML = 
-              <div class="truncate flex-1 mr-2">
-                <span class="text-slate-400 mr-2 text-[10px]"></span>
-                <span class="text-emerald-300"></span>
-              </div>
-              <button type="button" class="hist-copy-btn px-2 py-0.5 rounded bg-white/5 hover:bg-emerald-500 hover:text-slate-950 text-[11px] font-bold transition-all">Copy</button>
-            ;
-            row.querySelector(".hist-copy-btn").addEventListener("click", async () => {
+            row.innerHTML = "<div class=\"truncate flex-1 mr-2\"><span class=\"text-slate-400 mr-2 text-[10px]\">" + item.time + "</span><span class=\"text-emerald-300\">" + item.url + "</span></div><button type=\"button\" class=\"hist-copy-btn px-2 py-0.5 rounded bg-white/5 hover:bg-emerald-500 hover:text-slate-950 text-[11px] font-bold transition-all cursor-pointer\">Copy</button>";
+            row.querySelector(".hist-copy-btn").onclick = async function() {
               await navigator.clipboard.writeText(item.url);
               showToast("History Link Copied!");
-            });
+            };
             historyItemsContainer.appendChild(row);
           });
         }
 
-        historyToggleHead.addEventListener("click", () => {
-          const isHidden = historyDrawer.classList.toggle("hidden");
-          historyToggleText.textContent = isHidden ? "Show" : "Hide";
-        });
+        if (historyToggleHead && historyDrawer) {
+          historyToggleHead.onclick = function() {
+            var isHidden = historyDrawer.classList.toggle("hidden");
+            if (historyToggleText) historyToggleText.textContent = isHidden ? "Show" : "Hide";
+          };
+        }
 
-        clearHistoryBtn.addEventListener("click", () => {
-          localStorage.removeItem("dh_aff_history");
-          renderHistory();
-          showToast("History cleared");
-        });
+        if (clearHistoryBtn) {
+          clearHistoryBtn.onclick = function() {
+            localStorage.removeItem("dh_aff_history");
+            renderHistory();
+            showToast("History cleared");
+          };
+        }
 
-        // Listeners for Single Conversion
-        rawInput.addEventListener("input", () => {
+        rawInput.oninput = function() {
           clearTimeout(debounceTimer);
           debounceTimer = setTimeout(convertDeal, 600);
-        });
+        };
 
-        convertNowBtn.addEventListener("click", convertDeal);
+        convertNowBtn.onclick = convertDeal;
 
-        clearBtn.addEventListener("click", () => {
+        clearBtn.onclick = function() {
           rawInput.value = "";
           outputText.value = "";
-          productPreviewCard.classList.add("hidden");
+          if (productPreviewCard) productPreviewCard.classList.add("hidden");
           currentPrimaryUrl = "";
           currentFullText = "";
           currentProductMeta = null;
           rawInput.focus();
-        });
+        };
 
-        copyInlineBtn.addEventListener("click", async () => {
-          const text = outputText.value.trim();
-          if (text) {
-            await navigator.clipboard.writeText(text);
-            showToast("Copied to clipboard!");
-          }
-        });
+        if (copyInlineBtn) {
+          copyInlineBtn.onclick = async function() {
+            var text = outputText.value.trim();
+            if (text) {
+              await navigator.clipboard.writeText(text);
+              showToast("Copied to clipboard!");
+            }
+          };
+        }
 
-        whatsappBtn.addEventListener("click", () => {
-          const text = outputText.value.trim();
-          if (text) {
-            const waText = encodeURIComponent(text);
-            window.open("https://api.whatsapp.com/send?text=" + waText, "_blank");
-          }
-        });
+        if (whatsappBtn) {
+          whatsappBtn.onclick = function() {
+            var text = outputText.value.trim();
+            if (text) {
+              var waText = encodeURIComponent(text);
+              window.open("https://api.whatsapp.com/send?text=" + waText, "_blank");
+            }
+          };
+        }
 
-        testOpenBtn.addEventListener("click", () => {
-          const url = currentPrimaryUrl || outputText.value.trim();
-          if (url && url.startsWith("http")) {
-            window.open(url, "_blank");
-          }
-        });
+        if (testOpenBtn) {
+          testOpenBtn.onclick = function() {
+            var url = currentPrimaryUrl || outputText.value.trim();
+            if (url && url.indexOf("http") === 0) {
+              window.open(url, "_blank");
+            }
+          };
+        }
 
-        // Initialize default
         renderHistory();
-        rawInput.value = "https://www.amazon.in/dp/B0BD9BF14B?th=1&psc=1";
-        convertDeal();
-      })();
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initAffTool);
+      } else {
+        initAffTool();
+      }
     </script>
-</div>
-</Layout>
+</body>
+</html>
