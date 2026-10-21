@@ -5,14 +5,27 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Ensure path is always relative to the src/data directory
-const DB_PATH = path.resolve(__dirname, '../data/telegram_posts.json');
+// Ensure path works both in development and production server builds
+function getDbPath() {
+  const candidates = [
+    path.resolve(process.cwd(), 'src/data/telegram_posts.json'),
+    path.resolve(__dirname, '../data/telegram_posts.json'),
+    path.resolve(__dirname, '../../src/data/telegram_posts.json')
+  ];
+  for (let i = 0; i < candidates.length; i++) {
+    if (fs.existsSync(candidates[i])) return candidates[i];
+  }
+  return candidates[0];
+}
+
+const DB_PATH = getDbPath();
 
 export class TelegramDataStore {
   static load() {
     try {
-      if (fs.existsSync(DB_PATH)) {
-        const data = fs.readFileSync(DB_PATH, 'utf-8');
+      const activePath = getDbPath();
+      if (fs.existsSync(activePath)) {
+        const data = fs.readFileSync(activePath, 'utf-8');
         return JSON.parse(data);
       }
     } catch (e) {

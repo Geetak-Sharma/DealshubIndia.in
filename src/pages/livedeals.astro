@@ -28,18 +28,38 @@ try {
   if (storeData && Array.isArray(storeData.posts) && storeData.posts.length > 0) {
     rawDeals = storeData.posts;
   } else {
-    const tgURL = new URL('../data/telegram_posts.json', import.meta.url);
-    const tgData = await fs.readFile(tgURL, 'utf-8');
-    const parsed = JSON.parse(tgData);
-    rawDeals = parsed.posts || [];
+    const candidatePaths = [
+      new URL('../data/telegram_posts.json', import.meta.url),
+      new URL('../../src/data/telegram_posts.json', import.meta.url)
+    ];
+    for (const url of candidatePaths) {
+      try {
+        const tgData = await fs.readFile(url, 'utf-8');
+        const parsed = JSON.parse(tgData);
+        if (parsed.posts && parsed.posts.length > 0) {
+          rawDeals = parsed.posts;
+          break;
+        }
+      } catch (_) {}
+    }
   }
 } catch (e) {
   console.warn('[LiveDeals] Could not load telegram_posts.json fallback:', e);
   try {
-    const cacheURL = new URL('../data/deals_cache.json', import.meta.url);
-    const cacheData = await fs.readFile(cacheURL, 'utf-8');
-    const parsed = JSON.parse(cacheData);
-    rawDeals = parsed.deals || [];
+    const candidateCaches = [
+      new URL('../data/deals_cache.json', import.meta.url),
+      new URL('../../src/data/deals_cache.json', import.meta.url)
+    ];
+    for (const url of candidateCaches) {
+      try {
+        const cacheData = await fs.readFile(url, 'utf-8');
+        const parsed = JSON.parse(cacheData);
+        if (parsed.deals && parsed.deals.length > 0) {
+          rawDeals = parsed.deals;
+          break;
+        }
+      } catch (_) {}
+    }
   } catch (err) {
     console.warn('[LiveDeals] Could not load deals_cache.json fallback:', err);
   }
@@ -136,6 +156,7 @@ const normalizedDeals = rawDeals.map((item: any) => {
     category,
     isLoot: Boolean(item.isLoot || lowerCheck.includes("loot") || (discount && parseInt(discount) >= 70) || budgetTier === 'under99'),
     date: item.timestamp ? new Date(item.timestamp) : new Date(),
+    timestamp: item.timestamp ? Number(item.timestamp) : (item.date ? new Date(item.date).getTime() : Date.now()),
     couponText,
     bankOffer,
     variants,
@@ -454,6 +475,18 @@ const pageDescription = "Live 24/7 stream of verified Telegram loot deals, secre
         return "bg-amber-50 text-amber-800 border-amber-200/80";
       }
 
+      function formatTimeAgo(dateOrTimestamp) {
+        if (!dateOrTimestamp) return "Just now";
+        const d = new Date(dateOrTimestamp);
+        if (isNaN(d.getTime())) return "Just now";
+        const diffMins = Math.floor((Date.now() - d.getTime()) / (1000 * 60));
+        if (diffMins < 5) return "Just now";
+        if (diffMins < 60) return diffMins + "m ago";
+        const diffHours = Math.floor(diffMins / 60);
+        if (diffHours < 24) return diffHours + "h ago";
+        return Math.floor(diffHours / 24) + "d ago";
+      }
+
       function createCardHtml(deal) {
         const targetLink = deal.link || "#";
         const cleanedTitle = (deal.title || "Special Loot Deal").replace(/"/g, '&quot;');
@@ -466,6 +499,7 @@ const pageDescription = "Live 24/7 stream of verified Telegram loot deals, secre
         const category = deal.category || "General";
         const merchantBadgeClass = getBadgeClass(merchant);
         const merchantSvg = getMerchantSvg(merchant);
+        const timeAgo = formatTimeAgo(deal.timestamp || deal.date);
 
         const priceDisplay = numPrice > 0 ? "₹" + numPrice.toLocaleString("en-IN") : deal.price;
         const originalDisplay = numOriginal > numPrice ? "₹" + numOriginal.toLocaleString("en-IN") : "";
@@ -485,68 +519,64 @@ const pageDescription = "Live 24/7 stream of verified Telegram loot deals, secre
             data-loot="${isLoot ? "true" : "false"}"
             data-title="${cleanedTitle.toLowerCase()}"
           >
-            <div class="flex items-center justify-between gap-2 mb-2.5">
-              <div class="flex items-center gap-1.5 flex-wrap">
+            <div>
+              <!-- Top Metadata Bar: Store Pill & Time -->
+              <div class="flex items-center justify-between gap-2 mb-2.5">
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide shrink-0 ${merchantBadgeClass}">
                   ${merchantSvg}
                   <span>${merchant}</span>
                 </span>
-                ${isLoot ? `<span class="badge-loot inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0"><span>🔥</span><span>LOOT</span></span>` : ''}
-                ${deal.budgetTier === 'under99' ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-400/20 text-amber-300 border border-amber-400/40 shadow-sm shadow-amber-400/20 animate-pulse shrink-0"><span>⚡</span><span>UNDER ₹99 LOOT</span></span>` : ''}
-                ${deal.budgetTier === 'under499' ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0"><span>🪙</span><span>UNDER ₹499 VALUE STEAL</span></span>` : ''}
+
+                <div class="flex items-center gap-1.5 font-mono text-[11px] text-slate-400 shrink-0">
+                  ${deal.budgetTier === 'under99' ? `<span class="text-rose-300 font-bold bg-rose-500/20 border border-rose-400/30 px-1.5 py-0.5 rounded text-[10px]">⚡ Under ₹99</span>` : ''}
+                  <span>${timeAgo}</span>
+                </div>
               </div>
 
-              <div class="flex items-center gap-1.5 shrink-0">
-                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/25 shadow-sm">
-                  <span class="relative flex h-2 w-2">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                  </span>
-                  <span class="whitespace-nowrap">⚡ Live Drop</span>
-                </span>
+              <!-- Product Image Frame -->
+              <a href="${targetLink}" target="_blank" rel="noopener noreferrer sponsored" class="block w-full">
+                <div class="w-full h-36 bg-gray-50/80 hover:bg-gray-100/80 rounded-lg p-2.5 mb-3 border border-white/10 transition-colors flex items-center justify-center overflow-hidden">
+                  <img
+                    src="${displayImage || fallbackSvg}"
+                    alt="${cleanedTitle}"
+                    loading="lazy"
+                    decoding="async"
+                    referrerpolicy="no-referrer"
+                    class="max-h-full max-w-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
+                    onerror="this.onerror=null;this.src='${fallbackSvg}';"
+                  />
+                </div>
+              </a>
+
+              <!-- Product Title -->
+              <a href="${targetLink}" target="_blank" rel="noopener noreferrer sponsored" class="block group/title">
+                <h3 class="font-medium text-slate-100 text-xs sm:text-sm leading-snug line-clamp-2 group-hover/title:text-emerald-300 transition-colors" title="${cleanedTitle}">
+                  ${cleanedTitle}
+                </h3>
+              </a>
+
+              <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1">
+                <span class="capitalize">${category}</span>
               </div>
+
+              ${deal.couponText ? `
+                <div class="mt-2 p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-1.5 text-xs text-amber-200 shadow-sm">
+                  <span class="text-sm shrink-0 leading-none">✂️</span>
+                  <div class="leading-tight text-[11px]">
+                    <span class="font-bold text-amber-300">Action Required:</span> Tick <span class="underline decoration-amber-400 font-semibold text-white">&quot;${deal.couponText}&quot;</span> on ${merchant} before checkout.
+                  </div>
+                </div>
+              ` : ''}
+              ${deal.bankOffer ? `
+                <div class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-500/10 border border-blue-500/25 text-blue-300 text-[11px] font-medium self-start">
+                  <span>💳</span>
+                  <span class="line-clamp-1">${deal.bankOffer}</span>
+                </div>
+              ` : ''}
             </div>
 
-            <a href="${targetLink}" target="_blank" rel="noopener noreferrer sponsored" class="block w-full">
-              <div class="w-full h-36 bg-gray-50/80 hover:bg-gray-100/80 rounded-lg p-2.5 mb-3 border border-white/10 transition-colors flex items-center justify-center overflow-hidden">
-                <img
-                  src="${displayImage || fallbackSvg}"
-                  alt="${cleanedTitle}"
-                  loading="lazy"
-                  decoding="async"
-                  referrerpolicy="no-referrer"
-                  class="max-h-full max-w-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
-                  onerror="this.onerror=null;this.src='${fallbackSvg}';"
-                />
-              </div>
-            </a>
-
-            <div class="flex flex-col flex-grow justify-between">
-              <div>
-                <a href="${targetLink}" target="_blank" rel="noopener noreferrer sponsored" class="font-medium text-slate-100 text-xs sm:text-sm leading-snug line-clamp-2 hover:text-emerald-300 transition-colors" title="${cleanedTitle}">
-                  ${cleanedTitle}
-                </a>
-                <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1">
-                  <span class="capitalize">${category}</span>
-                </div>
-                ${deal.couponText ? `
-                  <div class="mt-2 p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-1.5 text-xs text-amber-200 shadow-sm">
-                    <span class="text-sm shrink-0 leading-none">✂️</span>
-                    <div class="leading-tight text-[11px]">
-                      <span class="font-bold text-amber-300">Action Required:</span> Tick <span class="underline decoration-amber-400 font-semibold text-white">&quot;${deal.couponText}&quot;</span> on ${merchant} before checkout.
-                    </div>
-                  </div>
-                ` : ''}
-                ${deal.bankOffer ? `
-                  <div class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-500/10 border border-blue-500/25 text-blue-300 text-[11px] font-medium self-start">
-                    <span>💳</span>
-                    <span class="line-clamp-1">${deal.bankOffer}</span>
-                  </div>
-                ` : ''}
-              </div>
-
-              <!-- Bottom Price & Actions Row -->
-              <div class="pt-3 border-t border-white/10 mt-3 flex items-center justify-between gap-2">
+            <!-- Bottom Price & Actions Row -->
+            <div class="pt-3 border-t border-white/10 mt-3 flex items-center justify-between gap-2">
                 <div class="font-mono flex items-baseline gap-1.5">
                   <span class="text-base sm:text-lg font-bold text-emerald-300">${priceDisplay}</span>
                   ${originalDisplay ? `<span class="text-xs text-slate-400 line-through">${originalDisplay}</span>` : ''}
@@ -609,7 +639,6 @@ const pageDescription = "Live 24/7 stream of verified Telegram loot deals, secre
                   </div>
                 </div>
               ` : ''}
-            </div>
           </article>
         `;
       }

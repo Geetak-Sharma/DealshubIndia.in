@@ -150,11 +150,10 @@ const fallbackImage = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/200
       </span>
 
       <div class="flex items-center gap-1.5 font-mono text-[11px] text-slate-400">
-        {budgetTier === 'under99' ? (
+        {budgetTier === 'under99' && (
           <span class="text-rose-300 font-bold bg-rose-500/20 border border-rose-400/30 px-1.5 py-0.5 rounded text-[10px]">⚡ Under ₹99</span>
-        ) : (
-          <span>{timeAgo}</span>
         )}
+        <span>{timeAgo}</span>
       </div>
     </div>
 

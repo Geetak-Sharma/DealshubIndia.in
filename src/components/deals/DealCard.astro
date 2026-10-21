@@ -35,8 +35,8 @@ else if (mins < 1440) timeAgo = `${Math.floor(mins / 60)}h ago`;
 else timeAgo = `${Math.floor(mins / 1440)}d ago`;
 
 // ---- Smart Discount Calculation ----
-const sellingNum = parseFloat(price.replace(/[^\d.]/g, '')) || 0;
-const originalNum = parseFloat(originalPrice?.replace(/[^\d.]/g, '') || '') || 0;
+const sellingNum = parseFloat(cleanPriceString(rawPrice).replace(/[^\d.]/g, '')) || 0;
+const originalNum = parseFloat((rawOriginalPrice ? cleanPriceString(rawOriginalPrice) : undefined)?.replace(/[^\d.]/g, '') || '') || 0;
 
 let smartDiscount = 0;
 if (originalNum > 0 && sellingNum > 0 && originalNum > sellingNum) {
