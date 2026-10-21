@@ -4,6 +4,24 @@ import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout title="Affiliate Link Engine — Personal Station" description="Private affiliate tool" includeHeader={false} includeFooter={false}>
+<style is:global>
+  #aff-main textarea,
+  #aff-main input {
+    background-color: #0c1017 !important;
+    color: #34d399 !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+  #aff-main textarea:focus,
+  #aff-main input:focus {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 1px #10b981 !important;
+  }
+  #aff-main textarea::placeholder {
+    color: #475569 !important;
+  }
+</style>
+<div id="aff-main" class="min-h-screen bg-[#07090e] text-slate-100 flex flex-col justify-between">
+
 
     <!-- Top Minimal Header -->
     <header class="border-b border-white/5 py-3 px-4 sm:px-8 bg-[#090c12]/90 flex items-center justify-between">
@@ -270,4 +288,6 @@ import Layout from "../layouts/Layout.astro";
       })();
     </script>
   
+
+</div>
 </Layout>
