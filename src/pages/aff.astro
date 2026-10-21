@@ -95,14 +95,14 @@ import Layout from "../layouts/Layout.astro";
           </div>
 
           <!-- Live Product Card Preview (if available) -->
-          <div id="product-preview-card" class="hidden rounded-2xl p-3 bg-white/[0.02] border border-white/10 flex items-center gap-3.5 transition-all">
-            <img id="preview-img" src="" alt="Product Preview" class="w-16 h-16 object-contain rounded-xl bg-white p-1 border border-white/10 shrink-0" />
+          <div id="product-preview-card" class="hidden rounded-2xl p-3.5 bg-white/[0.03] border border-white/10 flex items-center gap-4 transition-all">
+            <img id="preview-img" src="" alt="Product Preview" class="w-16 h-16 object-contain rounded-xl bg-white p-1.5 border border-white/10 shrink-0 shadow-md" />
             <div class="flex-1 min-w-0">
-              <h4 id="preview-title" class="text-xs font-bold text-white line-clamp-2 leading-tight"></h4>
-              <div class="flex items-center gap-2 mt-1.5 font-mono text-xs">
-                <span id="preview-price" class="text-emerald-400 font-black"></span>
-                <span id="preview-mrp" class="text-slate-500 line-through text-[11px]"></span>
-                <span id="preview-discount" class="text-rose-400 font-bold text-[11px] bg-rose-500/10 px-1.5 py-0.2 rounded border border-rose-500/20"></span>
+              <h4 id="preview-title" class="text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug"></h4>
+              <div class="flex items-center gap-2.5 mt-2 font-mono">
+                <span id="preview-price" class="text-emerald-400 font-black text-sm"></span>
+                <span id="preview-mrp" class="text-slate-500 line-through text-xs"></span>
+                <span id="preview-discount" class="text-rose-400 font-black text-[11px] bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20"></span>
               </div>
             </div>
           </div>
@@ -117,13 +117,13 @@ import Layout from "../layouts/Layout.astro";
             </div>
             
             <div class="grid grid-cols-3 gap-2 mb-3">
-              <button id="fmt-link-only-btn" type="button" class="p-2 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/30 text-xs font-mono text-slate-300 font-bold transition-all text-center cursor-pointer">
+              <button id="fmt-link-only-btn" type="button" class="p-2.5 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/30 text-xs font-mono text-slate-300 font-bold transition-all text-center cursor-pointer">
                 🔗 Link Only
               </button>
-              <button id="fmt-short-deal-btn" type="button" class="p-2 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/30 text-xs font-mono text-slate-300 font-bold transition-all text-center cursor-pointer">
+              <button id="fmt-short-deal-btn" type="button" class="p-2.5 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/30 text-xs font-mono text-slate-300 font-bold transition-all text-center cursor-pointer">
                 ⚡ Short Deal
               </button>
-              <button id="fmt-full-loot-btn" type="button" class="p-2 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/30 text-xs font-mono text-slate-300 font-bold transition-all text-center cursor-pointer">
+              <button id="fmt-full-loot-btn" type="button" class="p-2.5 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/30 text-xs font-mono text-slate-300 font-bold transition-all text-center cursor-pointer">
                 🔥 Full Loot
               </button>
             </div>
@@ -133,7 +133,7 @@ import Layout from "../layouts/Layout.astro";
           <div class="relative">
             <textarea
               id="output-text"
-              rows="3"
+              rows="4"
               readonly
               class="w-full rounded-2xl p-3.5 pr-24 text-xs sm:text-sm font-mono text-emerald-300 border border-emerald-500/30 bg-[#0c1017] focus:outline-none select-all shadow-inner resize-none"></textarea>
             
@@ -272,6 +272,7 @@ import Layout from "../layouts/Layout.astro";
         var currentPrimaryUrl = "";
         var currentFullText = "";
         var currentProductMeta = null;
+        var activeFormat = "link"; // "link" | "short" | "full"
 
         function showToast(msg) {
           if (!toast || !toastMsg) return;
@@ -296,6 +297,30 @@ import Layout from "../layouts/Layout.astro";
           };
         }
 
+        function updateOutputByFormat() {
+          if (!currentPrimaryUrl) return;
+          var title = (currentProductMeta && currentProductMeta.title) ? currentProductMeta.title : "Exclusive Deal";
+          var price = (currentProductMeta && currentProductMeta.price) ? currentProductMeta.price : "";
+          var mrp = (currentProductMeta && currentProductMeta.mrp) ? currentProductMeta.mrp : "";
+          var disc = (currentProductMeta && currentProductMeta.discount) ? currentProductMeta.discount : "";
+
+          if (activeFormat === "short") {
+            var priceStr = price ? " @ " + price : "";
+            var discStr = disc ? " (" + disc + (disc.indexOf("%") === -1 ? "%" : "") + " OFF)" : "";
+            outputText.value = "⚡ " + title + priceStr + discStr + "\n👉 " + currentPrimaryUrl;
+          } else if (activeFormat === "full") {
+            var priceLine = price ? "💰 Offer Price: " + price : "";
+            var mrpLine = mrp ? " | MRP: " + mrp : "";
+            var discLine = disc ? "\n🔥 Flat " + disc + " Discount" : "";
+            outputText.value = "🔥 LOOT DEAL 🔥\n\n📌 " + title + "\n" + priceLine + mrpLine + discLine + "\n\n🛒 Buy Now: " + currentPrimaryUrl;
+          } else {
+            // link only or multi-line original deal text
+            var rawVal = rawInput.value.trim();
+            var isMultiLine = rawVal.indexOf("\n") !== -1 || rawVal.length > 120;
+            outputText.value = (isMultiLine && currentFullText) ? currentFullText : currentPrimaryUrl;
+          }
+        }
+
         var debounceTimer = null;
         async function convertDeal() {
           var dealContent = rawInput.value.trim();
@@ -304,6 +329,7 @@ import Layout from "../layouts/Layout.astro";
             if (productPreviewCard) productPreviewCard.classList.add("hidden");
             currentPrimaryUrl = "";
             currentFullText = "";
+            currentProductMeta = null;
             return;
           }
 
@@ -311,6 +337,9 @@ import Layout from "../layouts/Layout.astro";
             loadingSpinner.classList.remove("hidden");
             loadingSpinner.classList.add("flex");
           }
+
+          // Trigger preview fetch concurrently with affiliate conversion
+          var previewPromise = fetchProductPreview(dealContent);
 
           try {
             var res = await fetch("/api/convert-aff", {
@@ -327,11 +356,11 @@ import Layout from "../layouts/Layout.astro";
               currentFullText = data.convertedText || "";
               currentPrimaryUrl = data.primaryUrl || "";
               
-              var isMultiLine = dealContent.indexOf("\n") !== -1 || dealContent.length > 120;
-              outputText.value = isMultiLine ? currentFullText : currentPrimaryUrl;
-
               saveToHistory(currentPrimaryUrl, dealContent);
-              fetchProductPreview(dealContent);
+              
+              // Wait for preview metadata to resolve before finalizing template
+              await previewPromise;
+              updateOutputByFormat();
             } else {
               showToast(data.message || "Conversion failed");
             }
@@ -354,12 +383,12 @@ import Layout from "../layouts/Layout.astro";
 
             var res = await fetch("/api/preview-meta?url=" + encodeURIComponent(target));
             var meta = await res.json();
-            if (meta && meta.success && (meta.title || meta.image)) {
+            if (meta && meta.success && (meta.title || meta.image || meta.price)) {
               currentProductMeta = meta;
               if (previewTitle) previewTitle.textContent = meta.title || "Product";
               if (previewPrice) previewPrice.textContent = meta.price || "";
               if (previewMrp) previewMrp.textContent = meta.mrp || "";
-              if (previewDiscount) previewDiscount.textContent = meta.discount ? meta.discount + " OFF" : "";
+              if (previewDiscount) previewDiscount.textContent = meta.discount ? meta.discount + (meta.discount.indexOf("OFF") === -1 ? " OFF" : "") : "";
               if (meta.image && previewImg) {
                 previewImg.src = meta.image;
                 previewImg.classList.remove("hidden");
@@ -377,32 +406,24 @@ import Layout from "../layouts/Layout.astro";
 
         if (fmtLinkOnlyBtn) {
           fmtLinkOnlyBtn.onclick = function() {
-            if (currentPrimaryUrl) {
-              outputText.value = currentPrimaryUrl;
-              showToast("Format: Link Only");
-            }
+            activeFormat = "link";
+            updateOutputByFormat();
+            showToast("Format: Link Only");
           };
         }
 
         if (fmtShortDealBtn) {
           fmtShortDealBtn.onclick = function() {
-            if (!currentPrimaryUrl) return;
-            var title = (currentProductMeta && currentProductMeta.title) ? currentProductMeta.title : "Exclusive Deal";
-            var price = (currentProductMeta && currentProductMeta.price) ? " @ " + currentProductMeta.price : "";
-            var disc = (currentProductMeta && currentProductMeta.discount) ? " (" + currentProductMeta.discount + " OFF)" : "";
-            outputText.value = "⚡ " + title + price + disc + "\n👉 " + currentPrimaryUrl;
+            activeFormat = "short";
+            updateOutputByFormat();
             showToast("Format: Short Deal");
           };
         }
 
         if (fmtFullLootBtn) {
           fmtFullLootBtn.onclick = function() {
-            if (!currentPrimaryUrl) return;
-            var title = (currentProductMeta && currentProductMeta.title) ? currentProductMeta.title : "Hot Loot Offer";
-            var price = (currentProductMeta && currentProductMeta.price) ? "Offer Price: " + currentProductMeta.price : "";
-            var mrp = (currentProductMeta && currentProductMeta.mrp) ? " | MRP: " + currentProductMeta.mrp : "";
-            var disc = (currentProductMeta && currentProductMeta.discount) ? "\n🔥 Flat " + currentProductMeta.discount + " Discount" : "";
-            outputText.value = "🔥 LOOT DEAL 🔥\n\n📌 " + title + "\n💰 " + price + mrp + disc + "\n\n🛒 Buy Now: " + currentPrimaryUrl;
+            activeFormat = "full";
+            updateOutputByFormat();
             showToast("Format: Full Loot");
           };
         }
@@ -541,6 +562,7 @@ import Layout from "../layouts/Layout.astro";
           currentPrimaryUrl = "";
           currentFullText = "";
           currentProductMeta = null;
+          activeFormat = "link";
           rawInput.focus();
         };
 
