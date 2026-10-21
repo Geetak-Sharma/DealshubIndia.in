@@ -307,7 +307,7 @@
       whatsappBtn.addEventListener("click", () => {
         const url = outputUrl.value.trim();
         if (url) {
-          const waText = encodeURIComponent("🔥 Check out this deal:\n" + url);
+          const waText = encodeURIComponent(url);
           window.open("https://api.whatsapp.com/send?text=" + waText, "_blank");
         }
       });
