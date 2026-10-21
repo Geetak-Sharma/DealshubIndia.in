@@ -29,13 +29,13 @@ import Layout from "../layouts/Layout.astro";
         <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30 flex items-center justify-center font-black text-emerald-400 text-xs shadow-lg shadow-emerald-500/10">DH</div>
         <div class="flex items-center gap-2">
           <span class="font-black text-sm tracking-tight text-white">DealsHub</span>
-          <span class="text-emerald-400 font-mono text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 tracking-wider">EARNKARO API ENGINE</span>
+          <span class="text-emerald-400 font-mono text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 tracking-wider">AFFILIATOR</span>
         </div>
       </div>
       <div class="flex items-center gap-3 text-xs font-mono text-slate-400">
         <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span class="hidden sm:inline font-semibold">Official API Connected</span>
+          <span class="font-semibold">Ready</span>
         </div>
       </div>
     </header>
@@ -47,31 +47,30 @@ import Layout from "../layouts/Layout.astro";
         <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-4">
           <div>
             <h1 class="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
-              Official EarnKaro Affiliator
+              Instant Link Generator
             </h1>
             <p class="text-xs text-slate-400 mt-1">
-              Paste any product URL or full Telegram/WhatsApp deal. Auto-converted via official EarnKaro API.
+              Paste any product URL or deal message to auto-convert.
             </p>
           </div>
           <div id="loading-spinner" class="hidden text-[11px] font-mono px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 items-center gap-1.5 self-start sm:self-auto">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-            <span>Converting deal...</span>
+            <span>Converting...</span>
           </div>
         </div>
 
         <!-- Input Area -->
-        <div class="relative mb-4">
+        <div class="relative mb-6">
           <div class="flex items-center justify-between mb-1.5">
             <label for="raw-input" class="block text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
-              Paste URL or Full Deal Message
+              Paste URL or Deal Message
             </label>
-            <span class="text-[11px] text-slate-500 font-mono">Amazon, Flipkart, Myntra, Ajio & more</span>
           </div>
           
           <textarea
             id="raw-input"
             rows="4"
-            placeholder="Paste any link or full message (e.g. https://www.amazon.in/dp/B0BD9BF14B or complete Telegram deal)..."
+            placeholder="Paste any link or full deal message here..."
             class="w-full rounded-2xl p-3.5 text-xs sm:text-sm text-emerald-300 placeholder:text-slate-600 focus:outline-none transition-all font-mono resize-none border border-white/10 focus:border-emerald-500 shadow-inner"></textarea>
           
           <div class="flex items-center justify-between mt-2.5">
@@ -87,42 +86,12 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </div>
 
-        <!-- Token Settings Accordion -->
-        <div class="mb-6 rounded-2xl bg-white/[0.02] border border-white/5 overflow-hidden">
-          <div class="p-3.5 flex items-center justify-between cursor-pointer select-none" id="token-toggle-head">
-            <div class="flex items-center gap-2.5 text-xs font-mono text-slate-300">
-              <span class="text-emerald-400">🔑</span>
-              <span>EarnKaro API Status:</span>
-              <span class="text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-mono" id="token-status-display">Active &bull; User ID: 2048366</span>
-            </div>
-            <button type="button" class="text-xs text-slate-400 hover:text-emerald-400 font-mono transition-colors" id="edit-token-toggle">Token Settings</button>
-          </div>
-          
-          <div id="token-edit-row" class="hidden p-3.5 pt-0 border-t border-white/5 space-y-3">
-            <div class="mt-3">
-              <label class="block text-[11px] font-mono text-slate-400 mb-1">EarnKaro Bearer Token</label>
-              <div class="flex gap-2">
-                <input
-                  type="password"
-                  id="custom-token-input"
-                  class="flex-1 rounded-xl px-3 py-1.5 text-xs text-emerald-300 font-mono focus:outline-none border border-white/10"
-                  placeholder="Paste EarnKaro JWT Token..."
-                />
-                <button id="save-token-btn" type="button" class="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black rounded-xl transition-all active:scale-95">Save</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Output Area -->
         <div id="output-card" class="transition-all duration-300">
           <div class="flex items-center justify-between mb-2">
             <span class="text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Official EarnKaro Converted Link
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Generated Link
             </span>
-            <div class="flex items-center gap-2">
-              <span id="platform-pill" class="text-[11px] font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">EarnKaro Profit Link</span>
-            </div>
           </div>
 
           <div class="relative mb-4">
@@ -164,43 +133,25 @@ import Layout from "../layouts/Layout.astro";
           <span>✓</span><span id="toast-msg">Copied to clipboard!</span>
         </div>
       </div>
-
-      <!-- Info badges -->
-      <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-[11px] text-slate-500 font-mono">
-        <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Official EarnKaro API</span>
-        <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 100% Commission Attributed</span>
-        <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> WhatsApp Clean URL Only</span>
-      </div>
     </main>
 
     <footer class="py-3 text-center text-[11px] text-slate-600 font-mono border-t border-white/5">
-      DealsHub Personal Station &bull; Private Internal Utility
+      DealsHub Personal Station
     </footer>
 
     <script is:inline>
       (function() {
-        const DEFAULT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2M2UzNTY2YWUzYzg1YzRiNzlmOTJhYmEiLCJlYXJua2FybyI6IjIwNDgzNjYiLCJpYXQiOjE3OTI2MTQ5OTZ9.YQv4Kob3s7c345CYr6So1F1xOGSyfVUG94PX7UTqn50";
-        let userToken = localStorage.getItem("dh_earnkaro_token") || DEFAULT_TOKEN;
-
         const rawInput = document.getElementById("raw-input");
         const outputUrl = document.getElementById("output-url");
-        const platformPill = document.getElementById("platform-pill");
         const pasteBtn = document.getElementById("paste-btn");
         const convertNowBtn = document.getElementById("convert-now-btn");
         const clearBtn = document.getElementById("clear-btn");
         const copyInlineBtn = document.getElementById("copy-inline-btn");
         const whatsappBtn = document.getElementById("whatsapp-share-btn");
         const testOpenBtn = document.getElementById("test-open-btn");
-        const tokenToggleHead = document.getElementById("token-toggle-head");
-        const editTokenToggle = document.getElementById("edit-token-toggle");
-        const tokenEditRow = document.getElementById("token-edit-row");
-        const customTokenInput = document.getElementById("custom-token-input");
-        const saveTokenBtn = document.getElementById("save-token-btn");
         const loadingSpinner = document.getElementById("loading-spinner");
         const toast = document.getElementById("toast");
         const toastMsg = document.getElementById("toast-msg");
-
-        customTokenInput.value = userToken;
 
         function showToast(msg) {
           toastMsg.textContent = msg;
@@ -208,55 +159,32 @@ import Layout from "../layouts/Layout.astro";
           setTimeout(() => toast.classList.add("hidden"), 2200);
         }
 
-        editTokenToggle.addEventListener("click", () => {
-          tokenEditRow.classList.toggle("hidden");
-        });
-
-        saveTokenBtn.addEventListener("click", () => {
-          const val = customTokenInput.value.trim();
-          if (val) {
-            userToken = val;
-            localStorage.setItem("dh_earnkaro_token", userToken);
-            tokenEditRow.classList.add("hidden");
-            convertDeal();
-            showToast("EarnKaro Token Saved!");
-          }
-        });
-
         let debounceTimer = null;
 
         async function convertDeal() {
           const dealContent = rawInput.value.trim();
           if (!dealContent) {
             outputUrl.value = "";
-            platformPill.textContent = "Waiting for link";
             return;
           }
 
           loadingSpinner.classList.remove("hidden");
           loadingSpinner.classList.add("flex");
-          platformPill.textContent = "Converting...";
 
           try {
             const res = await fetch("/api/convert-aff", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                deal: dealContent,
-                token: userToken
-              })
+              body: JSON.stringify({ deal: dealContent })
             });
 
             const data = await res.json();
             if (data && data.success && data.primaryUrl) {
               outputUrl.value = data.primaryUrl;
-              platformPill.textContent = "EarnKaro Profit Link";
             } else {
-              platformPill.textContent = data.message || "Conversion failed";
               showToast(data.message || "Could not affiliate link");
             }
           } catch (err) {
-            platformPill.textContent = "Error";
             console.error(err);
           } finally {
             loadingSpinner.classList.add("hidden");
@@ -287,7 +215,6 @@ import Layout from "../layouts/Layout.astro";
         clearBtn.addEventListener("click", () => {
           rawInput.value = "";
           outputUrl.value = "";
-          platformPill.textContent = "Cleared";
           rawInput.focus();
         });
 
@@ -295,7 +222,7 @@ import Layout from "../layouts/Layout.astro";
           const url = outputUrl.value.trim();
           if (url) {
             await navigator.clipboard.writeText(url);
-            showToast("Affiliate Link Copied!");
+            showToast("Copied!");
           }
         });
 
