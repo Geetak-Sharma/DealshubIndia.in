@@ -331,7 +331,7 @@ import Layout from "../layouts/Layout.astro";
               outputText.value = isMultiLine ? currentFullText : currentPrimaryUrl;
 
               saveToHistory(currentPrimaryUrl, dealContent);
-              fetchProductPreview(currentPrimaryUrl || dealContent);
+              fetchProductPreview(dealContent);
             } else {
               showToast(data.message || "Conversion failed");
             }
