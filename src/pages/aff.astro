@@ -1,37 +1,30 @@
 ﻿---
 export const prerender = false;
+import Layout from "../layouts/Layout.astro";
 ---
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Affiliate Link Engine — Personal Station</title>
-  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body {
-      background-color: #07090e;
-      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    }
-    textarea, input {
-      background-color: #0c1017 !important;
-      color: #34d399 !important;
-      border-color: rgba(255, 255, 255, 0.12) !important;
-    }
-    textarea:focus, input:focus {
-      border-color: #10b981 !important;
-      box-shadow: 0 0 0 1px #10b981 !important;
-    }
-    textarea::placeholder {
-      color: #475569 !important;
-    }
-  </style>
-</head>
-<body class="min-h-screen text-slate-100 flex flex-col justify-between selection:bg-emerald-500 selection:text-slate-950 font-sans">
+
+<Layout title="Affiliate Link Engine — Personal Station" description="Private affiliate tool" includeHeader={false} includeFooter={false}>
+<style is:global>
+  #aff-main textarea,
+  #aff-main input {
+    background-color: #0c1017 !important;
+    color: #34d399 !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+  #aff-main textarea:focus,
+  #aff-main input:focus {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 1px #10b981 !important;
+  }
+  #aff-main textarea::placeholder {
+    color: #475569 !important;
+  }
+</style>
+
+<div id="aff-main" class="min-h-screen bg-[#07090e] text-slate-100 flex flex-col justify-between selection:bg-emerald-500 selection:text-slate-950 font-sans">
 
     <!-- Top Minimal Header -->
-    <header class="border-b border-white/5 py-3 px-4 sm:px-8 bg-[#090c12]/95 backdrop-blur-md flex items-center justify-between sticky top-0 z-40">
+    <header class="border-b border-white/5 py-3.5 px-4 sm:px-8 bg-[#090c12]/95 backdrop-blur-md flex items-center justify-between sticky top-0 z-40">
       <div class="flex items-center gap-2.5">
         <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30 flex items-center justify-center font-black text-emerald-400 text-xs shadow-lg shadow-emerald-500/10">DH</div>
         <div class="flex items-center gap-2">
@@ -231,7 +224,7 @@ export const prerender = false;
     </footer>
 
     <script is:inline>
-      function initAffTool() {
+      function setupAffTool() {
         var rawInput = document.getElementById("raw-input");
         var outputText = document.getElementById("output-text");
         var convertNowBtn = document.getElementById("convert-now-btn");
@@ -583,11 +576,9 @@ export const prerender = false;
         renderHistory();
       }
 
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initAffTool);
-      } else {
-        initAffTool();
-      }
+      document.addEventListener("DOMContentLoaded", setupAffTool);
+      document.addEventListener("astro:page-load", setupAffTool);
+      setupAffTool();
     </script>
-</body>
-</html>
+</div>
+</Layout>
