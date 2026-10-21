@@ -4,10 +4,23 @@ export const prerender = false;
 
 const DEFAULT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2M2UzNTY2YWUzYzg1YzRiNzlmOTJhYmEiLCJlYXJua2FybyI6IjIwNDgzNjYiLCJpYXQiOjE3OTI2MTQ5OTZ9.YQv4Kob3s7c345CYr6So1F1xOGSyfVUG94PX7UTqn50';
 
+function sanitizeDealText(rawText) {
+  if (!rawText) return '';
+  // Strip competitor telegram channel promotions, @channel links, and t.me links
+  let clean = rawText
+    .replace(/(?:join|follow|subscribe)\s*:\s*@\w+/gi, '')
+    .replace(/(?:join|follow|subscribe)\s*@\w+/gi, '')
+    .replace(/@\w+/g, '')
+    .replace(/https?:\/\/t\.me\/[^\s]+/gi, '')
+    .trim();
+  return clean;
+}
+
 export const POST = async ({ request }) => {
   try {
     const body = await request.json();
-    const deal = body.deal ? String(body.deal).trim() : '';
+    let deal = body.deal ? String(body.deal).trim() : '';
+    const cleanCompetitors = body.cleanCompetitors !== false; // default true
     const token = body.token || process.env.EARNKARO_API_TOKEN || DEFAULT_TOKEN;
 
     if (!deal) {
@@ -15,6 +28,10 @@ export const POST = async ({ request }) => {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
+    }
+
+    if (cleanCompetitors) {
+      deal = sanitizeDealText(deal);
     }
 
     const res = await axios.post('https://ekaro-api.affiliaters.in/api/converter/public', {
@@ -25,7 +42,7 @@ export const POST = async ({ request }) => {
         'Authorization': 'Bearer ' + token,
         'Content-Type': 'application/json'
       },
-      timeout: 8000
+      timeout: 10000
     });
 
     if (res.data && res.data.success) {
@@ -37,6 +54,7 @@ export const POST = async ({ request }) => {
         success: 1,
         convertedText: convertedText,
         primaryUrl: primaryUrl,
+        allLinks: links,
         randomPostID: res.data.randomPostID
       }), {
         status: 200,

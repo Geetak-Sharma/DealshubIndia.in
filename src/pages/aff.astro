@@ -24,94 +24,133 @@ import Layout from "../layouts/Layout.astro";
 <div id="aff-main" class="min-h-screen bg-[#07090e] text-slate-100 flex flex-col justify-between selection:bg-emerald-500 selection:text-slate-950 font-sans">
 
     <!-- Top Minimal Header -->
-    <header class="border-b border-white/5 py-3.5 px-4 sm:px-8 bg-[#090c12]/95 backdrop-blur-md flex items-center justify-between sticky top-0 z-40">
+    <header class="border-b border-white/5 py-3 px-4 sm:px-8 bg-[#090c12]/95 backdrop-blur-md flex items-center justify-between sticky top-0 z-40">
       <div class="flex items-center gap-2.5">
         <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30 flex items-center justify-center font-black text-emerald-400 text-xs shadow-lg shadow-emerald-500/10">DH</div>
         <div class="flex items-center gap-2">
           <span class="font-black text-sm tracking-tight text-white">DealsHub</span>
-          <span class="text-emerald-400 font-mono text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 tracking-wider">AFFILIATOR</span>
+          <span class="text-emerald-400 font-mono text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 tracking-wider">AFFILIATOR PRO</span>
         </div>
       </div>
-      <div class="flex items-center gap-3 text-xs font-mono text-slate-400">
-        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span class="font-semibold">Ready</span>
-        </div>
+      
+      <!-- Mode Tabs (Single / Multi Batch) -->
+      <div class="flex items-center gap-1.5 p-1 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-mono">
+        <button id="tab-single-btn" type="button" class="px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-bold transition-all">
+          Single / Post
+        </button>
+        <button id="tab-batch-btn" type="button" class="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition-all">
+          Multi-Batch
+        </button>
       </div>
     </header>
 
-    <!-- Main Tool Container -->
-    <main class="flex-1 max-w-2xl w-full mx-auto px-4 py-8 sm:py-12 flex flex-col justify-center">
-      <div class="rounded-3xl p-6 sm:p-8 bg-[#0c1017] border border-white/10 shadow-2xl relative overflow-hidden">
+    <!-- Main Container -->
+    <main class="flex-1 max-w-3xl w-full mx-auto px-4 py-6 sm:py-10 flex flex-col justify-start">
+      <div class="rounded-3xl p-5 sm:p-7 bg-[#0c1017] border border-white/10 shadow-2xl relative overflow-hidden">
         
-        <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-4">
+        <!-- Header Row -->
+        <div class="mb-5 flex items-center justify-between gap-2 border-b border-white/5 pb-3.5">
           <div>
-            <h1 class="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
-              Instant Link Generator
+            <h1 class="text-lg sm:text-xl font-black text-white tracking-tight flex items-center gap-2" id="tool-heading">
+              Instant Link & Deal Affiliator
             </h1>
-            <p class="text-xs text-slate-400 mt-1">
-              Paste any product URL or deal message to auto-convert.
+            <p class="text-xs text-slate-400 mt-0.5" id="tool-subheading">
+              Paste product link or full forwarded message. Auto-replaces competitor links & converts to your affiliate link.
             </p>
           </div>
-          <div id="loading-spinner" class="hidden text-[11px] font-mono px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 items-center gap-1.5 self-start sm:self-auto">
+          <div id="loading-spinner" class="hidden text-[11px] font-mono px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 items-center gap-1.5">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
             <span>Converting...</span>
           </div>
         </div>
 
-        <!-- Input Area -->
-        <div class="relative mb-6">
-          <div class="flex items-center justify-between mb-1.5">
-            <label for="raw-input" class="block text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
-              Paste URL or Deal Message
-            </label>
-          </div>
-          
-          <textarea
-            id="raw-input"
-            rows="4"
-            placeholder="Paste any link or full deal message here..."
-            class="w-full rounded-2xl p-3.5 text-xs sm:text-sm text-emerald-300 placeholder:text-slate-600 focus:outline-none transition-all font-mono resize-none border border-white/10 focus:border-emerald-500 shadow-inner"></textarea>
-          
-          <div class="flex items-center justify-between mt-2.5">
-            <button id="paste-btn" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold border border-white/10 transition-all active:scale-95">
-              <span>📋</span> Paste Clipboard
-            </button>
-            <div class="flex items-center gap-2">
-              <button id="convert-now-btn" type="button" class="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition-all active:scale-95 shadow-md shadow-emerald-500/20">
-                Convert Link
+        <!-- 1. Single / Full Message View -->
+        <div id="single-view" class="space-y-4">
+          <!-- Textarea Input Area -->
+          <div class="relative">
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="raw-input" class="block text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
+                Paste URL or Forwarded Message
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer text-[11px] font-mono text-slate-400 hover:text-emerald-400 transition-colors select-none">
+                <input type="checkbox" id="clean-competitor-cb" checked class="rounded border-white/20 text-emerald-500 focus:ring-0 bg-transparent">
+                <span>Auto-Strip @Competitors</span>
+              </label>
+            </div>
+            
+            <textarea
+              id="raw-input"
+              rows="4"
+              placeholder="Paste any link or full message (e.g. Amazon, Flipkart, or multi-paragraph Telegram post)..."
+              class="w-full rounded-2xl p-3.5 text-xs sm:text-sm text-emerald-300 placeholder:text-slate-600 focus:outline-none transition-all font-mono resize-none border border-white/10 focus:border-emerald-500 shadow-inner"></textarea>
+            
+            <div class="flex items-center justify-between mt-2.5">
+              <button id="paste-btn" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold border border-white/10 transition-all active:scale-95">
+                <span>📋</span> Paste Clipboard
               </button>
-              <button id="clear-btn" type="button" class="text-xs font-mono text-slate-400 hover:text-rose-400 transition-colors">Clear</button>
+              <div class="flex items-center gap-2">
+                <button id="convert-now-btn" type="button" class="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition-all active:scale-95 shadow-md shadow-emerald-500/20">
+                  Convert Link
+                </button>
+                <button id="clear-btn" type="button" class="text-xs font-mono text-slate-400 hover:text-rose-400 transition-colors">Clear</button>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Output Area -->
-        <div id="output-card" class="transition-all duration-300">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Generated Link
-            </span>
+          <!-- Live Product Card Preview (if available) -->
+          <div id="product-preview-card" class="hidden rounded-2xl p-3 bg-white/[0.02] border border-white/10 flex items-center gap-3.5 transition-all">
+            <img id="preview-img" src="" alt="Product Preview" class="w-16 h-16 object-contain rounded-xl bg-white p-1 border border-white/10 shrink-0" />
+            <div class="flex-1 min-w-0">
+              <h4 id="preview-title" class="text-xs font-bold text-white line-clamp-2 leading-tight"></h4>
+              <div class="flex items-center gap-2 mt-1.5 font-mono text-xs">
+                <span id="preview-price" class="text-emerald-400 font-black"></span>
+                <span id="preview-mrp" class="text-slate-500 line-through text-[11px]"></span>
+                <span id="preview-discount" class="text-rose-400 font-bold text-[11px] bg-rose-500/10 px-1.5 py-0.2 rounded border border-rose-500/20"></span>
+              </div>
+            </div>
           </div>
 
-          <div class="relative mb-4">
-            <input
-              type="text"
-              id="output-url"
+          <!-- Format Template Preset Buttons -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> 1-Click Formats
+              </span>
+              <span class="text-[11px] font-mono text-slate-500">Pick format to share</span>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-2 mb-3">
+              <button id="fmt-link-only-btn" type="button" class="p-2 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/30 text-xs font-mono text-slate-300 font-bold transition-all text-center">
+                🔗 Link Only
+              </button>
+              <button id="fmt-short-deal-btn" type="button" class="p-2 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/30 text-xs font-mono text-slate-300 font-bold transition-all text-center">
+                ⚡ Short Deal
+              </button>
+              <button id="fmt-full-loot-btn" type="button" class="p-2 rounded-xl bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/30 text-xs font-mono text-slate-300 font-bold transition-all text-center">
+                🔥 Full Loot
+              </button>
+            </div>
+          </div>
+
+          <!-- Output Box Area -->
+          <div class="relative">
+            <textarea
+              id="output-text"
+              rows="3"
               readonly
-              value=""
-              class="w-full rounded-2xl p-3.5 pr-24 text-xs sm:text-sm font-mono text-emerald-300 border border-emerald-500/30 bg-[#0c1017] focus:outline-none select-all shadow-inner"
-            />
+              class="w-full rounded-2xl p-3.5 pr-24 text-xs sm:text-sm font-mono text-emerald-300 border border-emerald-500/30 bg-[#0c1017] focus:outline-none select-all shadow-inner resize-none"></textarea>
+            
             <button
               id="copy-inline-btn"
               type="button"
-              class="absolute right-2 top-2 bottom-2 px-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black transition-all active:scale-95 flex items-center gap-1 shadow-md shadow-emerald-500/20"
+              class="absolute right-2.5 top-2.5 px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black transition-all active:scale-95 flex items-center gap-1 shadow-md shadow-emerald-500/20"
             >
               <span>📋</span> Copy
             </button>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Quick Action Buttons -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
             <button
               id="whatsapp-share-btn"
               type="button"
@@ -128,9 +167,57 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </div>
 
+        <!-- 2. Multi-Batch View (Hidden by Default) -->
+        <div id="batch-view" class="hidden space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5 font-mono">
+              Paste Multiple Product URLs (One Per Line)
+            </label>
+            <textarea
+              id="batch-input"
+              rows="5"
+              placeholder="https://amazon.in/dp/...&#10;https://flipkart.com/...&#10;https://myntra.com/..."
+              class="w-full rounded-2xl p-3.5 text-xs sm:text-sm text-emerald-300 placeholder:text-slate-600 focus:outline-none transition-all font-mono resize-none border border-white/10 focus:border-emerald-500 shadow-inner"></textarea>
+            
+            <div class="flex items-center justify-between mt-2.5">
+              <button id="batch-convert-btn" type="button" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition-all active:scale-95 shadow-md shadow-emerald-500/20">
+                Convert All Links
+              </button>
+              <button id="batch-clear-btn" type="button" class="text-xs font-mono text-slate-400 hover:text-rose-400 transition-colors">Clear</button>
+            </div>
+          </div>
+
+          <div id="batch-results-container" class="hidden space-y-2 pt-2 border-t border-white/5">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold uppercase font-mono text-emerald-400">Converted Links</span>
+              <button id="copy-all-batch-btn" type="button" class="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-mono font-bold text-slate-200 transition-all">
+                Copy All Links
+              </button>
+            </div>
+            <div id="batch-list" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+          </div>
+        </div>
+
+        <!-- 3. Recent History Section (Collapsible) -->
+        <div class="mt-7 pt-5 border-t border-white/5">
+          <div class="flex items-center justify-between cursor-pointer select-none" id="history-toggle-head">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono flex items-center gap-1.5">
+              <span>🕒</span> Recent Conversions (<span id="history-count">0</span>)
+            </span>
+            <button type="button" class="text-xs font-mono text-slate-500 hover:text-emerald-400 transition-colors" id="history-toggle-text">Show</button>
+          </div>
+          
+          <div id="history-drawer" class="hidden mt-3 space-y-2 max-h-48 overflow-y-auto pr-1">
+            <div id="history-items-container" class="space-y-1.5 text-xs font-mono"></div>
+            <div class="pt-2 text-right">
+              <button id="clear-history-btn" type="button" class="text-[11px] font-mono text-slate-600 hover:text-rose-400 transition-colors">Clear History</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Toast Notification -->
         <div id="toast" class="hidden fixed bottom-6 right-6 px-4 py-2.5 rounded-2xl bg-emerald-500 text-slate-950 font-black text-xs shadow-2xl flex items-center gap-2 z-50 transition-all border border-emerald-400">
-          <span>✓</span><span id="toast-msg">Copied to clipboard!</span>
+          <span>✓</span><span id="toast-msg">Copied!</span>
         </div>
       </div>
     </main>
@@ -141,8 +228,9 @@ import Layout from "../layouts/Layout.astro";
 
     <script is:inline>
       (function() {
+        // Elements
         const rawInput = document.getElementById("raw-input");
-        const outputUrl = document.getElementById("output-url");
+        const outputText = document.getElementById("output-text");
         const pasteBtn = document.getElementById("paste-btn");
         const convertNowBtn = document.getElementById("convert-now-btn");
         const clearBtn = document.getElementById("clear-btn");
@@ -150,21 +238,80 @@ import Layout from "../layouts/Layout.astro";
         const whatsappBtn = document.getElementById("whatsapp-share-btn");
         const testOpenBtn = document.getElementById("test-open-btn");
         const loadingSpinner = document.getElementById("loading-spinner");
+        const cleanCompetitorCb = document.getElementById("clean-competitor-cb");
         const toast = document.getElementById("toast");
         const toastMsg = document.getElementById("toast-msg");
+
+        // Format Preset Buttons
+        const fmtLinkOnlyBtn = document.getElementById("fmt-link-only-btn");
+        const fmtShortDealBtn = document.getElementById("fmt-short-deal-btn");
+        const fmtFullLootBtn = document.getElementById("fmt-full-loot-btn");
+
+        // Product Preview Elements
+        const productPreviewCard = document.getElementById("product-preview-card");
+        const previewImg = document.getElementById("preview-img");
+        const previewTitle = document.getElementById("preview-title");
+        const previewPrice = document.getElementById("preview-price");
+        const previewMrp = document.getElementById("preview-mrp");
+        const previewDiscount = document.getElementById("preview-discount");
+
+        // Mode Tabs
+        const tabSingleBtn = document.getElementById("tab-single-btn");
+        const tabBatchBtn = document.getElementById("tab-batch-btn");
+        const singleView = document.getElementById("single-view");
+        const batchView = document.getElementById("batch-view");
+
+        // Batch Elements
+        const batchInput = document.getElementById("batch-input");
+        const batchConvertBtn = document.getElementById("batch-convert-btn");
+        const batchClearBtn = document.getElementById("batch-clear-btn");
+        const batchResultsContainer = document.getElementById("batch-results-container");
+        const batchList = document.getElementById("batch-list");
+        const copyAllBatchBtn = document.getElementById("copy-all-batch-btn");
+
+        // History Elements
+        const historyToggleHead = document.getElementById("history-toggle-head");
+        const historyToggleText = document.getElementById("history-toggle-text");
+        const historyDrawer = document.getElementById("history-drawer");
+        const historyCount = document.getElementById("history-count");
+        const historyItemsContainer = document.getElementById("history-items-container");
+        const clearHistoryBtn = document.getElementById("clear-history-btn");
+
+        // Current Active Converted State
+        let currentPrimaryUrl = "";
+        let currentFullText = "";
+        let currentProductMeta = null;
 
         function showToast(msg) {
           toastMsg.textContent = msg;
           toast.classList.remove("hidden");
-          setTimeout(() => toast.classList.add("hidden"), 2200);
+          setTimeout(() => toast.classList.add("hidden"), 2000);
         }
 
-        let debounceTimer = null;
+        // Tab Switching
+        tabSingleBtn.addEventListener("click", () => {
+          tabSingleBtn.className = "px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-bold transition-all";
+          tabBatchBtn.className = "px-3 py-1 rounded-lg text-slate-400 hover:text-white transition-all";
+          singleView.classList.remove("hidden");
+          batchView.classList.add("hidden");
+        });
 
+        tabBatchBtn.addEventListener("click", () => {
+          tabBatchBtn.className = "px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-bold transition-all";
+          tabSingleBtn.className = "px-3 py-1 rounded-lg text-slate-400 hover:text-white transition-all";
+          batchView.classList.remove("hidden");
+          singleView.classList.add("hidden");
+        });
+
+        // Conversion Function
+        let debounceTimer = null;
         async function convertDeal() {
           const dealContent = rawInput.value.trim();
           if (!dealContent) {
-            outputUrl.value = "";
+            outputText.value = "";
+            productPreviewCard.classList.add("hidden");
+            currentPrimaryUrl = "";
+            currentFullText = "";
             return;
           }
 
@@ -175,14 +322,28 @@ import Layout from "../layouts/Layout.astro";
             const res = await fetch("/api/convert-aff", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ deal: dealContent })
+              body: JSON.stringify({
+                deal: dealContent,
+                cleanCompetitors: cleanCompetitorCb.checked
+              })
             });
 
             const data = await res.json();
-            if (data && data.success && data.primaryUrl) {
-              outputUrl.value = data.primaryUrl;
+            if (data && data.success) {
+              currentFullText = data.convertedText || "";
+              currentPrimaryUrl = data.primaryUrl || "";
+              
+              // Default view: if user pasted multiple lines, show converted text; else link
+              const isMultiLine = dealContent.includes("\n") || dealContent.length > 120;
+              outputText.value = isMultiLine ? currentFullText : currentPrimaryUrl;
+
+              // Save to History
+              saveToHistory(currentPrimaryUrl, dealContent);
+
+              // Fetch Live Product Preview if single link
+              fetchProductPreview(currentPrimaryUrl || dealContent);
             } else {
-              showToast(data.message || "Could not affiliate link");
+              showToast(data.message || "Conversion failed");
             }
           } catch (err) {
             console.error(err);
@@ -192,6 +353,178 @@ import Layout from "../layouts/Layout.astro";
           }
         }
 
+        // Fetch Live Product Preview
+        async function fetchProductPreview(rawUrl) {
+          try {
+            const m = rawUrl.match(/https?:\/\/[^\s"'<>]+/i);
+            const target = m ? m[0] : "";
+            if (!target) return;
+
+            const res = await fetch("/api/preview-meta?url=" + encodeURIComponent(target));
+            const meta = await res.json();
+            if (meta && meta.success && (meta.title || meta.image)) {
+              currentProductMeta = meta;
+              previewTitle.textContent = meta.title || "Product";
+              previewPrice.textContent = meta.price || "";
+              previewMrp.textContent = meta.mrp || "";
+              previewDiscount.textContent = meta.discount ? ${meta.discount} OFF : "";
+              if (meta.image) {
+                previewImg.src = meta.image;
+                previewImg.classList.remove("hidden");
+              } else {
+                previewImg.classList.add("hidden");
+              }
+              productPreviewCard.classList.remove("hidden");
+            } else {
+              productPreviewCard.classList.add("hidden");
+            }
+          } catch(e) {
+            productPreviewCard.classList.add("hidden");
+          }
+        }
+
+        // Format Preset Handlers
+        fmtLinkOnlyBtn.addEventListener("click", () => {
+          if (currentPrimaryUrl) {
+            outputText.value = currentPrimaryUrl;
+            showToast("Set format: Link Only");
+          }
+        });
+
+        fmtShortDealBtn.addEventListener("click", () => {
+          if (!currentPrimaryUrl) return;
+          const title = currentProductMeta?.title || "Exclusive Deal";
+          const price = currentProductMeta?.price ?  @  : "";
+          const disc = currentProductMeta?.discount ?  ( OFF) : "";
+          outputText.value = ⚡ \n👉 ;
+          showToast("Set format: Short Deal");
+        });
+
+        fmtFullLootBtn.addEventListener("click", () => {
+          if (!currentPrimaryUrl) return;
+          const title = currentProductMeta?.title || "Hot Loot Offer";
+          const price = currentProductMeta?.price ? Offer Price:  : "";
+          const mrp = currentProductMeta?.mrp ?  | MRP:  : "";
+          const disc = currentProductMeta?.discount ? \n🔥 Flat  Discount : "";
+          outputText.value = 🔥 LOOT DEAL 🔥\n\n📌 \n💰 \n\n🛒 Buy Now: ;
+          showToast("Set format: Full Loot");
+        });
+
+        // Batch Conversion
+        batchConvertBtn.addEventListener("click", async () => {
+          const text = batchInput.value.trim();
+          if (!text) return;
+
+          batchConvertBtn.disabled = true;
+          batchConvertBtn.textContent = "Converting...";
+
+          try {
+            const res = await fetch("/api/convert-aff", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ deal: text, cleanCompetitors: false })
+            });
+
+            const data = await res.json();
+            if (data && data.success && data.convertedText) {
+              const links = data.convertedText.match(/https?:\/\/[^\s"'<>]+/gi) || [];
+              batchList.innerHTML = "";
+              links.forEach((l, idx) => {
+                const item = document.createElement("div");
+                item.className = "flex items-center justify-between p-2 rounded-xl bg-white/[0.03] border border-white/5 text-xs font-mono";
+                item.innerHTML = 
+                  <span class="truncate text-emerald-300 flex-1 mr-2"></span>
+                  <button type="button" class="copy-item-btn px-2.5 py-1 rounded bg-white/10 hover:bg-emerald-500 hover:text-slate-950 transition-all font-bold">Copy</button>
+                ;
+                item.querySelector(".copy-item-btn").addEventListener("click", async () => {
+                  await navigator.clipboard.writeText(l);
+                  showToast("Link Copied!");
+                });
+                batchList.appendChild(item);
+              });
+              batchResultsContainer.classList.remove("hidden");
+            }
+          } catch(e) {
+            console.error(e);
+          } finally {
+            batchConvertBtn.disabled = false;
+            batchConvertBtn.textContent = "Convert All Links";
+          }
+        });
+
+        copyAllBatchBtn.addEventListener("click", async () => {
+          const links = [...batchList.querySelectorAll("span")].map(s => s.textContent.trim()).join("\n");
+          if (links) {
+            await navigator.clipboard.writeText(links);
+            showToast("All Links Copied!");
+          }
+        });
+
+        batchClearBtn.addEventListener("click", () => {
+          batchInput.value = "";
+          batchList.innerHTML = "";
+          batchResultsContainer.classList.add("hidden");
+        });
+
+        // History Management
+        function getHistory() {
+          try {
+            return JSON.parse(localStorage.getItem("dh_aff_history") || "[]");
+          } catch(e) { return []; }
+        }
+
+        function saveToHistory(affUrl, rawText) {
+          if (!affUrl) return;
+          let hist = getHistory();
+          hist = hist.filter(h => h.url !== affUrl); // avoid dupes
+          hist.unshift({
+            url: affUrl,
+            snippet: rawText.slice(0, 45).replace(/\n/g, ' '),
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          });
+          if (hist.length > 25) hist.pop();
+          localStorage.setItem("dh_aff_history", JSON.stringify(hist));
+          renderHistory();
+        }
+
+        function renderHistory() {
+          const hist = getHistory();
+          historyCount.textContent = hist.length;
+          historyItemsContainer.innerHTML = "";
+          if (hist.length === 0) {
+            historyItemsContainer.innerHTML = '<div class="text-slate-500 py-1">No recent conversions</div>';
+            return;
+          }
+          hist.forEach(item => {
+            const row = document.createElement("div");
+            row.className = "flex items-center justify-between p-2 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-colors";
+            row.innerHTML = 
+              <div class="truncate flex-1 mr-2">
+                <span class="text-slate-400 mr-2 text-[10px]"></span>
+                <span class="text-emerald-300"></span>
+              </div>
+              <button type="button" class="hist-copy-btn px-2 py-0.5 rounded bg-white/5 hover:bg-emerald-500 hover:text-slate-950 text-[11px] font-bold transition-all">Copy</button>
+            ;
+            row.querySelector(".hist-copy-btn").addEventListener("click", async () => {
+              await navigator.clipboard.writeText(item.url);
+              showToast("History Link Copied!");
+            });
+            historyItemsContainer.appendChild(row);
+          });
+        }
+
+        historyToggleHead.addEventListener("click", () => {
+          const isHidden = historyDrawer.classList.toggle("hidden");
+          historyToggleText.textContent = isHidden ? "Show" : "Hide";
+        });
+
+        clearHistoryBtn.addEventListener("click", () => {
+          localStorage.removeItem("dh_aff_history");
+          renderHistory();
+          showToast("History cleared");
+        });
+
+        // Listeners for Single Conversion
         rawInput.addEventListener("input", () => {
           clearTimeout(debounceTimer);
           debounceTimer = setTimeout(convertDeal, 600);
@@ -207,41 +540,46 @@ import Layout from "../layouts/Layout.astro";
               convertDeal();
               showToast("Pasted from Clipboard!");
             }
-          } catch (e) {
+          } catch(e) {
             rawInput.focus();
           }
         });
 
         clearBtn.addEventListener("click", () => {
           rawInput.value = "";
-          outputUrl.value = "";
+          outputText.value = "";
+          productPreviewCard.classList.add("hidden");
+          currentPrimaryUrl = "";
+          currentFullText = "";
+          currentProductMeta = null;
           rawInput.focus();
         });
 
         copyInlineBtn.addEventListener("click", async () => {
-          const url = outputUrl.value.trim();
-          if (url) {
-            await navigator.clipboard.writeText(url);
-            showToast("Copied!");
+          const text = outputText.value.trim();
+          if (text) {
+            await navigator.clipboard.writeText(text);
+            showToast("Copied to clipboard!");
           }
         });
 
         whatsappBtn.addEventListener("click", () => {
-          const url = outputUrl.value.trim();
-          if (url) {
-            const waText = encodeURIComponent(url);
+          const text = outputText.value.trim();
+          if (text) {
+            const waText = encodeURIComponent(text);
             window.open("https://api.whatsapp.com/send?text=" + waText, "_blank");
           }
         });
 
         testOpenBtn.addEventListener("click", () => {
-          const url = outputUrl.value.trim();
-          if (url) {
+          const url = currentPrimaryUrl || outputText.value.trim();
+          if (url && url.startsWith("http")) {
             window.open(url, "_blank");
           }
         });
 
-        // Initialize default sample
+        // Initialize default
+        renderHistory();
         rawInput.value = "https://www.amazon.in/dp/B0BD9BF14B?th=1&psc=1";
         convertDeal();
       })();
