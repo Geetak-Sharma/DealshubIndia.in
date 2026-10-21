@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DealsHub Offline Affiliate Engine</title>
+  <title>DealsHub Offline EarnKaro Engine</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { background-color: #07090e; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
@@ -22,14 +22,14 @@
 <body class="min-h-screen text-slate-100 flex flex-col justify-between selection:bg-emerald-500 selection:text-slate-950">
 
   <!-- Header -->
-  <header class="border-b border-white/5 py-3 px-4 sm:px-8 bg-[#090c12]/95 backdrop-blur-md flex items-center justify-between">
+  <header class="border-b border-white/5 py-3.5 px-4 sm:px-8 bg-[#090c12]/95 backdrop-blur-md flex items-center justify-between">
     <div class="flex items-center gap-2.5">
       <div class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center font-bold text-emerald-400 text-xs">DH</div>
-      <span class="font-black text-sm tracking-tight text-white">DealsHub <span class="text-emerald-400 font-mono text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">AFFILIATE LOCAL</span></span>
+      <span class="font-black text-sm tracking-tight text-white">DealsHub <span class="text-emerald-400 font-mono text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">EARNKARO API LOCAL</span></span>
     </div>
     <div class="flex items-center gap-2 text-xs font-mono text-emerald-400">
       <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-      <span>100% Offline / Local Engine</span>
+      <span>Official API Engine</span>
     </div>
   </header>
 
@@ -37,31 +37,42 @@
   <main class="flex-1 max-w-2xl w-full mx-auto px-4 py-8 sm:py-12 flex flex-col justify-center">
     <div class="rounded-3xl p-6 sm:p-8 bg-[#0c1017] border border-white/10 shadow-2xl relative overflow-hidden">
       
-      <div class="mb-6">
-        <h1 class="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
-          Instant Affiliate Link Generator
-        </h1>
-        <p class="text-xs sm:text-sm text-slate-400 mt-1">
-          Extracts ASIN, strips tracking parameters, and injects your official affiliate credentials.
-        </p>
+      <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-4">
+        <div>
+          <h1 class="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
+            EarnKaro Link Affiliator
+          </h1>
+          <p class="text-xs text-slate-400 mt-1">
+            Official EarnKaro API &bull; Amazon, Flipkart, Myntra, Ajio & full deal messages.
+          </p>
+        </div>
+        <div id="loading-spinner" class="hidden text-[11px] font-mono px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>Converting...</span>
+        </div>
       </div>
 
       <!-- Input Area -->
       <div class="relative mb-4">
         <label for="raw-input" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5 font-mono">
-          Paste Amazon or Flipkart Link
+          Paste Link or Deal Text
         </label>
         <textarea
           id="raw-input"
-          rows="3"
-          placeholder="Paste URL (e.g. https://www.amazon.in/dp/B0BD9BF14B or raw deal text)"
+          rows="4"
+          placeholder="Paste URL or full Telegram/WhatsApp deal message..."
           class="w-full rounded-2xl p-3.5 text-xs sm:text-sm text-emerald-300 placeholder:text-slate-600 focus:outline-none transition-all font-mono resize-none border border-white/10"></textarea>
         
-        <div class="flex items-center justify-between mt-2">
+        <div class="flex items-center justify-between mt-2.5">
           <button id="paste-btn" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold border border-white/10 transition-colors active:scale-95">
             <span>📋</span> Paste Clipboard
           </button>
-          <button id="clear-btn" type="button" class="text-xs font-mono text-slate-400 hover:text-rose-400 transition-colors">Clear</button>
+          <div class="flex items-center gap-2">
+            <button id="convert-now-btn" type="button" class="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition-all active:scale-95">
+              Convert Link
+            </button>
+            <button id="clear-btn" type="button" class="text-xs font-mono text-slate-400 hover:text-rose-400 transition-colors">Clear</button>
+          </div>
         </div>
       </div>
 
@@ -69,22 +80,21 @@
       <div class="mb-6 rounded-2xl bg-white/[0.02] border border-white/5 overflow-hidden">
         <div class="p-3.5 flex items-center justify-between select-none">
           <div class="flex items-center gap-2.5 text-xs font-mono text-slate-300">
-            <span class="text-emerald-400">🏷️</span>
-            <span>Amazon Tag:</span>
-            <span class="text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-mono" id="active-tag-display">earnkaro09e_103755-21</span>
+            <span class="text-emerald-400">🔑</span>
+            <span>API Status:</span>
+            <span class="text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-mono">EarnKaro API Connected</span>
           </div>
-          <button type="button" class="text-xs text-slate-400 hover:text-emerald-400 font-mono" id="edit-tag-toggle">Configure</button>
+          <button type="button" class="text-xs text-slate-400 hover:text-emerald-400 font-mono" id="edit-token-toggle">Token</button>
         </div>
-        <div id="tag-edit-row" class="hidden p-3.5 pt-0 border-t border-white/5">
+        <div id="token-edit-row" class="hidden p-3.5 pt-0 border-t border-white/5">
           <div class="flex gap-2 mt-2">
             <input
-              type="text"
-              id="custom-tag-input"
-              value="earnkaro09e_103755-21"
+              type="password"
+              id="custom-token-input"
               class="flex-1 rounded-xl px-3 py-1.5 text-xs text-emerald-300 font-mono focus:outline-none border border-white/10"
-              placeholder="e.g. earnkaro09e_103755-21"
+              placeholder="Paste Bearer Token..."
             />
-            <button id="save-tag-btn" type="button" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold rounded-xl transition-colors">Save</button>
+            <button id="save-token-btn" type="button" class="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold rounded-xl transition-colors">Save</button>
           </div>
         </div>
       </div>
@@ -93,12 +103,9 @@
       <div id="output-card" class="transition-all duration-300">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Generated Affiliate Link
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Converted Affiliate Link
           </span>
-          <div class="flex items-center gap-2">
-            <span id="asin-pill" class="hidden text-[11px] font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20"></span>
-            <span id="platform-pill" class="text-[11px] font-bold font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">Amazon</span>
-          </div>
+          <span id="platform-pill" class="text-[11px] font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">EarnKaro Profit Link</span>
         </div>
 
         <div class="relative mb-4">
@@ -147,29 +154,27 @@
 
   <script>
     (function() {
-      const DEFAULT_AMAZON_TAG = "earnkaro09e_103755-21";
-      const DEFAULT_FLIPKART_AFFID = "earnkaro09";
-      let amazonTag = localStorage.getItem("dh_aff_amazon_tag") || DEFAULT_AMAZON_TAG;
+      const DEFAULT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2M2UzNTY2YWUzYzg1YzRiNzlmOTJhYmEiLCJlYXJua2FybyI6IjIwNDgzNjYiLCJpYXQiOjE3OTI2MTQ5OTZ9.YQv4Kob3s7c345CYr6So1F1xOGSyfVUG94PX7UTqn50";
+      let userToken = localStorage.getItem("dh_earnkaro_token") || DEFAULT_TOKEN;
 
       const rawInput = document.getElementById("raw-input");
       const outputUrl = document.getElementById("output-url");
       const platformPill = document.getElementById("platform-pill");
-      const asinPill = document.getElementById("asin-pill");
       const pasteBtn = document.getElementById("paste-btn");
+      const convertNowBtn = document.getElementById("convert-now-btn");
       const clearBtn = document.getElementById("clear-btn");
       const copyInlineBtn = document.getElementById("copy-inline-btn");
       const whatsappBtn = document.getElementById("whatsapp-share-btn");
       const testOpenBtn = document.getElementById("test-open-btn");
-      const activeTagDisplay = document.getElementById("active-tag-display");
-      const editTagToggle = document.getElementById("edit-tag-toggle");
-      const tagEditRow = document.getElementById("tag-edit-row");
-      const customTagInput = document.getElementById("custom-tag-input");
-      const saveTagBtn = document.getElementById("save-tag-btn");
+      const editTokenToggle = document.getElementById("edit-token-toggle");
+      const tokenEditRow = document.getElementById("token-edit-row");
+      const customTokenInput = document.getElementById("custom-token-input");
+      const saveTokenBtn = document.getElementById("save-token-btn");
+      const loadingSpinner = document.getElementById("loading-spinner");
       const toast = document.getElementById("toast");
       const toastMsg = document.getElementById("toast-msg");
 
-      activeTagDisplay.textContent = amazonTag;
-      customTagInput.value = amazonTag;
+      customTokenInput.value = userToken;
 
       function showToast(msg) {
         toastMsg.textContent = msg;
@@ -177,110 +182,78 @@
         setTimeout(() => toast.classList.add("hidden"), 2200);
       }
 
-      editTagToggle.addEventListener("click", () => tagEditRow.classList.toggle("hidden"));
+      editTokenToggle.addEventListener("click", () => tokenEditRow.classList.toggle("hidden"));
 
-      saveTagBtn.addEventListener("click", () => {
-        const val = customTagInput.value.trim();
+      saveTokenBtn.addEventListener("click", () => {
+        const val = customTokenInput.value.trim();
         if (val) {
-          amazonTag = val;
-          localStorage.setItem("dh_aff_amazon_tag", amazonTag);
-          activeTagDisplay.textContent = amazonTag;
-          tagEditRow.classList.add("hidden");
-          processInput();
-          showToast("Affiliate Tag Saved!");
+          userToken = val;
+          localStorage.setItem("dh_earnkaro_token", userToken);
+          tokenEditRow.classList.add("hidden");
+          convertDeal();
+          showToast("EarnKaro Token Saved!");
         }
       });
 
-      function extractUrl(text) {
-        if (!text) return "";
-        const m = text.match(/https?:\/\/[^\s"'<>]+/i);
-        return m ? m[0] : text.trim();
-      }
+      let debounceTimer = null;
 
-      function transformAffiliate(rawUrl) {
-        if (!rawUrl || !rawUrl.startsWith("http")) return { url: rawUrl, platform: "Unknown", asin: null };
-        try {
-          const parsed = new URL(rawUrl);
-          const host = parsed.hostname.toLowerCase();
-          const fullPath = parsed.pathname + parsed.search;
-
-          if (host.includes("amazon.") || host.includes("amzn.") || host.includes("amazn.")) {
-            const asinMatch = fullPath.match(/(?:\/dp\/|\/gp\/product\/|\/gp\/aw\/d\/|\/o\/ASIN\/|ASIN\/)([B0-9A-Z]{10})/i) ||
-                              fullPath.match(/\/([B0-9A-Z]{10})(?:[/?#]|$)/i);
-            const asin = asinMatch ? asinMatch[1].toUpperCase() : null;
-            const domain = host.includes("amazon.in") || host.includes("amzn.in") ? "https://www.amazon.in" : parsed.origin;
-
-            if (asin) {
-              const params = new URLSearchParams();
-              if (parsed.searchParams.get("th") === "1") params.set("th", "1");
-              if (parsed.searchParams.get("psc") === "1") params.set("psc", "1");
-              if (parsed.searchParams.has("ck")) params.set("ck", "");
-              params.set("tag", amazonTag);
-              const qs = params.toString() ? "?" + params.toString() : "?tag=" + amazonTag;
-              return { url: domain + "/dp/" + asin + qs, platform: "Amazon", asin };
-            } else {
-              const stripList = ["ascsubtag", "linkCode", "ref", "ref_", "creative", "creativeASIN", "pf_rd_r", "pf_rd_p", "pd_rd_r", "pd_rd_w", "pd_rd_wg", "qid", "sr", "keywords"];
-              stripList.forEach(k => parsed.searchParams.delete(k));
-              parsed.searchParams.set("tag", amazonTag);
-              return { url: parsed.toString(), platform: "Amazon", asin: null };
-            }
-          }
-
-          if (host.includes("flipkart.") || host.includes("fkrt.")) {
-            const pid = parsed.searchParams.get("pid");
-            const lid = parsed.searchParams.get("lid");
-            if (parsed.pathname.includes("/p/")) {
-              const cleanParams = new URLSearchParams();
-              if (pid) cleanParams.set("pid", pid);
-              if (lid) cleanParams.set("lid", lid);
-              cleanParams.set("affid", DEFAULT_FLIPKART_AFFID);
-              const qs = cleanParams.toString() ? "?" + cleanParams.toString() : "";
-              return { url: "https://www.flipkart.com" + parsed.pathname + qs, platform: "Flipkart", asin: pid };
-            } else {
-              parsed.searchParams.set("affid", DEFAULT_FLIPKART_AFFID);
-              return { url: parsed.toString(), platform: "Flipkart", asin: null };
-            }
-          }
-
-          return { url: rawUrl, platform: "Direct URL", asin: null };
-        } catch(e) {
-          return { url: rawUrl, platform: "Raw Link", asin: null };
-        }
-      }
-
-      function processInput() {
-        const val = rawInput.value.trim();
-        if (!val) {
+      async function convertDeal() {
+        const dealContent = rawInput.value.trim();
+        if (!dealContent) {
           outputUrl.value = "";
           platformPill.textContent = "Waiting for link";
-          asinPill.classList.add("hidden");
           return;
         }
 
-        let url = extractUrl(val);
-        if (!url.startsWith("http://") && !url.startsWith("https://")) {
-          url = "https://" + url;
-        }
+        loadingSpinner.classList.remove("hidden");
+        loadingSpinner.classList.add("flex");
+        platformPill.textContent = "Converting...";
 
-        const res = transformAffiliate(url);
-        outputUrl.value = res.url;
-        platformPill.textContent = res.platform;
-        if (res.asin) {
-          asinPill.textContent = "ASIN: " + res.asin;
-          asinPill.classList.remove("hidden");
-        } else {
-          asinPill.classList.add("hidden");
+        try {
+          const res = await fetch("https://ekaro-api.affiliaters.in/api/converter/public", {
+            method: "POST",
+            headers: {
+              "Authorization": "Bearer " + userToken,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              deal: dealContent,
+              convert_option: "convert_only"
+            })
+          });
+
+          const data = await res.json();
+          if (data && data.success && data.data) {
+            const converted = data.data;
+            const links = converted.match(/https?:\/\/[^\s"'<>]+/gi) || [];
+            outputUrl.value = links[0] || converted;
+            platformPill.textContent = "EarnKaro Profit Link";
+          } else {
+            platformPill.textContent = data.message || "Failed";
+            showToast(data.message || "Could not affiliate link");
+          }
+        } catch(err) {
+          platformPill.textContent = "Error";
+          console.error(err);
+        } finally {
+          loadingSpinner.classList.add("hidden");
+          loadingSpinner.classList.remove("flex");
         }
       }
 
-      rawInput.addEventListener("input", processInput);
+      rawInput.addEventListener("input", () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(convertDeal, 600);
+      });
+
+      convertNowBtn.addEventListener("click", convertDeal);
 
       pasteBtn.addEventListener("click", async () => {
         try {
           const text = await navigator.clipboard.readText();
           if (text) {
             rawInput.value = text;
-            processInput();
+            convertDeal();
             showToast("Pasted from Clipboard!");
           }
         } catch(e) {
@@ -292,7 +265,6 @@
         rawInput.value = "";
         outputUrl.value = "";
         platformPill.textContent = "Cleared";
-        asinPill.classList.add("hidden");
         rawInput.focus();
       });
 
@@ -317,8 +289,8 @@
         if (url) window.open(url, "_blank");
       });
 
-      rawInput.value = "https://www.amazon.in/dp/B0BD9BF14B?th=1&psc=1&ck";
-      processInput();
+      rawInput.value = "https://www.amazon.in/dp/B0BD9BF14B?th=1&psc=1";
+      convertDeal();
     })();
   </script>
 </body>
