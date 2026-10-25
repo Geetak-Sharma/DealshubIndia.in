@@ -1,0 +1,125 @@
+---
+export const prerender = true;
+import Layout from "../layouts/Layout.astro";
+import PdfyTool from "../components/tools/PdfyTool";
+
+const title = "Convert Images to PDF Free & Offline — pdfy | DealsHub India";
+const description = "Free online JPG to PDF converter. Combine multiple images into clean, borderless PDFs directly on your phone or PC. 100% private, no file uploads, instant size calculation.";
+---
+
+<Layout 
+  title={title} 
+  description={description} 
+  activePath="/pdfy"
+  includeHeader={true} 
+  includeFooter={true}
+>
+  <!-- Rich Structured Data for SEO (WebApplication Schema) -->
+  <script type="application/ld+json" slot="head">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "pdfy — Images to PDF Converter",
+      "url": "https://dealshubindia.in/pdfy",
+      "description": "Convert multiple JPG, PNG, WEBP images to PDF in your browser with zero server uploads and clean borderless output.",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "All (Web, Android, iOS, Windows, macOS)",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "INR"
+      },
+      "featureList": [
+        "100% In-Browser RAM processing",
+        "No file size or page count limits",
+        "Clean full-bleed borderless pages",
+        "Drag and drop page reordering",
+        "One-click 90-degree page rotation",
+        "Real-time compression size estimation"
+      ]
+    }
+  </script>
+
+  <main class="min-h-screen bg-[#05070B] text-gray-100 py-6 sm:py-10 px-3 sm:px-6 relative overflow-hidden">
+    <!-- Ambient Depth Glows -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-emerald-500/10 via-teal-500/5 to-transparent blur-3xl pointer-events-none -z-10" />
+
+    <div class="max-w-4xl mx-auto flex flex-col items-center">
+      <!-- Breadcrumb Navigation -->
+      <nav aria-label="Breadcrumb" class="w-full max-w-md flex items-center justify-between text-xs text-gray-400 mb-2 px-2">
+        <ol class="flex items-center gap-1.5 list-none p-0 m-0">
+          <li><a href="/" class="hover:text-emerald-400 transition-colors">Home</a></li>
+          <li class="text-gray-600">/</li>
+          <li><a href="/tools" class="hover:text-emerald-400 transition-colors">Tools</a></li>
+          <li class="text-gray-600">/</li>
+          <li><span class="text-emerald-400 font-mono font-medium" aria-current="page">pdfy</span></li>
+        </ol>
+        <span class="text-[10px] font-mono text-emerald-400/80 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+          In-Device Engine
+        </span>
+      </nav>
+
+      <!-- Main Tool Component with DnD, Worker Compression & Preview -->
+      <PdfyTool client:load />
+
+      <!-- SEO Content Section for Search Engines & Visitors -->
+      <article class="w-full max-w-2xl mt-12 space-y-8 text-gray-300 border-t border-white/10 pt-10 px-2">
+        <header class="space-y-3">
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            Convert Multiple Images to PDF Online (Free & 100% Private)
+          </h1>
+          <p class="text-xs sm:text-sm text-gray-400 leading-relaxed">
+            Need to combine camera photos, screenshots, or receipts into a single PDF document? 
+            <b>pdfy</b> processes every image locally in your device's memory using modern HTML5 Web Workers and 
+            <code class="text-emerald-400 font-mono text-xs">pdf-lib</code>. 
+            No files are ever uploaded across the internet.
+          </p>
+        </header>
+
+        <section class="space-y-4">
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <span class="text-emerald-400">⚡</span> Why Choose pdfy?
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+              <h3 class="font-bold text-white">Full-Bleed Borderless Output</h3>
+              <p class="text-gray-400">Unlike typical converters that add thick white margins around your photos, pdfy fits each image edge-to-edge.</p>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+              <h3 class="font-bold text-white">True Calculated Sizes</h3>
+              <p class="text-gray-400">Preview exact output file sizes for Compact, Balanced, and Original tiers before downloading.</p>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+              <h3 class="font-bold text-white">Zero Server Transfers</h3>
+              <p class="text-gray-400">Your sensitive documents, ID cards, and statements stay securely on your device.</p>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1.5">
+              <h3 class="font-bold text-white">Touch Drag-and-Drop</h3>
+              <p class="text-gray-400">Reorder pages effortlessly by dragging thumbnails, and rotate sideways camera photos with one tap.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- FAQs for SEO Rich Snippets -->
+        <section class="space-y-3">
+          <h2 class="text-lg font-bold text-white">Frequently Asked Questions</h2>
+          <div class="space-y-2 text-xs">
+            <details class="p-3 rounded-xl bg-white/[0.02] border border-white/5 cursor-pointer">
+              <summary class="font-semibold text-white">Is pdfy free to use?</summary>
+              <p class="mt-2 text-gray-400 leading-relaxed">Yes, pdfy is 100% free with unlimited image conversions. There are no subscriptions, limits, or hidden fees.</p>
+            </details>
+            <details class="p-3 rounded-xl bg-white/[0.02] border border-white/5 cursor-pointer">
+              <summary class="font-semibold text-white">Are my photos uploaded to a server?</summary>
+              <p class="mt-2 text-gray-400 leading-relaxed">No. Everything happens client-side in your browser using JavaScript and Canvas rendering. Your files never leave your device.</p>
+            </details>
+            <details class="p-3 rounded-xl bg-white/[0.02] border border-white/5 cursor-pointer">
+              <summary class="font-semibold text-white">Which image formats are supported?</summary>
+              <p class="mt-2 text-gray-400 leading-relaxed">pdfy supports all standard picture formats including JPG, JPEG, PNG, WEBP, AVIF, and BMP.</p>
+            </details>
+          </div>
+        </section>
+      </article>
+
+    </div>
+  </main>
+</Layout>

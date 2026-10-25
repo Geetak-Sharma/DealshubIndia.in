@@ -1,0 +1,30 @@
+---
+export const prerender = true;
+import Layout from "../../layouts/Layout.astro";
+import PdfyTool from "../../components/tools/PdfyTool";
+
+const title = "pdfy — Images to PDF Tool | DealsHub";
+const description = "Convert multiple images to PDF on your device with true calculated sizes for Low, Medium, and High quality presets.";
+---
+
+<Layout title={title} description={description} activePath="/tools">
+  <div class="py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 mb-8">
+      <div class="flex items-center gap-2 text-xs text-gray-400 mb-6">
+        <a href="/tools" class="hover:text-emerald-400">← Back to All Tools</a>
+      </div>
+      <div class="text-center mb-8">
+        <h1 class="text-3xl sm:text-5xl font-black text-white mb-3">
+          Images to PDF Converter (<span class="text-emerald-400 font-mono">pdfy</span>)
+        </h1>
+        <p class="text-sm text-gray-400 max-w-xl mx-auto">
+          Convert multiple images to PDF locally in your browser. Real compression size calculation with custom quality options.
+        </p>
+      </div>
+    </div>
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <PdfyTool client:load />
+    </div>
+  </div>
+</Layout>
+

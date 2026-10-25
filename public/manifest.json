@@ -1,17 +1,50 @@
 {
-    "name": "DealsHub India",
-    "short_name": "DealsHub",
-    "description": "Scouring the Internet for Loots Since 2018.",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#0B0E14",
-    "theme_color": "#25D366",
-    "icons": [
-        {
-            "src": "/favicon.svg",
-            "sizes": "any",
-            "type": "image/svg+xml",
-            "purpose": "any maskable"
-        }
-    ]
+  "id": "/affy",
+  "name": "affy — DealsHub Link Engine",
+  "short_name": "⚡ affy",
+  "description": "Next-Gen Link & Deal Conversion Station",
+  "start_url": "/affy",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false,
+  "background_color": "#05070B",
+  "theme_color": "#05070B",
+  "categories": ["shopping", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "share_target": {
+    "action": "/affy",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }
